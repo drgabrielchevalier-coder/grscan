@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GRScan — Escaneamento Digital Odontológico</title>
+  <meta name="description" content="Escaneamento intraoral digital com precisão, conforto e agilidade. Agende online seu horário.">
+  <meta property="og:title" content="GRScan — Escaneamento Digital Odontológico">
+  <meta property="og:description" content="Moldagem digital sem massa, sem desconforto e com arquivos prontos para o laboratório. Agende online.">
+  <meta name="theme-color" content="#0b6e8a">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="header" id="topo">
+    <div class="container header__inner">
+      <a href="#topo" class="logo" aria-label="GRScan — início">
+        <img src="assets/favicon.svg" alt="" width="32" height="32">
+        <span>GR<strong>Scan</strong></span>
+      </a>
+      <button class="nav-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav" id="menu">
+        <a href="#beneficios">Benefícios</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#aplicacoes">Aplicações</a>
+        <a href="#faq">Dúvidas</a>
+        <a href="#agendar" class="btn btn--primary btn--sm">Agendar</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero__inner">
+        <div class="hero__text">
+          <span class="tag">Escaneamento intraoral digital</span>
+          <h1>Moldagem digital precisa, rápida e <span class="hl">sem massa</span>.</h1>
+          <p class="lead">A GRScan leva tecnologia de escaneamento 3D ao seu tratamento odontológico: mais conforto para o paciente, mais precisão para o dentista e arquivos prontos para o laboratório em minutos.</p>
+          <div class="hero__cta">
+            <a href="#agendar" class="btn btn--primary">Agendar escaneamento</a>
+            <a href="#como-funciona" class="btn btn--ghost">Como funciona</a>
+          </div>
+          <ul class="hero__stats">
+            <li><strong>~10 min</strong><span>por arcada</span></li>
+            <li><strong>0</strong><span>massa de moldagem</span></li>
+            <li><strong>STL</strong><span>envio digital ao laboratório</span></li>
+          </ul>
+        </div>
+        <div class="hero__visual" aria-hidden="true">
+          <div class="scan-card">
+            <svg viewBox="0 0 200 160" class="tooth-arch">
+              <defs>
+                <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9f1f7"/>
+                </linearGradient>
+              </defs>
+              <path d="M30 140 C 20 60, 60 20, 100 20 C 140 20, 180 60, 170 140" fill="none" stroke="#bfe6ef" stroke-width="34" stroke-linecap="round"/>
+              <g fill="url(#g1)" stroke="#0b6e8a" stroke-width="1.5">
+                <rect x="22" y="112" width="20" height="24" rx="7"/>
+                <rect x="24" y="84" width="20" height="24" rx="7"/>
+                <rect x="32" y="58" width="19" height="22" rx="7"/>
+                <rect x="46" y="38" width="18" height="21" rx="7"/>
+                <rect x="64" y="25" width="16" height="20" rx="6"/>
+                <rect x="82" y="19" width="17" height="21" rx="6"/>
+                <rect x="101" y="19" width="17" height="21" rx="6"/>
+                <rect x="120" y="25" width="16" height="20" rx="6"/>
+                <rect x="136" y="38" width="18" height="21" rx="7"/>
+                <rect x="149" y="58" width="19" height="22" rx="7"/>
+                <rect x="156" y="84" width="20" height="24" rx="7"/>
+                <rect x="158" y="112" width="20" height="24" rx="7"/>
+              </g>
+              <rect class="scan-line" x="10" y="0" width="180" height="3" rx="1.5" fill="#22c3a6"/>
+            </svg>
+            <div class="scan-card__info">
+              <span class="dot"></span> Escaneamento em andamento… <strong>98%</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BENEFÍCIOS -->
+    <section class="section" id="beneficios">
+      <div class="container">
+        <header class="section__head">
+          <span class="tag">Por que digital?</span>
+          <h2>Vantagens para pacientes e dentistas</h2>
+        </header>
+        <div class="grid grid--3">
+          <article class="card">
+            <div class="card__icon">😌</div>
+            <h3>Conforto total</h3>
+            <p>Sem massa, sem moldeira e sem ânsia. O paciente acompanha o modelo 3D na tela em tempo real.</p>
+          </article>
+          <article class="card">
+            <div class="card__icon">🎯</div>
+            <h3>Alta precisão</h3>
+            <p>Captura detalhada de dentes e tecidos, reduzindo distorções, ajustes e retrabalho.</p>
+          </article>
+          <article class="card">
+            <div class="card__icon">⚡</div>
+            <h3>Agilidade</h3>
+            <p>Arquivos enviados digitalmente ao laboratório no mesmo dia, encurtando o tempo de tratamento.</p>
+          </article>
+          <article class="card">
+            <div class="card__icon">🧼</div>
+            <h3>Biossegurança</h3>
+            <p>Processo limpo, com ponteiras higienizadas e protocolos rigorosos de esterilização.</p>
+          </article>
+          <article class="card">
+            <div class="card__icon">🗂️</div>
+            <h3>Registro permanente</h3>
+            <p>Modelos digitais arquivados para comparar a evolução e planejar novos tratamentos.</p>
+          </article>
+          <article class="card">
+            <div class="card__icon">🤝</div>
+            <h3>Atendimento ao dentista</h3>
+            <p>Atendemos clínicas e consultórios que querem oferecer moldagem digital sem investir em um scanner.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section class="section section--alt" id="como-funciona">
+      <div class="container">
+        <header class="section__head">
+          <span class="tag">Passo a passo</span>
+          <h2>Como funciona</h2>
+        </header>
+        <ol class="steps">
+          <li class="step">
+            <span class="step__n">1</span>
+            <h3>Agende online</h3>
+            <p>Escolha o melhor dia e horário na nossa agenda — a confirmação chega no seu e-mail.</p>
+          </li>
+          <li class="step">
+            <span class="step__n">2</span>
+            <h3>Escaneamento</h3>
+            <p>Captura intraoral 3D em poucos minutos, de forma rápida e confortável.</p>
+          </li>
+          <li class="step">
+            <span class="step__n">3</span>
+            <h3>Conferência</h3>
+            <p>Revisamos o modelo digital, mordida e margens antes de finalizar.</p>
+          </li>
+          <li class="step">
+            <span class="step__n">4</span>
+            <h3>Envio dos arquivos</h3>
+            <p>Arquivos STL/PLY entregues ao dentista ou direto ao laboratório indicado.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- APLICAÇÕES -->
+    <section class="section" id="aplicacoes">
+      <div class="container split">
+        <div>
+          <span class="tag">Aplicações</span>
+          <h2>Para quais tratamentos?</h2>
+          <p class="lead">O escaneamento digital substitui a moldagem convencional na maioria dos procedimentos protéticos, ortodônticos e de planejamento.</p>
+          <a href="#agendar" class="btn btn--primary">Quero agendar</a>
+        </div>
+        <ul class="chips">
+          <li>Coroas e facetas</li>
+          <li>Prótese sobre implante</li>
+          <li>Alinhadores invisíveis</li>
+          <li>Documentação ortodôntica</li>
+          <li>Placas de bruxismo</li>
+          <li>Guias cirúrgicos</li>
+          <li>Planejamento estético (DSD)</li>
+          <li>Modelos de estudo</li>
+          <li>Contenções</li>
+          <li>Onlays e inlays</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- AGENDAMENTO -->
+    <section class="section section--brand" id="agendar">
+      <div class="container">
+        <header class="section__head section__head--light">
+          <span class="tag tag--light">Agendamento online</span>
+          <h2>Escolha seu horário</h2>
+          <p>Selecione abaixo o dia e o horário disponíveis. Você receberá a confirmação por e-mail e um lembrete antes do atendimento.</p>
+        </header>
+        <div class="booking" id="booking">
+          <!-- O iframe do Google Agenda é inserido aqui via script.js -->
+          <div class="booking__fallback">
+            <p><strong>Agenda em configuração.</strong></p>
+            <p>Enquanto isso, fale com a gente para marcar seu horário.</p>
+            <a class="btn btn--primary" data-whatsapp href="#">Agendar pelo WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+      <div class="container container--narrow">
+        <header class="section__head">
+          <span class="tag">Dúvidas frequentes</span>
+          <h2>Perguntas frequentes</h2>
+        </header>
+        <div class="faq">
+          <details>
+            <summary>O escaneamento dói ou causa desconforto?</summary>
+            <p>Não. O scanner é uma pequena ponteira que capta imagens sem contato agressivo e sem nenhum material na boca.</p>
+          </details>
+          <details>
+            <summary>Quanto tempo dura o atendimento?</summary>
+            <p>Em média de 10 a 20 minutos, dependendo do tipo de caso (uma ou duas arcadas, registro de mordida etc.).</p>
+          </details>
+          <details>
+            <summary>Preciso de pedido do meu dentista?</summary>
+            <p>Sim, recomendamos que o escaneamento seja solicitado pelo seu cirurgião-dentista, que indicará o objetivo e o laboratório de destino.</p>
+          </details>
+          <details>
+            <summary>Como os arquivos são entregues?</summary>
+            <p>Enviamos os arquivos digitais (STL/PLY) por link seguro ao dentista ou diretamente ao laboratório indicado.</p>
+          </details>
+          <details>
+            <summary>Posso remarcar ou cancelar?</summary>
+            <p>Sim. Use o link do e-mail de confirmação do Google Agenda ou fale com a gente pelo WhatsApp.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div>
+        <a href="#topo" class="logo logo--light">
+          <img src="assets/favicon.svg" alt="" width="28" height="28">
+          <span>GR<strong>Scan</strong></span>
+        </a>
+        <p>Escaneamento digital odontológico.</p>
+      </div>
+      <ul class="footer__contact">
+        <li><a data-whatsapp href="#">WhatsApp</a></li>
+        <li><a data-email href="#">E-mail</a></li>
+        <li><a data-instagram href="#">Instagram</a></li>
+      </ul>
+      <p class="footer__copy">© <span id="ano"></span> GRScan. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <a class="wa-float" data-whatsapp href="#" aria-label="Falar no WhatsApp">
+    <svg viewBox="0 0 32 32" width="28" height="28" fill="currentColor" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-1-2.2-1-.3-.1-.5-.2-.7.1l-1 1.2c-.2.2-.4.3-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.6.3-.6v-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.8 1.1 3.3.9 3.9.8.6 0 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6l-.8-.3Z"/></svg>
+  </a>
+
+  <script src="script.js"></script>
+</body>
+</html>
