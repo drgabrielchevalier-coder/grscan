@@ -1,36 +1,35 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="no-js">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GRScan — Escaneamento Digital Odontológico</title>
-  <meta name="description" content="Escaneamento intraoral digital com precisão, conforto e agilidade. Agende online seu horário.">
-  <meta property="og:title" content="GRScan — Escaneamento Digital Odontológico">
-  <meta property="og:description" content="Moldagem digital sem massa, sem desconforto e com arquivos prontos para o laboratório. Agende online.">
-  <meta name="theme-color" content="#0b6e8a">
+  <title>GR Digital Scan — Escaneamento intraoral de alta precisão</title>
+  <meta name="description" content="Serviço especializado de escaneamento intraoral com tecnologia iTero, realizado na sua clínica. Agende online.">
+  <meta property="og:title" content="GR Digital Scan — Escaneamento intraoral de alta precisão">
+  <meta property="og:description" content="Leve o fluxo digital para a sua clínica sem investir em um scanner.">
+  <meta name="theme-color" content="#14110e">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <header class="header" id="topo">
     <div class="container header__inner">
-      <a href="#topo" class="logo" aria-label="GRScan — início">
-        <img src="assets/favicon.svg" alt="" width="32" height="32">
-        <span>GR<strong>Scan</strong></span>
+      <a href="#topo" class="brand" aria-label="GR Digital Scan — início">
+        <img src="assets/logo.svg" alt="" width="44" height="44">
+        <span class="brand__text"><span>DIGITAL</span><small>SCAN</small></span>
       </a>
       <button class="nav-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu">
         <span></span><span></span><span></span>
       </button>
       <nav class="nav" id="menu">
-        <a href="#beneficios">Benefícios</a>
-        <a href="#como-funciona">Como funciona</a>
+        <a href="#por-que">A GR Digital Scan</a>
         <a href="#aplicacoes">Aplicações</a>
-        <a href="#faq">Dúvidas</a>
-        <a href="#agendar" class="btn btn--primary btn--sm">Agendar</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#agendar" class="btn btn--gold btn--sm">Agendar</a>
       </nav>
     </div>
   </header>
@@ -38,224 +37,254 @@
   <main>
     <!-- HERO -->
     <section class="hero">
+      <div class="hero__glow" aria-hidden="true"></div>
       <div class="container hero__inner">
         <div class="hero__text">
-          <span class="tag">Escaneamento intraoral digital</span>
-          <h1>Moldagem digital precisa, rápida e <span class="hl">sem massa</span>.</h1>
-          <p class="lead">A GRScan leva tecnologia de escaneamento 3D ao seu tratamento odontológico: mais conforto para o paciente, mais precisão para o dentista e arquivos prontos para o laboratório em minutos.</p>
-          <div class="hero__cta">
-            <a href="#agendar" class="btn btn--primary">Agendar escaneamento</a>
-            <a href="#como-funciona" class="btn btn--ghost">Como funciona</a>
+          <h1 class="fade-up">Escaneamento intraoral de <em>alta precisão.</em></h1>
+          <span class="rule fade-up"></span>
+          <p class="lead fade-up">Tecnologia iTero, realizada por um serviço especializado, integrada à sua rotina clínica.</p>
+          <div class="hero__cta fade-up">
+            <a href="#" data-whatsapp class="btn btn--gold">
+              <svg class="i-wa" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-1-2.2-1-.3-.1-.5-.2-.7.1l-1 1.2c-.2.2-.4.3-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.6.3-.6v-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.8 1.1 3.3.9 3.9.8.6 0 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6l-.8-.3Z" fill="currentColor"/></svg>
+              Solicite um orçamento
+            </a>
+            <a href="#agendar" class="btn btn--line">Agendar online</a>
           </div>
-          <ul class="hero__stats">
-            <li><strong>~10 min</strong><span>por arcada</span></li>
-            <li><strong>0</strong><span>massa de moldagem</span></li>
-            <li><strong>STL</strong><span>envio digital ao laboratório</span></li>
-          </ul>
         </div>
+
         <div class="hero__visual" aria-hidden="true">
-          <div class="scan-card">
-            <svg viewBox="0 0 200 160" class="tooth-arch">
-              <defs>
-                <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9f1f7"/>
-                </linearGradient>
-              </defs>
-              <path d="M30 140 C 20 60, 60 20, 100 20 C 140 20, 180 60, 170 140" fill="none" stroke="#bfe6ef" stroke-width="34" stroke-linecap="round"/>
-              <g fill="url(#g1)" stroke="#0b6e8a" stroke-width="1.5">
-                <rect x="22" y="112" width="20" height="24" rx="7"/>
-                <rect x="24" y="84" width="20" height="24" rx="7"/>
-                <rect x="32" y="58" width="19" height="22" rx="7"/>
-                <rect x="46" y="38" width="18" height="21" rx="7"/>
-                <rect x="64" y="25" width="16" height="20" rx="6"/>
-                <rect x="82" y="19" width="17" height="21" rx="6"/>
-                <rect x="101" y="19" width="17" height="21" rx="6"/>
-                <rect x="120" y="25" width="16" height="20" rx="6"/>
-                <rect x="136" y="38" width="18" height="21" rx="7"/>
-                <rect x="149" y="58" width="19" height="22" rx="7"/>
-                <rect x="156" y="84" width="20" height="24" rx="7"/>
-                <rect x="158" y="112" width="20" height="24" rx="7"/>
+          <svg viewBox="0 0 420 420" class="scan-art">
+            <defs>
+              <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+                <stop offset="0" stop-color="#c9974f" stop-opacity=".35"/>
+                <stop offset="1" stop-color="#c9974f" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#f6e1b5"/><stop offset=".55" stop-color="#d3a35c"/><stop offset="1" stop-color="#9a6a31"/>
+              </linearGradient>
+              <linearGradient id="beam" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#7fd6ff" stop-opacity="0"/>
+                <stop offset=".5" stop-color="#b8e9ff" stop-opacity=".95"/>
+                <stop offset="1" stop-color="#e7b6ff" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="wand" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#ece7df"/><stop offset="1" stop-color="#bdb6aa"/>
+              </linearGradient>
+              <clipPath id="archClip"><path d="M70 330 C 50 170, 120 80, 210 80 C 300 80, 370 170, 350 330 L 300 330 C 315 200, 270 135, 210 135 C 150 135, 105 200, 120 330 Z"/></clipPath>
+              <pattern id="dots" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="1.3" fill="#bfe8ff"/></pattern>
+            </defs>
+            <circle cx="210" cy="210" r="200" fill="url(#halo)"/>
+            <circle cx="210" cy="210" r="170" fill="none" stroke="url(#gold)" stroke-opacity=".25" class="orbit"/>
+            <circle cx="210" cy="210" r="135" fill="none" stroke="url(#gold)" stroke-opacity=".15" stroke-dasharray="2 8" class="orbit orbit--rev"/>
+
+            <!-- arcada -->
+            <g class="arch">
+              <path d="M70 330 C 50 170, 120 80, 210 80 C 300 80, 370 170, 350 330 L 300 330 C 315 200, 270 135, 210 135 C 150 135, 105 200, 120 330 Z" fill="#1d1813" stroke="url(#gold)" stroke-width="1.5"/>
+              <g fill="none" stroke="url(#gold)" stroke-width="1.6" class="teeth">
+                <rect x="72" y="290" width="38" height="34" rx="12"/>
+                <rect x="70" y="248" width="38" height="36" rx="12"/>
+                <rect x="76" y="208" width="36" height="34" rx="12"/>
+                <rect x="88" y="172" width="33" height="31" rx="11"/>
+                <rect x="106" y="140" width="30" height="29" rx="10"/>
+                <rect x="130" y="113" width="27" height="28" rx="9"/>
+                <rect x="158" y="96" width="25" height="30" rx="8"/>
+                <rect x="186" y="89" width="23" height="32" rx="8"/>
+                <rect x="211" y="89" width="23" height="32" rx="8"/>
+                <rect x="237" y="96" width="25" height="30" rx="8"/>
+                <rect x="263" y="113" width="27" height="28" rx="9"/>
+                <rect x="284" y="140" width="30" height="29" rx="10"/>
+                <rect x="299" y="172" width="33" height="31" rx="11"/>
+                <rect x="308" y="208" width="36" height="34" rx="12"/>
+                <rect x="312" y="248" width="38" height="36" rx="12"/>
+                <rect x="310" y="290" width="38" height="34" rx="12"/>
               </g>
-              <rect class="scan-line" x="10" y="0" width="180" height="3" rx="1.5" fill="#22c3a6"/>
-            </svg>
-            <div class="scan-card__info">
-              <span class="dot"></span> Escaneamento em andamento… <strong>98%</strong>
+              <g clip-path="url(#archClip)">
+                <rect class="scan-dots" x="40" y="60" width="340" height="80" fill="url(#dots)" opacity=".7"/>
+              </g>
+              <rect class="scan-beam" x="40" y="60" width="340" height="4" rx="2" fill="url(#beam)"/>
+            </g>
+
+            <!-- scanner -->
+            <g class="wand">
+              <rect x="250" y="250" width="44" height="190" rx="22" fill="url(#wand)" transform="rotate(-38 272 345)"/>
+              <rect x="258" y="232" width="28" height="40" rx="10" fill="#f4f1ec" transform="rotate(-38 272 345)"/>
+              <circle cx="232" cy="240" r="5" fill="#9fe0ff" class="wand-led"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- destaques -->
+      <div class="container">
+        <ul class="highlights">
+          <li class="reveal">
+            <svg class="ico ico--stopwatch" viewBox="0 0 48 48"><path class="draw" d="M4 22h8M2 28h9M6 34h7"/><circle class="draw" cx="28" cy="27" r="15"/><path class="draw" d="M24 8h8M28 8v4M40 13l3-3"/><path class="hand" d="M28 27V18"/><circle cx="28" cy="27" r="1.6" fill="currentColor"/></svg>
+            <span>Mais agilidade<br>no atendimento</span>
+          </li>
+          <li class="reveal">
+            <svg class="ico ico--target" viewBox="0 0 48 48"><circle class="draw" cx="24" cy="24" r="14"/><circle class="pulse" cx="24" cy="24" r="6"/><path class="draw spin" d="M24 4v10M24 34v10M4 24h10M34 24h10"/></svg>
+            <span>Alta precisão<br>e confiabilidade</span>
+          </li>
+          <li class="reveal">
+            <svg class="ico ico--chair" viewBox="0 0 48 48"><circle class="draw bob" cx="11" cy="10" r="4"/><path class="draw" d="M8 16l6 14h16l6 6M14 30l-2 8h26M30 30l8-6"/></svg>
+            <span>Mais conforto<br>para o paciente</span>
+          </li>
+          <li class="reveal">
+            <svg class="ico ico--monitor" viewBox="0 0 48 48"><rect class="draw" x="5" y="7" width="38" height="26" rx="2"/><path class="draw" d="M18 41h12M24 33v8"/><path class="draw tooth-blink" d="M19 14c-2 0-3 2-3 4 0 3 1 8 3 8 1 0 1-4 2-4h6c1 0 1 4 2 4 2 0 3-5 3-8 0-2-1-4-3-4-2 0-3 1-5 1s-3-1-5-1Z"/></svg>
+            <span>Arquivos digitais prontos<br>para o seu fluxo de trabalho</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- POR QUE -->
+    <section class="section section--cream" id="por-que">
+      <div class="container why">
+        <div class="laptop reveal" aria-hidden="true">
+          <div class="laptop__screen">
+            <div class="laptop__bar"><span>iTero</span><i></i><i></i><i></i><i></i></div>
+            <div class="laptop__body">
+              <div class="laptop__side"><i></i><i></i><i></i></div>
+              <svg viewBox="0 0 200 160" class="model3d">
+                <defs>
+                  <radialGradient id="gum" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#f0a7a0"/><stop offset="1" stop-color="#c9665f"/></radialGradient>
+                  <radialGradient id="enamel" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#fffdf8"/><stop offset="1" stop-color="#e3d6bf"/></radialGradient>
+                </defs>
+                <path d="M25 150 C 10 60, 60 15, 100 15 C 140 15, 190 60, 175 150 L 140 150 C 150 85, 125 55, 100 55 C 75 55, 50 85, 60 150 Z" fill="url(#gum)"/>
+                <g fill="url(#enamel)" stroke="#cbb994" stroke-width=".6">
+                  <ellipse cx="38" cy="136" rx="12" ry="11"/><ellipse cx="36" cy="113" rx="12" ry="11"/>
+                  <ellipse cx="39" cy="91" rx="11" ry="10"/><ellipse cx="46" cy="71" rx="10" ry="9.5"/>
+                  <ellipse cx="57" cy="53" rx="9" ry="9"/><ellipse cx="70" cy="39" rx="8" ry="8.5"/>
+                  <ellipse cx="84" cy="29" rx="7.5" ry="8.5"/><ellipse cx="99" cy="25" rx="7.5" ry="9"/>
+                  <ellipse cx="114" cy="29" rx="7.5" ry="8.5"/><ellipse cx="128" cy="39" rx="8" ry="8.5"/>
+                  <ellipse cx="142" cy="53" rx="9" ry="9"/><ellipse cx="153" cy="71" rx="10" ry="9.5"/>
+                  <ellipse cx="160" cy="91" rx="11" ry="10"/><ellipse cx="163" cy="113" rx="12" ry="11"/>
+                  <ellipse cx="161" cy="136" rx="12" ry="11"/>
+                </g>
+              </svg>
             </div>
           </div>
+          <div class="laptop__base"></div>
+        </div>
+        <div class="why__text reveal">
+          <h2>Por que escolher a <em>GR Digital Scan?</em></h2>
+          <span class="rule"></span>
+          <p class="lead">Um serviço completo de escaneamento intraoral, <strong>sem a necessidade de investir em um scanner</strong> na sua clínica.</p>
+          <ul class="checks">
+            <li>Equipamento iTero de última geração</li>
+            <li>Operador especializado no seu consultório</li>
+            <li>Arquivos STL/PLY enviados ao laboratório de sua escolha</li>
+          </ul>
         </div>
       </div>
     </section>
 
-    <!-- BENEFÍCIOS -->
-    <section class="section" id="beneficios">
+    <!-- APLICAÇÕES -->
+    <section class="section section--dark" id="aplicacoes">
       <div class="container">
-        <header class="section__head">
-          <span class="tag">Por que digital?</span>
-          <h2>Vantagens para pacientes e dentistas</h2>
-        </header>
-        <div class="grid grid--3">
-          <article class="card">
-            <div class="card__icon">😌</div>
-            <h3>Conforto total</h3>
-            <p>Sem massa, sem moldeira e sem ânsia. O paciente acompanha o modelo 3D na tela em tempo real.</p>
+        <h2 class="center reveal">Aplicações na sua <em>prática clínica</em></h2>
+        <div class="apps">
+          <article class="app reveal">
+            <svg class="ico ico--tooth" viewBox="0 0 48 48"><path class="draw" d="M15 6c-5 0-9 4-9 10 0 6 3 10 4 16 1 5 2 10 5 10 4 0 3-11 9-11s5 11 9 11c3 0 4-5 5-10 1-6 4-10 4-16 0-6-4-10-9-10-4 0-5 2-9 2s-5-2-9-2Z"/><path class="sparkle" d="M36 4v6M33 7h6"/></svg>
+            <h3>Reabilitação protética</h3>
           </article>
-          <article class="card">
-            <div class="card__icon">🎯</div>
-            <h3>Alta precisão</h3>
-            <p>Captura detalhada de dentes e tecidos, reduzindo distorções, ajustes e retrabalho.</p>
+          <article class="app reveal">
+            <svg class="ico ico--aligner" viewBox="0 0 48 48"><path class="draw" d="M4 30c0-10 9-17 20-17s20 7 20 17"/><path class="draw" d="M9 30c0-7 7-12 15-12s15 5 15 12"/><path class="draw" d="M4 30h5M39 30h5M14 19l2 5M20 16l1 5M28 16l-1 5M34 19l-2 5"/></svg>
+            <h3>Ortodontia digital</h3>
           </article>
-          <article class="card">
-            <div class="card__icon">⚡</div>
-            <h3>Agilidade</h3>
-            <p>Arquivos enviados digitalmente ao laboratório no mesmo dia, encurtando o tempo de tratamento.</p>
+          <article class="app reveal">
+            <svg class="ico ico--implant" viewBox="0 0 48 48"><path class="draw" d="M16 6c-3 0-5 2-5 5 0 3 2 5 3 7h20c1-2 3-4 3-7 0-3-2-5-5-5-3 0-4 1-8 1s-5-1-8-1Z"/><g class="screw"><path class="draw" d="M19 22h10M18 27h12M19 32h10M20 37h8M22 42h4M24 22v20"/></g></svg>
+            <h3>Planejamento para implantes</h3>
           </article>
-          <article class="card">
-            <div class="card__icon">🧼</div>
-            <h3>Biossegurança</h3>
-            <p>Processo limpo, com ponteiras higienizadas e protocolos rigorosos de esterilização.</p>
-          </article>
-          <article class="card">
-            <div class="card__icon">🗂️</div>
-            <h3>Registro permanente</h3>
-            <p>Modelos digitais arquivados para comparar a evolução e planejar novos tratamentos.</p>
-          </article>
-          <article class="card">
-            <div class="card__icon">🤝</div>
-            <h3>Atendimento ao dentista</h3>
-            <p>Atendemos clínicas e consultórios que querem oferecer moldagem digital sem investir em um scanner.</p>
+          <article class="app reveal">
+            <svg class="ico ico--cad" viewBox="0 0 48 48"><rect class="draw" x="6" y="8" width="36" height="24" rx="2"/><path class="draw" d="M2 38h44l-3 4H5Z"/><path class="draw tooth-blink" d="M19 14c-2 0-3 2-3 4 0 3 1 8 3 8 1 0 1-4 2-4h6c1 0 1 4 2 4 2 0 3-5 3-8 0-2-1-4-3-4-2 0-3 1-5 1s-3-1-5-1Z"/><path class="scanline" d="M8 14h32"/></svg>
+            <h3>Fluxo CAD/CAM</h3>
           </article>
         </div>
       </div>
     </section>
 
     <!-- COMO FUNCIONA -->
-    <section class="section section--alt" id="como-funciona">
+    <section class="section section--cream" id="como-funciona">
       <div class="container">
-        <header class="section__head">
-          <span class="tag">Passo a passo</span>
-          <h2>Como funciona</h2>
-        </header>
+        <h2 class="center reveal">Como <em>funciona?</em></h2>
         <ol class="steps">
-          <li class="step">
+          <li class="step reveal">
             <span class="step__n">1</span>
-            <h3>Agende online</h3>
-            <p>Escolha o melhor dia e horário na nossa agenda — a confirmação chega no seu e-mail.</p>
+            <svg class="ico ico--cal" viewBox="0 0 48 48"><rect class="draw" x="6" y="9" width="36" height="33" rx="3"/><path class="draw" d="M6 18h36M15 5v8M33 5v8"/><g class="cal-dots" fill="currentColor"><circle cx="15" cy="25" r="1.8"/><circle cx="24" cy="25" r="1.8"/><circle cx="33" cy="25" r="1.8"/><circle cx="15" cy="33" r="1.8"/><circle class="cal-pick" cx="24" cy="33" r="1.8"/><circle cx="33" cy="33" r="1.8"/></g></svg>
+            <p>Agende o<br>atendimento</p>
           </li>
-          <li class="step">
+          <li class="step__sep" aria-hidden="true"></li>
+          <li class="step reveal">
             <span class="step__n">2</span>
-            <h3>Escaneamento</h3>
-            <p>Captura intraoral 3D em poucos minutos, de forma rápida e confortável.</p>
+            <svg class="ico ico--wand" viewBox="0 0 48 48"><g class="wand-move"><rect class="draw" x="4" y="22" width="34" height="8" rx="4" transform="rotate(-15 21 26)"/><path class="draw" d="M36 20l8-3" /></g><circle class="led" cx="16" cy="28" r="1.6" fill="currentColor"/></svg>
+            <p>Realizamos o escaneamento<br>na sua clínica</p>
           </li>
-          <li class="step">
+          <li class="step__sep" aria-hidden="true"></li>
+          <li class="step reveal">
             <span class="step__n">3</span>
-            <h3>Conferência</h3>
-            <p>Revisamos o modelo digital, mordida e margens antes de finalizar.</p>
-          </li>
-          <li class="step">
-            <span class="step__n">4</span>
-            <h3>Envio dos arquivos</h3>
-            <p>Arquivos STL/PLY entregues ao dentista ou direto ao laboratório indicado.</p>
+            <svg class="ico ico--folder" viewBox="0 0 48 48"><path class="draw" d="M4 12h14l4 4h22v24H4Z"/><path class="draw file" d="M14 8h18v14H14Z"/><path class="draw" d="M4 20h40"/></svg>
+            <p>Você recebe os arquivos digitais<br>com rapidez e segurança</p>
           </li>
         </ol>
       </div>
     </section>
 
-    <!-- APLICAÇÕES -->
-    <section class="section" id="aplicacoes">
-      <div class="container split">
-        <div>
-          <span class="tag">Aplicações</span>
-          <h2>Para quais tratamentos?</h2>
-          <p class="lead">O escaneamento digital substitui a moldagem convencional na maioria dos procedimentos protéticos, ortodônticos e de planejamento.</p>
-          <a href="#agendar" class="btn btn--primary">Quero agendar</a>
-        </div>
-        <ul class="chips">
-          <li>Coroas e facetas</li>
-          <li>Prótese sobre implante</li>
-          <li>Alinhadores invisíveis</li>
-          <li>Documentação ortodôntica</li>
-          <li>Placas de bruxismo</li>
-          <li>Guias cirúrgicos</li>
-          <li>Planejamento estético (DSD)</li>
-          <li>Modelos de estudo</li>
-          <li>Contenções</li>
-          <li>Onlays e inlays</li>
-        </ul>
-      </div>
-    </section>
-
     <!-- AGENDAMENTO -->
-    <section class="section section--brand" id="agendar">
+    <section class="section section--dark" id="agendar">
       <div class="container">
-        <header class="section__head section__head--light">
-          <span class="tag tag--light">Agendamento online</span>
-          <h2>Escolha seu horário</h2>
-          <p>Selecione abaixo o dia e o horário disponíveis. Você receberá a confirmação por e-mail e um lembrete antes do atendimento.</p>
-        </header>
-        <div class="booking" id="booking">
-          <!-- O iframe do Google Agenda é inserido aqui via script.js -->
+        <div class="center reveal">
+          <h2>Agende <em>online</em></h2>
+          <span class="rule rule--center"></span>
+          <p class="lead">Escolha o dia e o horário disponíveis. A confirmação chega por e-mail, com lembrete antes do atendimento.</p>
+        </div>
+        <div class="booking reveal" id="booking">
           <div class="booking__fallback">
-            <p><strong>Agenda em configuração.</strong></p>
+            <p class="booking__title">Agenda em configuração</p>
             <p>Enquanto isso, fale com a gente para marcar seu horário.</p>
-            <a class="btn btn--primary" data-whatsapp href="#">Agendar pelo WhatsApp</a>
+            <a class="btn btn--gold" data-whatsapp href="#">Agendar pelo WhatsApp</a>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- FAQ -->
-    <section class="section" id="faq">
-      <div class="container container--narrow">
-        <header class="section__head">
-          <span class="tag">Dúvidas frequentes</span>
-          <h2>Perguntas frequentes</h2>
-        </header>
-        <div class="faq">
-          <details>
-            <summary>O escaneamento dói ou causa desconforto?</summary>
-            <p>Não. O scanner é uma pequena ponteira que capta imagens sem contato agressivo e sem nenhum material na boca.</p>
-          </details>
-          <details>
-            <summary>Quanto tempo dura o atendimento?</summary>
-            <p>Em média de 10 a 20 minutos, dependendo do tipo de caso (uma ou duas arcadas, registro de mordida etc.).</p>
-          </details>
-          <details>
-            <summary>Preciso de pedido do meu dentista?</summary>
-            <p>Sim, recomendamos que o escaneamento seja solicitado pelo seu cirurgião-dentista, que indicará o objetivo e o laboratório de destino.</p>
-          </details>
-          <details>
-            <summary>Como os arquivos são entregues?</summary>
-            <p>Enviamos os arquivos digitais (STL/PLY) por link seguro ao dentista ou diretamente ao laboratório indicado.</p>
-          </details>
-          <details>
-            <summary>Posso remarcar ou cancelar?</summary>
-            <p>Sim. Use o link do e-mail de confirmação do Google Agenda ou fale com a gente pelo WhatsApp.</p>
-          </details>
-        </div>
+    <!-- CTA FINAL -->
+    <section class="cta">
+      <svg class="cta__lines" viewBox="0 0 1440 400" preserveAspectRatio="none" aria-hidden="true">
+        <defs><linearGradient id="lineg" x1="0" x2="1"><stop offset="0" stop-color="#c9974f" stop-opacity="0"/><stop offset=".5" stop-color="#e9c88a"/><stop offset="1" stop-color="#c9974f" stop-opacity="0"/></linearGradient></defs>
+        <path class="flow" d="M-20 60 C 300 120, 300 380, 720 360 S 1200 200, 1460 330" fill="none" stroke="url(#lineg)" stroke-width="1.5"/>
+        <path class="flow flow--2" d="M-20 140 C 260 160, 360 400, 760 390 S 1260 260, 1460 380" fill="none" stroke="url(#lineg)" stroke-width="1"/>
+      </svg>
+      <div class="container center reveal">
+        <h2>Leve o fluxo digital<br><em>para a sua clínica.</em></h2>
+        <p class="lead">Conte com a GR Digital Scan e ofereça ao seu paciente uma experiência mais moderna, confortável e precisa.</p>
+        <a href="#" data-whatsapp class="btn btn--gold btn--lg">
+          <svg class="i-wa" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-1-2.2-1-.3-.1-.5-.2-.7.1l-1 1.2c-.2.2-.4.3-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.6.3-.6v-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.8 1.1 3.3.9 3.9.8.6 0 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6l-.8-.3Z" fill="currentColor"/></svg>
+          Solicite um orçamento
+        </a>
       </div>
     </section>
   </main>
 
   <footer class="footer">
     <div class="container footer__inner">
-      <div>
-        <a href="#topo" class="logo logo--light">
-          <img src="assets/favicon.svg" alt="" width="28" height="28">
-          <span>GR<strong>Scan</strong></span>
-        </a>
-        <p>Escaneamento digital odontológico.</p>
-      </div>
+      <a href="#topo" class="brand">
+        <img src="assets/logo.svg" alt="" width="48" height="48">
+        <span class="brand__text"><span>DIGITAL</span><small>SCAN</small></span>
+      </a>
+      <span class="footer__sep" aria-hidden="true"></span>
+      <p>Escaneamento intraoral<br>com excelência.</p>
       <ul class="footer__contact">
         <li><a data-whatsapp href="#">WhatsApp</a></li>
         <li><a data-email href="#">E-mail</a></li>
         <li><a data-instagram href="#">Instagram</a></li>
       </ul>
-      <p class="footer__copy">© <span id="ano"></span> GRScan. Todos os direitos reservados.</p>
     </div>
+    <p class="footer__copy container">© <span id="ano"></span> GR Digital Scan. Todos os direitos reservados.</p>
   </footer>
 
   <a class="wa-float" data-whatsapp href="#" aria-label="Falar no WhatsApp">
-    <svg viewBox="0 0 32 32" width="28" height="28" fill="currentColor" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-1-2.2-1-.3-.1-.5-.2-.7.1l-1 1.2c-.2.2-.4.3-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.6.3-.6v-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.8 1.1 3.3.9 3.9.8.6 0 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6l-.8-.3Z"/></svg>
+    <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-1-2.2-1-.3-.1-.5-.2-.7.1l-1 1.2c-.2.2-.4.3-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.6.3-.6v-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.8 1.1 3.3.9 3.9.8.6 0 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6l-.8-.3Z" fill="currentColor"/></svg>
   </a>
 
   <script src="script.js"></script>

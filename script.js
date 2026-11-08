@@ -10,13 +10,14 @@ const CONFIG = {
 
   // WhatsApp com DDI + DDD, só números. Ex.: "5511999999999"
   whatsapp: "",
-  whatsappMessage: "Olá! Gostaria de agendar um escaneamento digital com a GRScan.",
+  whatsappMessage: "Olá! Gostaria de solicitar um orçamento de escaneamento intraoral com a GR Digital Scan.",
 
   email: "",       // Ex.: "contato@grscan.com.br"
   instagram: "",   // Ex.: "grscan"
 };
 /* ============================================================ */
 
+document.documentElement.classList.remove("no-js");
 (function () {
   // Agenda do Google
   const booking = document.getElementById("booking");
@@ -25,7 +26,7 @@ const CONFIG = {
       ? CONFIG.googleCalendarUrl
       : CONFIG.googleCalendarUrl + (CONFIG.googleCalendarUrl.includes("?") ? "&" : "?") + "gv=true";
     booking.innerHTML =
-      '<iframe src="' + url + '" title="Agendamento online GRScan" loading="lazy"></iframe>';
+      '<iframe src="' + url + '" title="Agendamento online GR Digital Scan" loading="lazy"></iframe>';
   }
 
   // Links de contato
@@ -35,6 +36,8 @@ const CONFIG = {
         a.href = href;
         a.target = "_blank";
         a.rel = "noopener";
+      } else if (a.classList.contains("btn") && !a.closest(".booking__fallback")) {
+        a.href = "#agendar"; // sem contato configurado, o botão leva à agenda
       } else if (!a.closest(".booking__fallback")) {
         a.hidden = true;
       }
@@ -69,14 +72,22 @@ const CONFIG = {
   // Ano no rodapé
   document.getElementById("ano").textContent = new Date().getFullYear();
 
-  // Animação ao rolar
-  const els = document.querySelectorAll(".card, .step, .section__head, .chips, .faq details");
+  // Cabeçalho com fundo ao rolar
+  const header = document.querySelector(".header");
+  const onScroll = () => header.classList.toggle("is-scrolled", window.scrollY > 20);
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+
+  // Animações de entrada (e desenho dos ícones)
+  const els = document.querySelectorAll(".reveal, .fade-up");
   if ("IntersectionObserver" in window) {
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (e.isIntersecting) { e.target.classList.add("is-visible"); io.unobserve(e.target); }
       });
-    }, { threshold: 0.12 });
-    els.forEach((el) => { el.classList.add("reveal"); io.observe(el); });
+    }, { threshold: 0.15 });
+    els.forEach((el) => io.observe(el));
+  } else {
+    els.forEach((el) => el.classList.add("is-visible"));
   }
 })();
