@@ -333,6 +333,11 @@ body.modal-open { overflow: hidden; }
 .field.is-invalid input, .field.is-invalid select, .field.is-invalid textarea, .chips.is-invalid .chip span, .slots.is-invalid .tslot span { border-color: #e2725b; }
 .slots { display: flex; flex-wrap: wrap; gap: 8px; }
 .slots .bk__hint { margin: .7em 0 0; }
+.days { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px; scrollbar-width: thin; scrollbar-color: rgba(217,164,65,.4) transparent; }
+.days .bk__hint { margin: .4em 0 0; }
+.tday span { display: flex !important; flex-direction: column; align-items: center; gap: 2px; min-width: 64px; padding: .55em .7em !important; border-radius: 10px !important; line-height: 1.1; }
+.tday small { font-size: .66rem; text-transform: uppercase; letter-spacing: .06em; opacity: .75; }
+.tday b { font-size: .95rem; font-weight: 700; }
 .tslot span { border-radius: 8px; padding: .55em .9em; font-variant-numeric: tabular-nums; }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .bk__footer { display: flex; flex-direction: column; align-items: center; gap: 10px; }

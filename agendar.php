@@ -15,15 +15,18 @@ $DURACAO_MIN = 60;
 
 header('Content-Type: application/json; charset=utf-8');
 date_default_timezone_set('America/Sao_Paulo');
+require __DIR__ . '/agenda-google.php';
 
-function responder($ok, $msg = '') {
-    http_response_code($ok ? 200 : 400);
-    echo json_encode(['ok' => $ok, 'message' => $msg], JSON_UNESCAPED_UNICODE);
+function responder($ok, $msg = '', $code = null, $extra = []) {
+    http_response_code($code ?? ($ok ? 200 : 400));
+    echo json_encode(array_merge(['ok' => $ok, 'message' => $msg], $extra), JSON_UNESCAPED_UNICODE);
     exit;
 }
 
+$emailAtivo  = strpos($DESTINO, 'exemplo.com') === false;
+$agendaAtiva = ag_ativa();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') responder(false, 'Método inválido.');
-if (strpos($DESTINO, 'exemplo.com') !== false) responder(false, 'Agendamento por e-mail ainda não configurado.');
+if (!$emailAtivo && !$agendaAtiva) responder(false, 'Agendamento ainda não configurado.');
 
 $d = json_decode(file_get_contents('php://input'), true);
 if (!is_array($d)) $d = $_POST;
@@ -73,7 +76,29 @@ foreach ($linhas as $k => $x) $texto .= $k . ': ' . $x . "\n";
 $fone = preg_replace('/\D/', '', $v['telefone']);
 if (strlen($fone) <= 11) $fone = '55' . $fone;
 $texto .= "\nResponder pelo WhatsApp: https://wa.me/{$fone}\n";
-$texto .= "Abra o anexo .ics para adicionar ao Google Agenda.\n";
+
+// Google Agenda: confere se o horário continua livre e cria o evento
+$reservado = false;
+if ($agendaAtiva) {
+    try {
+        $livres = ag_horarios_livres();
+        if (!in_array($v['hora'], $livres[$v['data']] ?? [], true)) {
+            responder(false, 'Esse horário acabou de ser reservado. Escolha outro, por favor.', 409, ['ocupado' => true]);
+        }
+        $c = ag_config();
+        $ini = new DateTimeImmutable($v['data'] . ' ' . $v['hora'], new DateTimeZone($c['FUSO']));
+        ag_criar_evento($ini, $ini->modify('+' . (int)$c['DURACAO_MIN'] . ' minutes'),
+            'Escaneamento — ' . $v['clinica'] . ' (' . $v['trabalho'] . ')',
+            $v['endereco'] . ', ' . $v['cidade'], trim($texto));
+        $reservado = true;
+        // descarta o cache de horários para o site atualizar na hora
+        @unlink(sys_get_temp_dir() . '/grscan_disp_' . md5($c['AGENDA_DISPONIVEL'] . $c['AGENDA_COMPROMISSOS']));
+    } catch (Throwable $e) {
+        error_log('[GR Scan] Google Agenda: ' . $e->getMessage());
+        if (!$emailAtivo) responder(false, 'Não foi possível reservar agora. Tente novamente em instantes.', 502);
+    }
+}
+$texto .= $reservado ? "Já está no seu Google Agenda.\n" : "Abra o anexo .ics para adicionar ao Google Agenda.\n";
 
 // Convite de calendário (.ics)
 $esc = fn($s) => addcslashes(str_replace("\n", ' ', $s), ',;\\');
@@ -102,16 +127,19 @@ function enviar($para, $de, $responderPara, $assunto, $texto, $ics = null) {
     return mail($para, $assunto, $corpo, $h, '-f' . $de);
 }
 
-$ok = enviar($DESTINO, $REMETENTE, $v['email'],
-    "Agendamento: {$v['clinica']} — {$dataBR} {$v['hora']}", $texto, $ics);
-if (!$ok) responder(false, 'Não foi possível enviar agora.');
+if ($emailAtivo) {
+    $ok = enviar($DESTINO, $REMETENTE, $v['email'],
+        ($reservado ? 'Novo agendamento: ' : 'Agendamento: ') . "{$v['clinica']} — {$dataBR} {$v['hora']}", $texto, $reservado ? null : $ics);
+    if (!$ok && !$reservado) responder(false, 'Não foi possível enviar agora.');
 
-// Cópia para o dentista
-$conf = "Olá, {$v['nome']}!\n\nRecebemos sua solicitação de escaneamento intraoral. " .
-        "Vamos confirmar o horário com você em breve.\n\n";
-foreach (['Trabalho','Clínica','Endereço','Data'] as $k) $conf .= $k . ': ' . $linhas[$k] . "\n";
-$conf .= "\nGR Scan — Digital Scan";
-enviar($v['email'], $REMETENTE, $DESTINO, 'Recebemos sua solicitação — GR Scan', $conf);
+    // Cópia para o dentista
+    $conf = "Olá, {$v['nome']}!\n\n" . ($reservado
+        ? "Seu horário de escaneamento intraoral está reservado. Qualquer mudança, fale com a gente.\n\n"
+        : "Recebemos sua solicitação de escaneamento intraoral. Vamos confirmar o horário com você em breve.\n\n");
+    foreach (['Trabalho','Clínica','Endereço','Data'] as $k) $conf .= $k . ': ' . $linhas[$k] . "\n";
+    $conf .= "\nGR Scan — Digital Scan";
+    enviar($v['email'], $REMETENTE, $DESTINO, ($reservado ? 'Horário reservado' : 'Recebemos sua solicitação') . ' — GR Scan', $conf);
+}
 
 // Registro em planilha, fora da pasta pública quando possível
 $dir = is_writable(dirname(__DIR__)) ? dirname(__DIR__) : __DIR__;
@@ -123,4 +151,4 @@ if ($f = @fopen($csv, 'a')) {
     fclose($f);
 }
 
-responder(true);
+responder(true, '', 200, ['reservado' => $reservado]);

@@ -1,4 +1,7 @@
-# Bloqueia acesso público à planilha de agendamentos
-<FilesMatch "\.(csv)$">
+# Bloqueia acesso público à planilha de agendamentos, às chaves e aos arquivos de configuração
+<FilesMatch "\.(csv|json|pem)$">
+  Require all denied
+</FilesMatch>
+<FilesMatch "^(agenda-config|agenda-google)\.php$">
   Require all denied
 </FilesMatch>

@@ -38,6 +38,9 @@ const CONFIG = {
   // Arquivo que envia a solicitação por e-mail (configure o e-mail dentro de agendar.php).
   // Deixe "" para enviar só pelo WhatsApp.
   endpointAgendamento: "agendar.php",
+  // Lê os horários livres do Google Agenda (configure em agenda-config.php).
+  // Enquanto não estiver configurado, o formulário usa as regras de "agenda" acima.
+  endpointDisponibilidade: "disponibilidade.php",
 };
 /* ============================================================ */
 
@@ -110,6 +113,7 @@ document.documentElement.classList.remove("no-js");
     if (!modal || modal.open) return;
     if (typeof modal.showModal === "function") modal.showModal(); else modal.setAttribute("open", "");
     document.body.classList.add("modal-open");
+    document.dispatchEvent(new Event("bk:open"));
     const box = $(".bk-modal__box", modal); if (box) box.scrollTop = 0;
     setTimeout(() => {
       const first = $('input[name="trabalho"]', modal);
@@ -153,7 +157,10 @@ document.documentElement.classList.remove("no-js");
     const max = new Date(today); max.setDate(max.getDate() + A.diasNoFuturo);
     dateInput.min = iso(min); dateInput.max = iso(max);
 
+    // Horários vindos do Google Agenda (null = usa as regras fixas de CONFIG.agenda)
+    let G = null, gLoadedAt = 0;
     const dayOk = (s) => {
+      if (G) return !!(s && G[s] && G[s].length);
       if (!s || s < dateInput.min || s > dateInput.max) return false;
       if (A.datasBloqueadas.includes(s)) return false;
       return A.diasDaSemana.includes(new Date(s + "T12:00:00").getDay());
@@ -164,23 +171,70 @@ document.documentElement.classList.remove("no-js");
     };
 
     const slots = $("#slots");
+    const slotHtml = (h) => '<label class="tslot"><input type="radio" name="hora" value="' + h + '"><span>' + h + "</span></label>";
     const renderSlots = () => {
       const s = dateInput.value;
       slots.classList.remove("is-invalid");
       if (!s) { slots.innerHTML = '<p class="bk__hint">Escolha uma data para ver os horários.</p>'; return; }
       if (!dayOk(s)) {
-        slots.innerHTML = '<p class="bk__hint">Sem atendimento nesta data. Atendemos: ' + diasTxt() + '.</p>';
+        slots.innerHTML = G
+          ? '<p class="bk__hint">Não há mais horários livres nesta data. Escolha outro dia.</p>'
+          : '<p class="bk__hint">Sem atendimento nesta data. Atendemos: ' + diasTxt() + '.</p>';
         return;
       }
+      if (G) { slots.innerHTML = G[s].map(slotHtml).join(""); return; }
       let html = "";
       for (let t = toMin(A.inicio); t <= toMin(A.fim); t += A.intervaloMinutos) {
-        const h = pad(Math.floor(t / 60)) + ":" + pad(t % 60);
-        html += '<label class="tslot"><input type="radio" name="hora" value="' + h + '"><span>' + h + "</span></label>";
+        html += slotHtml(pad(Math.floor(t / 60)) + ":" + pad(t % 60));
       }
       slots.innerHTML = html;
     };
     dateInput.addEventListener("change", renderSlots);
     dateInput.addEventListener("input", renderSlots);
+
+    // ---- Modo Google Agenda: mostra só os dias e horários livres ----
+    const days = document.createElement("div");
+    days.className = "days"; days.id = "days"; days.hidden = true;
+    dateInput.after(days);
+    const dayLabel = (s) => {
+      const d = new Date(s + "T12:00:00");
+      const wd = d.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "");
+      return "<small>" + wd + "</small><b>" + pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "</b>";
+    };
+    const renderDays = () => {
+      const list = Object.keys(G).filter((s) => G[s].length).sort();
+      if (!list.length) {
+        days.innerHTML = '<p class="bk__hint">Nenhum horário livre no momento. Fale com a gente pelo WhatsApp ou tente mais tarde.</p>';
+      } else {
+        days.innerHTML = list.map((s) =>
+          '<label class="tslot tday"><input type="radio" name="dia" value="' + s + '"' + (s === dateInput.value ? " checked" : "") +
+          "><span>" + dayLabel(s) + "</span></label>").join("");
+      }
+      if (dateInput.value && !dayOk(dateInput.value)) dateInput.value = "";
+      renderSlots();
+    };
+    days.addEventListener("change", (e) => {
+      if (e.target.name !== "dia") return;
+      dateInput.value = e.target.value; renderSlots();
+    });
+    const loadAvailability = async (force) => {
+      if (!CONFIG.endpointDisponibilidade || !location.protocol.startsWith("http")) return;
+      if (!force && G && Date.now() - gLoadedAt < 60000) return;
+      try {
+        const r = await fetch(CONFIG.endpointDisponibilidade + "?t=" + Date.now(), { cache: "no-store" });
+        const j = await r.json();
+        if (!j.ok || !j.dias) return; // agenda não conectada: segue com as regras fixas
+        G = j.dias; gLoadedAt = Date.now();
+        form.classList.add("is-google");
+        dateInput.hidden = true; days.hidden = false;
+        dateInput.closest(".field").classList.add("field--full");
+        slots.closest(".field").classList.add("field--full");
+        $("#bk-submit").textContent = "Reservar horário";
+        const sub = $(".bk-modal__head p"); if (sub) sub.textContent = "Os horários mostrados estão livres e são reservados na hora.";
+        renderDays();
+      } catch (_) { /* mantém o modo sem agenda */ }
+    };
+    document.addEventListener("bk:open", () => loadAvailability(false));
 
     // limpa marca de erro ao editar
     form.addEventListener("input", (e) => {
@@ -231,7 +285,7 @@ document.documentElement.classList.remove("no-js");
     const waText = (d) => "Olá! Gostaria de agendar um escaneamento com a GR Scan.\n\n" +
       summary(d).map(([k, v]) => "*" + k + ":* " + v).join("\n");
 
-    const showDone = (d, sentByEmail) => {
+    const showDone = (d, modo) => {
       $("#bk-sum").innerHTML = summary(d).map(([k, v]) => {
         const li = document.createElement("li");
         li.innerHTML = "<strong></strong> ";
@@ -241,8 +295,10 @@ document.documentElement.classList.remove("no-js");
       }).join("");
       const wa = $("#bk-wa");
       if (CONFIG.whatsapp) { wa.href = waLink(waText(d)); wa.hidden = false; }
-      $("#bk-done-text").textContent = sentByEmail
-        ? "Recebemos o seu pedido e enviamos uma cópia para " + d.email + ". Vamos confirmar o horário com você em breve."
+      $("#bk-done h3").textContent = modo === "reservado" ? "Horário reservado!" : "Solicitação enviada!";
+      $("#bk-done-text").textContent =
+        modo === "reservado" ? "Seu escaneamento está agendado. Enviamos os detalhes para " + d.email + "."
+        : modo === "email" ? "Recebemos o seu pedido e enviamos uma cópia para " + d.email + ". Vamos confirmar o horário com você em breve."
         : "Finalize o envio da mensagem no WhatsApp para concluir o pedido. Vamos confirmar o horário com você em breve.";
       form.hidden = true;
       const done = $("#bk-done"); done.hidden = false;
@@ -255,28 +311,41 @@ document.documentElement.classList.remove("no-js");
       if (!validate()) return;
       const d = collect();
       const btn = $("#bk-submit");
+      const label = btn.textContent;
       btn.disabled = true; btn.textContent = "Enviando…";
-      let ok = false;
+      let ok = false, j = {};
       if (CONFIG.endpointAgendamento && location.protocol.startsWith("http")) {
         try {
           const r = await fetch(CONFIG.endpointAgendamento, {
             method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d),
           });
-          const j = await r.json().catch(() => ({}));
+          j = await r.json().catch(() => ({}));
           ok = r.ok && j.ok;
         } catch (_) { ok = false; }
       }
-      btn.disabled = false; btn.textContent = "Solicitar agendamento";
-      if (ok) return showDone(d, true);
+      btn.disabled = false; btn.textContent = label;
+      if (ok) {
+        if (j.reservado) loadAvailability(true);
+        return showDone(d, j.reservado ? "reservado" : "email");
+      }
+      if (j.ocupado) {
+        // alguém reservou esse horário antes: atualiza a lista e pede outro
+        await loadAvailability(true);
+        errorBox.textContent = j.message || "Esse horário acabou de ser reservado. Escolha outro.";
+        slots.classList.add("is-invalid");
+        slots.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
       if (CONFIG.whatsapp) {
         window.open(waLink(waText(d)), "_blank", "noopener");
-        return showDone(d, false);
+        return showDone(d, "whatsapp");
       }
       errorBox.textContent = "Não foi possível enviar agora. Tente novamente em instantes.";
     });
 
     $("#bk-new").addEventListener("click", () => {
-      form.reset(); renderSlots();
+      form.reset(); dateInput.value = "";
+      if (G) renderDays(); else renderSlots();
       $("#bk-done").hidden = true; form.hidden = false;
       form.scrollIntoView({ behavior: "smooth", block: "start" });
     });
