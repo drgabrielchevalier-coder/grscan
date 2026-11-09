@@ -24,7 +24,7 @@
         <img src="assets/logo.svg" alt="" width="42" height="38">
         <span class="brand__text"><span>GR SCAN</span><small>DIGITAL SCAN</small></span>
       </a>
-      <a href="#" data-whatsapp class="btn btn--gold btn--sm"><svg class="i-wa" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-1-2.2-1-.3-.1-.5-.2-.7.1l-1 1.2c-.2.2-.4.3-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.6.3-.6v-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.8 1.1 3.3.9 3.9.8.6 0 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6l-.8-.3Z" fill="currentColor"/></svg> <span class="hide-sm">Entrar em&nbsp;</span>contato</a>
+      <a href="#" data-whatsapp class="btn btn--gold btn--sm"><svg class="i-wa" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-1-2.2-1-.3-.1-.5-.2-.7.1l-1 1.2c-.2.2-.4.3-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.6.3-.6v-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.8 1.1 3.3.9 3.9.8.6 0 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6l-.8-.3Z" fill="currentColor"/></svg> <span><span class="hide-sm">Entrar em </span>contato</span></a>
     </div>
   </header>
 
@@ -235,102 +235,122 @@
           <p class="muted">Informe o trabalho, o local e o melhor horário. Confirmamos o agendamento com você em seguida.</p>
         </div>
 
-        <form class="bk reveal" id="bk" novalidate>
-          <!-- 1. Trabalho -->
-          <fieldset class="bk__step">
-            <legend><span class="bk__n">1</span> Trabalho</legend>
-            <p class="bk__hint">Qual o tipo de trabalho?</p>
-            <div class="chips" role="radiogroup">
-              <label class="chip"><input type="radio" name="trabalho" value="Prótese / coroa / faceta" required><span>Prótese, coroa ou faceta</span></label>
-              <label class="chip"><input type="radio" name="trabalho" value="Prótese sobre implante"><span>Prótese sobre implante</span></label>
-              <label class="chip"><input type="radio" name="trabalho" value="Ortodontia / alinhadores"><span>Ortodontia / alinhadores</span></label>
-              <label class="chip"><input type="radio" name="trabalho" value="Placa / contenção"><span>Placa ou contenção</span></label>
-              <label class="chip"><input type="radio" name="trabalho" value="Guia cirúrgico / planejamento"><span>Guia cirúrgico / planejamento</span></label>
-              <label class="chip"><input type="radio" name="trabalho" value="Documentação / modelo de estudo"><span>Documentação / estudo</span></label>
-              <label class="chip"><input type="radio" name="trabalho" value="Outro"><span>Outro</span></label>
-            </div>
-            <div class="bk__row">
-              <label class="field"><span>Arcadas</span>
-                <select name="arcadas" required>
-                  <option value="Ambas (superior e inferior)">Ambas (superior e inferior)</option>
-                  <option value="Superior">Superior</option>
-                  <option value="Inferior">Inferior</option>
-                </select>
-              </label>
-              <label class="field"><span>Nº de pacientes</span>
-                <input type="number" name="pacientes" min="1" max="20" value="1" required>
-              </label>
-              <label class="field"><span>Laboratório de destino <em>(opcional)</em></span>
-                <input type="text" name="laboratorio" maxlength="120" placeholder="Nome do laboratório">
-              </label>
-            </div>
-          </fieldset>
+        <button type="button" class="bk-launch reveal" data-open-booking aria-haspopup="dialog" aria-controls="bk-modal">
+          <span class="bk-launch__ico"><svg class="ico ico--cal" viewBox="0 0 48 48"><rect class="draw" x="6" y="9" width="36" height="33" rx="3"/><path class="draw" d="M6 18h36M15 5v8M33 5v8"/><g class="cal-dots" fill="currentColor"><circle cx="15" cy="25" r="1.8"/><circle cx="24" cy="25" r="1.8"/><circle cx="33" cy="25" r="1.8"/><circle cx="15" cy="33" r="1.8"/><circle class="cal-pick" cx="24" cy="33" r="1.8"/><circle cx="33" cy="33" r="1.8"/></g></svg></span>
+          <span class="bk-launch__txt"><strong>Agendar escaneamento</strong><small>Clique para abrir o formulário · leva menos de 1 minuto</small></span>
+          <span class="bk-launch__max" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></span>
+        </button>
 
-          <!-- 2. Local -->
-          <fieldset class="bk__step">
-            <legend><span class="bk__n">2</span> Local do atendimento</legend>
-            <div class="bk__row">
-              <label class="field field--wide"><span>Clínica / consultório</span>
-                <input type="text" name="clinica" maxlength="120" required placeholder="Nome da clínica">
-              </label>
-              <label class="field field--wide"><span>Endereço completo</span>
-                <input type="text" name="endereco" maxlength="200" required placeholder="Rua, número, sala, bairro" autocomplete="street-address">
-              </label>
-              <label class="field"><span>Cidade</span>
-                <input type="text" name="cidade" maxlength="80" required autocomplete="address-level2">
-              </label>
-            </div>
-          </fieldset>
+        <dialog class="bk-modal" id="bk-modal" aria-labelledby="bk-title">
+          <div class="bk-modal__box">
+            <header class="bk-modal__head">
+              <div>
+                <h2 id="bk-title">Agendar escaneamento</h2>
+                <p>Preencha os dados e confirmamos o horário com você.</p>
+              </div>
+              <button type="button" class="bk-modal__close" data-close-booking aria-label="Fechar formulário">
+                <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+              </button>
+            </header>
+            <form class="bk" id="bk" novalidate>
+              <!-- 1. Trabalho -->
+              <fieldset class="bk__step">
+                <legend><span class="bk__n">1</span> Trabalho</legend>
+                <p class="bk__hint">Qual o tipo de trabalho?</p>
+                <div class="chips" role="radiogroup">
+                  <label class="chip"><input type="radio" name="trabalho" value="Prótese / coroa / faceta" required><span>Prótese, coroa ou faceta</span></label>
+                  <label class="chip"><input type="radio" name="trabalho" value="Prótese sobre implante"><span>Prótese sobre implante</span></label>
+                  <label class="chip"><input type="radio" name="trabalho" value="Ortodontia / alinhadores"><span>Ortodontia / alinhadores</span></label>
+                  <label class="chip"><input type="radio" name="trabalho" value="Placa / contenção"><span>Placa ou contenção</span></label>
+                  <label class="chip"><input type="radio" name="trabalho" value="Guia cirúrgico / planejamento"><span>Guia cirúrgico / planejamento</span></label>
+                  <label class="chip"><input type="radio" name="trabalho" value="Documentação / modelo de estudo"><span>Documentação / estudo</span></label>
+                  <label class="chip"><input type="radio" name="trabalho" value="Outro"><span>Outro</span></label>
+                </div>
+                <div class="bk__row">
+                  <label class="field"><span>Arcadas</span>
+                    <select name="arcadas" required>
+                      <option value="Ambas (superior e inferior)">Ambas (superior e inferior)</option>
+                      <option value="Superior">Superior</option>
+                      <option value="Inferior">Inferior</option>
+                    </select>
+                  </label>
+                  <label class="field"><span>Nº de pacientes</span>
+                    <input type="number" name="pacientes" min="1" max="20" value="1" required>
+                  </label>
+                  <label class="field"><span>Laboratório de destino <em>(opcional)</em></span>
+                    <input type="text" name="laboratorio" maxlength="120" placeholder="Nome do laboratório">
+                  </label>
+                </div>
+              </fieldset>
 
-          <!-- 3. Data e horário -->
-          <fieldset class="bk__step">
-            <legend><span class="bk__n">3</span> Data e horário</legend>
-            <div class="bk__row">
-              <label class="field"><span>Data</span>
-                <input type="date" name="data" required>
-              </label>
-              <div class="field field--wide"><span>Horário</span>
-                <div class="slots" id="slots"><p class="bk__hint">Escolha uma data para ver os horários.</p></div>
+              <!-- 2. Local -->
+              <fieldset class="bk__step">
+                <legend><span class="bk__n">2</span> Local do atendimento</legend>
+                <div class="bk__row">
+                  <label class="field field--wide"><span>Clínica / consultório</span>
+                    <input type="text" name="clinica" maxlength="120" required placeholder="Nome da clínica">
+                  </label>
+                  <label class="field field--wide"><span>Endereço completo</span>
+                    <input type="text" name="endereco" maxlength="200" required placeholder="Rua, número, sala, bairro" autocomplete="street-address">
+                  </label>
+                  <label class="field"><span>Cidade</span>
+                    <input type="text" name="cidade" maxlength="80" required autocomplete="address-level2">
+                  </label>
+                </div>
+              </fieldset>
+
+              <!-- 3. Data e horário -->
+              <fieldset class="bk__step">
+                <legend><span class="bk__n">3</span> Data e horário</legend>
+                <div class="bk__row">
+                  <label class="field"><span>Data</span>
+                    <input type="date" name="data" required>
+                  </label>
+                  <div class="field field--wide"><span>Horário</span>
+                    <div class="slots" id="slots"><p class="bk__hint">Escolha uma data para ver os horários.</p></div>
+                  </div>
+                </div>
+              </fieldset>
+
+              <!-- 4. Contato -->
+              <fieldset class="bk__step">
+                <legend><span class="bk__n">4</span> Seus dados</legend>
+                <div class="bk__row">
+                  <label class="field"><span>Dentista responsável</span>
+                    <input type="text" name="nome" maxlength="100" required autocomplete="name">
+                  </label>
+                  <label class="field"><span>WhatsApp</span>
+                    <input type="tel" name="telefone" maxlength="20" required placeholder="(00) 00000-0000" autocomplete="tel">
+                  </label>
+                  <label class="field"><span>E-mail</span>
+                    <input type="email" name="email" maxlength="120" required autocomplete="email">
+                  </label>
+                  <label class="field field--full"><span>Observações <em>(opcional)</em></span>
+                    <textarea name="obs" rows="3" maxlength="800" placeholder="Ex.: dente 36, escaneamento de transferentes, registro de mordida…"></textarea>
+                  </label>
+                </div>
+                <label class="hp" aria-hidden="true">Não preencha<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+              </fieldset>
+
+              <div class="bk__footer">
+                <p class="bk__error" id="bk-error" role="alert"></p>
+                <button type="submit" class="btn btn--gold btn--lg" id="bk-submit">Solicitar agendamento</button>
+              </div>
+            </form>
+
+            <div class="bk-done" id="bk-done" hidden>
+              <svg viewBox="0 0 48 48" class="ico ico--ok"><circle class="draw" cx="24" cy="24" r="20"/><path class="draw" d="M15 24l6 6 12-12"/></svg>
+              <h3>Solicitação enviada!</h3>
+              <p id="bk-done-text">Recebemos o seu pedido e vamos confirmar o horário com você em breve.</p>
+              <ul class="bk-done__sum" id="bk-sum"></ul>
+              <div class="bk-done__actions">
+                <a class="btn btn--gold" id="bk-wa" href="#" target="_blank" rel="noopener" hidden>Confirmar pelo WhatsApp</a>
+                <button type="button" class="btn btn--line" id="bk-new">Novo agendamento</button>
+                <button type="button" class="btn btn--line" data-close-booking>Fechar</button>
               </div>
             </div>
-          </fieldset>
-
-          <!-- 4. Contato -->
-          <fieldset class="bk__step">
-            <legend><span class="bk__n">4</span> Seus dados</legend>
-            <div class="bk__row">
-              <label class="field"><span>Dentista responsável</span>
-                <input type="text" name="nome" maxlength="100" required autocomplete="name">
-              </label>
-              <label class="field"><span>WhatsApp</span>
-                <input type="tel" name="telefone" maxlength="20" required placeholder="(00) 00000-0000" autocomplete="tel">
-              </label>
-              <label class="field"><span>E-mail</span>
-                <input type="email" name="email" maxlength="120" required autocomplete="email">
-              </label>
-              <label class="field field--full"><span>Observações <em>(opcional)</em></span>
-                <textarea name="obs" rows="3" maxlength="800" placeholder="Ex.: dente 36, escaneamento de transferentes, registro de mordida…"></textarea>
-              </label>
-            </div>
-            <label class="hp" aria-hidden="true">Não preencha<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
-          </fieldset>
-
-          <div class="bk__footer">
-            <p class="bk__error" id="bk-error" role="alert"></p>
-            <button type="submit" class="btn btn--gold btn--lg" id="bk-submit">Solicitar agendamento</button>
           </div>
-        </form>
-
-        <div class="bk-done" id="bk-done" hidden>
-          <svg viewBox="0 0 48 48" class="ico ico--ok"><circle class="draw" cx="24" cy="24" r="20"/><path class="draw" d="M15 24l6 6 12-12"/></svg>
-          <h3>Solicitação enviada!</h3>
-          <p id="bk-done-text">Recebemos o seu pedido e vamos confirmar o horário com você em breve.</p>
-          <ul class="bk-done__sum" id="bk-sum"></ul>
-          <div class="bk-done__actions">
-            <a class="btn btn--gold" id="bk-wa" href="#" target="_blank" rel="noopener" hidden>Confirmar pelo WhatsApp</a>
-            <button type="button" class="btn btn--line" id="bk-new">Novo agendamento</button>
-          </div>
-        </div>
+        </dialog>
       </div>
     </section>
 

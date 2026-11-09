@@ -59,6 +59,39 @@ document.documentElement.classList.remove("no-js");
   }
   if (CONFIG.horario) $$("[data-horario]").forEach((el) => (el.textContent = CONFIG.horario));
 
+  // ---------- Janela do agendamento (abre/fecha) ----------
+  const modal = $("#bk-modal");
+  const openBooking = () => {
+    if (!modal || modal.open) return;
+    if (typeof modal.showModal === "function") modal.showModal(); else modal.setAttribute("open", "");
+    document.body.classList.add("modal-open");
+    const box = $(".bk-modal__box", modal); if (box) box.scrollTop = 0;
+    setTimeout(() => {
+      const first = $('input[name="trabalho"]', modal);
+      if (first && !$("#bk").hidden) first.focus({ preventScroll: true });
+    }, 50);
+  };
+  const closeBooking = () => {
+    if (!modal) return;
+    if (typeof modal.close === "function" && modal.open) modal.close(); else modal.removeAttribute("open");
+    document.body.classList.remove("modal-open");
+  };
+  if (modal) {
+    modal.addEventListener("close", () => document.body.classList.remove("modal-open"));
+    // clique fora da caixa fecha
+    modal.addEventListener("click", (e) => { if (e.target === modal) closeBooking(); });
+    $$("[data-close-booking]").forEach((b) => b.addEventListener("click", closeBooking));
+    $$("[data-open-booking]").forEach((b) => b.addEventListener("click", openBooking));
+    // todos os botões/links "#agendar" abrem o formulário
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest('a[href="#agendar"]');
+      if (!a) return;
+      e.preventDefault();
+      openBooking();
+    });
+    if (location.hash === "#agendar") setTimeout(openBooking, 400);
+  }
+
   // ---------- Formulário de agendamento ----------
   const form = $("#bk");
   if (form) {
