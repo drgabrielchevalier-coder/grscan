@@ -18,7 +18,6 @@ const CONFIG = {
     "Rio de Janeiro": [-22.93, -43.47],
     "Niterói": [-22.915, -43.065],
   },
-  mapaBase: { nome: "Base GR Scan · Xerém", lat: -22.5757, lng: -43.3063 },
   mapaVizinhos: [["Magé", -22.62, -43.10], ["São Gonçalo", -22.80, -42.99]],
   // Horário de atendimento (texto). Ex.: "Segunda a sexta, das 8h às 18h, com hora marcada."
   horario: "",
@@ -118,21 +117,6 @@ document.documentElement.classList.remove("no-js");
     });
     (CONFIG.mapaVizinhos || []).forEach(([nome, lat, lng]) =>
       L.marker([lat, lng], { interactive: false, keyboard: false, icon: L.divIcon({ className: "cov-near", html: nome, iconSize: null }) }).addTo(map));
-
-    // Base (ponto de partida) com rotas animadas até cada município
-    const B = CONFIG.mapaBase;
-    if (B) {
-      Object.values(CONFIG.mapaRotulos || {}).forEach(([lat, lng]) => {
-        const a = [B.lat, B.lng], b = [lat, lng], pts = [];
-        const mid = [(a[0] + b[0]) / 2 + (b[1] - a[1]) * 0.18, (a[1] + b[1]) / 2 - (b[0] - a[0]) * 0.18];
-        for (let t = 0; t <= 1.0001; t += 0.05) {
-          pts.push([(1 - t) * (1 - t) * a[0] + 2 * (1 - t) * t * mid[0] + t * t * b[0], (1 - t) * (1 - t) * a[1] + 2 * (1 - t) * t * mid[1] + t * t * b[1]]);
-        }
-        L.polyline(pts, { color: "#fbe3a0", weight: 1.6, opacity: 0.85, dashArray: "2 9", lineCap: "round", className: "cov-route", interactive: false }).addTo(map);
-      });
-      L.marker([B.lat, B.lng], { keyboard: false, title: B.nome,
-        icon: L.divIcon({ className: "cov-base", html: "<span></span><em>" + B.nome + "</em>", iconSize: [16, 16], iconAnchor: [8, 8] }) }).addTo(map);
-    }
 
     const fit = (animate) => {
       const w = mapa.clientWidth;

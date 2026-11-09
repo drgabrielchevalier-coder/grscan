@@ -408,7 +408,8 @@ body.modal-open { overflow: hidden; }
 .field.is-invalid input, .field.is-invalid select, .field.is-invalid textarea, .chips.is-invalid .chip span, .slots.is-invalid .tslot span { border-color: #e2725b; }
 .slots { display: flex; flex-wrap: wrap; gap: 8px; }
 .slots .bk__hint { margin: .7em 0 0; }
-.bk__travel {
+.bk__travel[hidden], .bk__travel { display: none !important; }
+.bk__travel-old {
   display: flex; align-items: flex-start; gap: .6em; margin: -.2rem 0 1rem; padding: .7em 1em; border-radius: 10px;
   font-size: .85rem; color: var(--text); background: rgba(64,215,200,.07); border: 1px solid rgba(64,215,200,.3);
 }
