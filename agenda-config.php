@@ -7,9 +7,10 @@
    definidos em script.js (CONFIG.agenda) e envia os pedidos só por e-mail.
 */
 return [
-    // Caminho do arquivo .json da conta de serviço do Google (FORA da pasta public_html).
-    // Ex.: '/home/u123456789/grscan-google.json'
-    'ARQUIVO_CHAVE' => '/home/SEU_USUARIO/grscan-google.json',
+    // Arquivo .json da conta de serviço do Google. Por padrão o site procura o arquivo
+    // "grscan-google.json" na pasta ACIMA de public_html (que não é acessível pela internet).
+    // Só mude se você guardou o arquivo em outro lugar.
+    'ARQUIVO_CHAVE' => dirname(__DIR__) . '/grscan-google.json',
 
     // ID da agenda onde você marca os horários DISPONÍVEIS.
     // Google Agenda > Configurações da agenda "GR Scan – Disponível" > Integrar agenda > ID da agenda

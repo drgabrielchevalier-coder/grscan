@@ -54,7 +54,7 @@ Com isso você marca os horários livres no Google Agenda e o site mostra e rese
 4. Crie na agenda "Disponível" os blocos em que você atende.
 
 **3. Hospedagem**
-1. Envie o arquivo `.json` para uma pasta **fora** de `public_html` (ex.: `/home/SEU_USUARIO/grscan-google.json`).
-2. Em `agenda-config.php`, preencha `ARQUIVO_CHAVE`, `AGENDA_DISPONIVEL` e `AGENDA_COMPROMISSOS` e ajuste duração, intervalo e folga.
+1. Renomeie o arquivo `.json` para `grscan-google.json` e envie para a pasta **acima** de `public_html` (a pasta do domínio, que não é pública).
+2. Em `agenda-config.php`, preencha `AGENDA_DISPONIVEL` e `AGENDA_COMPROMISSOS` e ajuste duração, intervalo e folga.
 3. Envie `agenda-config.php`, `agenda-google.php`, `disponibilidade.php`, `agendar.php` e `.htaccess` junto com o site.
 4. Teste abrindo `https://seu-site/disponibilidade.php`: deve aparecer `"ok":true` com os dias e horários.
