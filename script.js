@@ -10,7 +10,7 @@ const CONFIG = {
 
   // WhatsApp com DDI + DDD, só números. Ex.: "5511999999999"
   whatsapp: "",
-  whatsappMessage: "Olá! Gostaria de solicitar um orçamento de escaneamento intraoral com a GR Digital Scan.",
+  whatsappMessage: "Olá! Gostaria de solicitar um orçamento de escaneamento intraoral com a GR Scan.",
 
   email: "",       // Ex.: "contato@grscan.com.br"
   instagram: "",   // Ex.: "grscan"
@@ -26,7 +26,7 @@ document.documentElement.classList.remove("no-js");
       ? CONFIG.googleCalendarUrl
       : CONFIG.googleCalendarUrl + (CONFIG.googleCalendarUrl.includes("?") ? "&" : "?") + "gv=true";
     booking.innerHTML =
-      '<iframe src="' + url + '" title="Agendamento online GR Digital Scan" loading="lazy"></iframe>';
+      '<iframe src="' + url + '" title="Agendamento online GR Scan" loading="lazy"></iframe>';
   }
 
   // Links de contato

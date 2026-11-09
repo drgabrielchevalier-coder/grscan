@@ -1,4 +1,4 @@
-# GR Digital Scan — Landing page
+# GR Scan — Landing page
 
 Landing page estática (HTML/CSS/JS puro), visual escuro com dourado, para o serviço de escaneamento digital odontológico, com agendamento online via Google Agenda.
 
