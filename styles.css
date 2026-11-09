@@ -195,7 +195,16 @@ h3 { font-size: 1rem; font-weight: 700; }
 .tech__img { padding: 12px; border-radius: 12px; background: #3a3836; box-shadow: 0 30px 60px -30px #000; }
 .tech__screen { position: relative; aspect-ratio: 4 / 3.2; border-radius: 6px; overflow: hidden; display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, #2b241a, #0b0a08 70%); }
 .tech__arch { width: 72%; }
-.mv--scanner { position: absolute; inset: 0; width: 100%; height: 100%; }
+.scanscene canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; z-index: 1; cursor: grab; touch-action: pan-y; }
+.scanscene canvas:active { cursor: grabbing; }
+.scanscene canvas { opacity: 0; transition: opacity .8s ease; }
+.scanscene.is-ready canvas { opacity: 1; }
+.scanscene.is-fallback .tech__pct { display: none; }
+.scanscene__legend {
+  position: absolute; left: 14px; bottom: 14px; z-index: 2; display: flex; align-items: center; gap: .6em;
+  font-size: .72rem; color: var(--text); padding: .45em .9em .45em .5em; border-radius: 8px; background: rgba(10,9,7,.7); border: 1px solid rgba(255,255,255,.08);
+}
+.scanscene__legend i { width: 5px; height: 18px; border-radius: 3px; background: #2fe0cf; box-shadow: 0 0 10px #2fe0cf; }
 .tech__glow { position: absolute; width: 70%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(64,215,200,.18), rgba(217,164,65,.12) 45%, transparent 70%); animation: breathe 5s ease-in-out infinite; }
 .tech__trace { stroke-dasharray: 420; stroke-dashoffset: 420; animation: trace 4s ease-in-out infinite; filter: drop-shadow(0 0 4px #f3d27a); }
 @keyframes trace { 0% { stroke-dashoffset: 420; } 60%, 100% { stroke-dashoffset: 0; } }
@@ -477,6 +486,7 @@ model-viewer { --poster-color: transparent; --progress-bar-color: var(--gold-2);
   .header .btn--sm { padding: .55em .9em; font-size: .62rem; }
   .brand__text span { font-size: 1.05rem; }
   .hide-sm { display: none; }
+  .scanscene .tech__pct { display: none; }
   .strip { grid-template-columns: 1fr; padding: 22px; }
   .pillars { grid-template-columns: 1fr; padding: 24px; }
   .hero__cta .btn { flex: 1 1 100%; }
