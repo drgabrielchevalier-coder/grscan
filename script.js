@@ -18,6 +18,10 @@ const CONFIG = {
     "Rio de Janeiro": [-22.93, -43.47],
     "Niterói": [-22.915, -43.065],
     "Belford Roxo": [-22.765, -43.395],
+    // menores (etiqueta discreta)
+    "Mesquita": [-22.795, -43.455, "sm"],
+    "Nilópolis": [-22.818, -43.418, "sm"],
+    "São João de Meriti": [-22.795, -43.36, "sm"],
   },
   mapaVizinhos: [["Magé", -22.62, -43.10], ["São Gonçalo", -22.80, -42.99]],
   // Horário de atendimento (texto). Ex.: "Segunda a sexta, das 8h às 18h, com hora marcada."
@@ -113,12 +117,15 @@ document.documentElement.classList.remove("no-js");
     // Nomes dos municípios e cidades vizinhas
     const labels = [];
     Object.entries(CONFIG.mapaRotulos || {}).forEach(([nome, p], i) => {
-      labels.push(L.marker(p, { interactive: false, keyboard: false,
-        icon: L.divIcon({ className: "cov-label", html: '<span style="--d:' + (0.6 + i * 0.25) + 's">' + nome + "</span>", iconSize: null }) }).addTo(map));
+      labels.push(L.marker([p[0], p[1]], { interactive: false, keyboard: false,
+        icon: L.divIcon({ className: "cov-label" + (p[2] === "sm" ? " cov-label--sm" : ""), html: '<span style="--d:' + (0.6 + i * 0.25) + 's">' + nome + "</span>", iconSize: null }) }).addTo(map));
     });
     (CONFIG.mapaVizinhos || []).forEach(([nome, lat, lng]) =>
       L.marker([lat, lng], { interactive: false, keyboard: false, icon: L.divIcon({ className: "cov-near", html: nome, iconSize: null }) }).addTo(map));
 
+    // etiquetas dos municípios pequenos só aparecem com zoom
+    const zoomCls = () => mapa.classList.toggle("cov--zoom", map.getZoom() >= 11.5);
+    map.on("zoomend", zoomCls);
     const fit = (animate) => {
       const w = mapa.clientWidth;
       const opts = { paddingTopLeft: w < 420 ? [12, 64] : [24, 70], paddingBottomRight: w < 420 ? [12, 48] : [24, 40] };

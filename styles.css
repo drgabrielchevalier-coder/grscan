@@ -214,6 +214,9 @@ h3 { font-size: 1rem; font-weight: 700; }
   padding: .3em .8em; border-radius: 8px; font-weight: 700; font-size: .92rem; color: #fff;
   background: rgba(12,10,6,.82); border: 1.5px solid #e9b54a; box-shadow: 0 0 14px rgba(233,181,74,.55), 0 6px 16px rgba(0,0,0,.6);
 }
+.cov-label--sm { visibility: hidden; }
+.cov--zoom .cov-label--sm { visibility: visible; }
+.cov-label--sm span { font-size: .66rem; font-weight: 600; padding: .2em .55em; border-width: 1px; }
 .cov--on .cov-label span { animation: covPop .6s calc(2.4s + var(--d)) cubic-bezier(.3,1.6,.5,1) forwards; }
 @keyframes covPop { to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 .cov-near { transform: translate(-50%, -50%); white-space: nowrap; color: #e8e3d8; font-size: .78rem; font-weight: 500; text-shadow: 0 1px 4px #000, 0 0 8px #000; opacity: .85; pointer-events: none; }
@@ -248,6 +251,7 @@ h3 { font-size: 1rem; font-weight: 700; }
 @media (max-width: 560px) {
   .cov { aspect-ratio: 3 / 3.4; }
   .cov-label span { font-size: .72rem; padding: .25em .6em; }
+  .cov-label--sm span { font-size: .55rem; padding: .15em .4em; }
   .cov-near { font-size: .65rem; }
   .cov-legend { right: 18px; bottom: 30px; padding: 7px 10px; gap: 8px; }
   .cov-legend i { width: 24px; height: 16px; }
