@@ -41,6 +41,11 @@ const CONFIG = {
   // Lê os horários livres do Google Agenda (configure em agenda-config.php).
   // Enquanto não estiver configurado, o formulário usa as regras de "agenda" acima.
   endpointDisponibilidade: "disponibilidade.php",
+
+  // Página de reservas do Google Agenda ("Agenda de agendamentos").
+  // Preenchido: o botão "Agendar" abre essa página dentro do site, com os horários livres da sua agenda.
+  // Vazio (""): usa o formulário próprio do site.
+  googleAgendamentoUrl: "https://calendar.google.com/calendar/appointments/schedules/AcZssZ25gLU9mfg06dVwexH09kKzk3KGn9nSaVpUgUGZgBxkSkKDm_N5woDil1dccoPBrSu8D1IzscS0?gv=true",
 };
 /* ============================================================ */
 
@@ -109,11 +114,29 @@ document.documentElement.classList.remove("no-js");
 
   // ---------- Janela do agendamento (abre/fecha) ----------
   const modal = $("#bk-modal");
+  const gcalUrl = CONFIG.googleAgendamentoUrl;
+  if (modal && gcalUrl) {
+    // Usa a página de reservas do Google Agenda no lugar do formulário próprio
+    $("#bk-gcal").hidden = false;
+    $("#bk").hidden = true;
+    $("#bk-gcal-link").href = gcalUrl.replace(/[?&]gv=true/, "");
+    const sub = $(".bk-modal__head p", modal);
+    if (sub) sub.textContent = "Escolha um horário livre. A reserva é confirmada na hora e você recebe o convite por e-mail.";
+    modal.classList.add("bk-modal--gcal");
+  }
+  const loadGcal = () => {
+    const frame = $(".bk-gcal__frame", modal);
+    if (!gcalUrl || !frame || $("iframe", frame)) return;
+    const f = document.createElement("iframe");
+    f.src = gcalUrl; f.title = "Agenda de reservas GR Scan"; f.loading = "eager";
+    f.addEventListener("load", () => frame.classList.add("is-loaded"));
+    frame.append(f);
+  };
   const openBooking = () => {
     if (!modal || modal.open) return;
     if (typeof modal.showModal === "function") modal.showModal(); else modal.setAttribute("open", "");
     document.body.classList.add("modal-open");
-    document.dispatchEvent(new Event("bk:open"));
+    if (gcalUrl) loadGcal(); else document.dispatchEvent(new Event("bk:open"));
     const box = $(".bk-modal__box", modal); if (box) box.scrollTop = 0;
     setTimeout(() => {
       const first = $('input[name="trabalho"]', modal);

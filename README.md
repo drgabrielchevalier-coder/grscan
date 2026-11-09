@@ -29,7 +29,14 @@ O formulário da seção "Agende seu escaneamento" pede trabalho, arcadas, local
 Cada pedido chega por e-mail com um convite `.ics` (um clique adiciona ao Google Agenda), o dentista recebe uma confirmação
 e uma cópia fica em `agendamentos-grscan.csv`, fora da pasta pública. Sem o PHP configurado, o pedido segue pelo WhatsApp.
 
-## Conectar ao Google Agenda (horários automáticos)
+## Página de reservas do Google Agenda (em uso)
+
+O botão "Agendar escaneamento" abre a **página de reservas do Google Agenda** dentro do site
+(`googleAgendamentoUrl` em `script.js`). Disponibilidade, duração, intervalo e perguntas do formulário
+são configurados no próprio Google Agenda, na agenda de agendamentos "GR Scan".
+Para voltar ao formulário próprio do site, deixe `googleAgendamentoUrl: ""`.
+
+## Alternativa: formulário próprio conectado ao Google Agenda (avançado)
 
 Com isso você marca os horários livres no Google Agenda e o site mostra e reserva sozinho.
 

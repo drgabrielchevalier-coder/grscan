@@ -294,6 +294,25 @@ h3 { font-size: 1rem; font-weight: 700; }
 .bk-modal .bk-done { margin: 0 auto; border: 0; background: none; padding: 40px 28px; }
 body.modal-open { overflow: hidden; }
 
+/* Página de reservas do Google Agenda dentro da janela */
+.bk-gcal { padding: 18px 24px 22px; display: flex; flex-direction: column; gap: 12px; }
+.bk-gcal__tip {
+  margin: 0; display: flex; align-items: center; gap: .7em; font-size: .86rem; color: var(--text-soft);
+  padding: .7em 1em; border-radius: 10px; background: rgba(217,164,65,.08); border: 1px solid var(--line);
+}
+.bk-gcal__tip i { flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%; background: var(--gold-2); box-shadow: 0 0 0 4px rgba(217,164,65,.2); }
+.bk-gcal__tip strong { color: var(--gold-1); font-weight: 600; }
+.bk-gcal__frame {
+  position: relative; height: min(720px, calc(100dvh - 250px)); min-height: 460px; border-radius: 12px; overflow: hidden;
+  background: #fff; box-shadow: 0 0 0 1px var(--line);
+}
+.bk-gcal__frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity .4s; }
+.bk-gcal__frame.is-loaded iframe { opacity: 1; }
+.bk-gcal__loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: #555; font-size: .9rem; }
+.bk-gcal__alt { margin: 0; text-align: center; font-size: .8rem; color: var(--text-soft); }
+.bk-gcal__alt a { color: var(--gold-1); }
+
+
 /* Booking form */
 .bk {
   max-width: 920px; margin: 40px auto 0; padding: 36px; border-radius: 14px;
@@ -526,6 +545,8 @@ model-viewer { --poster-color: transparent; --progress-bar-color: var(--gold-2);
   .bk-modal__head { padding: 18px 18px 14px; }
   .bk-modal { width: 100%; max-height: 100dvh; height: 100dvh; border-radius: 0; }
   .bk-modal__box { max-height: 100dvh; }
+  .bk-gcal { padding: 12px 10px 16px; }
+  .bk-gcal__frame { height: calc(100dvh - 210px); min-height: 420px; border-radius: 8px; }
   .bk-launch { gap: 14px; padding: 16px; }
   .bk-launch__ico { width: 56px; height: 56px; }
   .bk-launch__max { display: none; }

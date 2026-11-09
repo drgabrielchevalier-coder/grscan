@@ -238,7 +238,7 @@
 
         <button type="button" class="bk-launch reveal" data-open-booking aria-haspopup="dialog" aria-controls="bk-modal">
           <span class="bk-launch__ico"><svg class="ico ico--cal" viewBox="0 0 48 48"><rect class="draw" x="6" y="9" width="36" height="33" rx="3"/><path class="draw" d="M6 18h36M15 5v8M33 5v8"/><g class="cal-dots" fill="currentColor"><circle cx="15" cy="25" r="1.8"/><circle cx="24" cy="25" r="1.8"/><circle cx="33" cy="25" r="1.8"/><circle cx="15" cy="33" r="1.8"/><circle class="cal-pick" cx="24" cy="33" r="1.8"/><circle cx="33" cy="33" r="1.8"/></g></svg></span>
-          <span class="bk-launch__txt"><strong>Agendar escaneamento</strong><small>Clique para abrir o formulário · leva menos de 1 minuto</small></span>
+          <span class="bk-launch__txt"><strong>Agendar escaneamento</strong><small>Clique para ver os horários livres e reservar</small></span>
           <span class="bk-launch__max" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></span>
         </button>
 
@@ -253,6 +253,11 @@
                 <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
               </button>
             </header>
+            <div class="bk-gcal" id="bk-gcal" hidden>
+              <p class="bk-gcal__tip"><i></i><span>Ao confirmar, informe no formulário do Google o <strong>endereço da clínica</strong> e o <strong>tipo de trabalho</strong>.</span></p>
+              <div class="bk-gcal__frame"><p class="bk-gcal__loading">Carregando horários disponíveis…</p></div>
+              <p class="bk-gcal__alt">Prefere abrir em outra aba? <a id="bk-gcal-link" href="#" target="_blank" rel="noopener">Abrir a agenda de reservas</a></p>
+            </div>
             <form class="bk" id="bk" novalidate>
               <!-- 1. Trabalho -->
               <fieldset class="bk__step">
