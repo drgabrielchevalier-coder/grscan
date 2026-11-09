@@ -12,17 +12,8 @@ const CONFIG = {
   regiao: "Rio de Janeiro e Região Metropolitana",
   // Mapa de cobertura: os contornos dos municípios ficam em assets/municipios.geojson.
   // Aqui só a posição do nome de cada município e da base (ponto de partida).
-  mapaRotulos: {
-    "Nova Iguaçu": [-22.66, -43.56],
-    "Duque de Caxias": [-22.63, -43.29],
-    "Rio de Janeiro": [-22.93, -43.47],
-    "Niterói": [-22.915, -43.065],
-    "Belford Roxo": [-22.765, -43.395],
-    // menores (etiqueta discreta)
-    "Mesquita": [-22.795, -43.455, "sm"],
-    "Nilópolis": [-22.818, -43.418, "sm"],
-    "São João de Meriti": [-22.795, -43.36, "sm"],
-  },
+  // Nomes sobre os municípios (vazio = sem nomes). Ex.: "Niterói": [-22.915, -43.065],
+  mapaRotulos: {},
   mapaVizinhos: [["Magé", -22.62, -43.10], ["São Gonçalo", -22.80, -42.99]],
   // Horário de atendimento (texto). Ex.: "Segunda a sexta, das 8h às 18h, com hora marcada."
   horario: "",
