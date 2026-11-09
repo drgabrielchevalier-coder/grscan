@@ -10,17 +10,16 @@ const CONFIG = {
 
   // Região atendida (aparece no texto)
   regiao: "Rio de Janeiro e Região Metropolitana",
-  // Locais marcados no mapa. "rotulo" = onde o nome aparece: "top", "bottom", "left" ou "right".
-  // O mapa se ajusta sozinho para mostrar todos.
-  mapaLocais: [
-    { nome: "Rio de Janeiro", lat: -22.9068, lng: -43.1729, rotulo: "left" },
-    { nome: "Niterói", lat: -22.8832, lng: -43.1034, rotulo: "right" },
-    { nome: "Duque de Caxias", lat: -22.7856, lng: -43.3117, rotulo: "right" },
-    { nome: "Nova Iguaçu", lat: -22.7592, lng: -43.4511, rotulo: "top" },
-    { nome: "Campo Grande", lat: -22.9035, lng: -43.5592, rotulo: "bottom" },
-  ],
-  // Raio aproximado de atendimento ao redor de cada local, em km (0 = sem círculo)
-  mapaRaioKm: 5,
+  // Mapa de cobertura: os contornos dos municípios ficam em assets/municipios.geojson.
+  // Aqui só a posição do nome de cada município e da base (ponto de partida).
+  mapaRotulos: {
+    "Nova Iguaçu": [-22.70, -43.53],
+    "Duque de Caxias": [-22.66, -43.31],
+    "Rio de Janeiro": [-22.93, -43.47],
+    "Niterói": [-22.915, -43.065],
+  },
+  mapaBase: { nome: "Base GR Scan · Xerém", lat: -22.5757, lng: -43.3063 },
+  mapaVizinhos: [["Magé", -22.62, -43.10], ["São Gonçalo", -22.80, -42.99]],
   // Horário de atendimento (texto). Ex.: "Segunda a sexta, das 8h às 18h, com hora marcada."
   horario: "",
 
@@ -72,44 +71,85 @@ document.documentElement.classList.remove("no-js");
   // ---------- Região, horário e mapa ----------
   if (CONFIG.regiao) $$("[data-regiao]").forEach((el) => (el.textContent = CONFIG.regiao));
   const mapa = $("#mapa");
-  const locais = CONFIG.mapaLocais || [];
-  if (mapa && locais.length && window.L) {
-    mapa.innerHTML = '<div class="map__canvas" role="region" aria-label="Mapa da área de atendimento"></div>';
+  if (mapa && window.L) initCoverageMap(mapa).catch((e) => console.warn("Mapa:", e));
+
+  async function initCoverageMap(mapa) {
     const L = window.L;
-    const map = L.map($(".map__canvas", mapa), { zoomSnap: 0.25,
-      scrollWheelZoom: false, zoomControl: true, attributionControl: true, tap: false,
+    const geo = await fetch("assets/municipios.geojson").then((r) => r.json());
+    mapa.innerHTML =
+      '<div class="map__canvas" role="region" aria-label="Mapa de cobertura: municípios atendidos"></div>' +
+      '<div class="cov-title"><b>Mapa de Cobertura</b><small>Municípios atendidos</small></div>' +
+      '<div class="cov-north" aria-hidden="true"><svg viewBox="0 0 24 32"><path d="M12 2l7 18-7-5-7 5z"/></svg>N</div>' +
+      '<div class="cov-legend"><i></i><span><b>Áreas atendidas</b><small>(municípios)</small></span></div>';
+    mapa.classList.add("cov");
+    const map = L.map($(".map__canvas", mapa), {
+      zoomSnap: 0.25, scrollWheelZoom: false, zoomControl: false, attributionControl: true, tap: false,
     });
-    // Mapa do OpenStreetMap (escurecido no CSS para combinar com o site)
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    // posição inicial afastada (antes de adicionar camadas); depois "voa" até a região
+    const bounds = L.geoJSON(geo).getBounds();
+    map.setView(bounds.getCenter(), 8);
+    L.control.zoom({ position: "bottomleft" }).addTo(map);
+    L.control.scale({ position: "bottomleft", imperial: false, maxWidth: 120 }).addTo(map);
+    const esri = "https://server.arcgisonline.com/ArcGIS/rest/services/";
+    L.tileLayer(esri + "World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 18, className: "cov-sat", attribution: "Imagens &copy; Esri",
     }).addTo(map);
-    const OFFSETS = { top: [0, -10], bottom: [0, 10], left: [-10, 0], right: [10, 0] };
-    const pts = [];
-    locais.forEach((l, i) => {
-      const p = [l.lat, l.lng]; pts.push(p);
-      if (CONFIG.mapaRaioKm) {
-        L.circle(p, { radius: CONFIG.mapaRaioKm * 1000, color: "#d9a441", weight: 1, opacity: 0.5, fillColor: "#d9a441", fillOpacity: 0.12, interactive: false }).addTo(map);
-      }
-      const icon = L.divIcon({ className: "map-pin", html: '<span style="animation-delay:' + i * 0.3 + 's"></span>', iconSize: [18, 18], iconAnchor: [9, 9] });
-      L.marker(p, { icon, title: l.nome, keyboard: false })
-        .bindTooltip(l.nome, { permanent: true, direction: l.rotulo || "top", offset: OFFSETS[l.rotulo || "top"], className: "map-tip" })
-        .addTo(map);
+    L.tileLayer(esri + "Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 18, className: "cov-roads", attribution: "Vias &copy; Esri, OpenStreetMap",
+    }).addTo(map);
+
+    // Municípios: preenchimento dourado + contorno que "corre"
+    const areas = L.geoJSON(geo, {
+      style: () => ({ color: "#ffcf5a", weight: 2, opacity: 1, fillColor: "#e0a530", fillOpacity: 0.32, className: "cov-area" }),
+      onEachFeature: (f, layer) => {
+        layer.on("mouseover", () => layer.setStyle({ fillOpacity: 0.5 }));
+        layer.on("mouseout", () => layer.setStyle({ fillOpacity: 0.32 }));
+      },
+    }).addTo(map);
+    // comprimento normalizado para a animação de "desenhar" o contorno
+    areas.eachLayer((l) => l._path && l._path.setAttribute("pathLength", "1000"));
+    L.geoJSON(geo, { style: () => ({ color: "#fff4cf", weight: 1.4, opacity: 0.9, fill: false, dashArray: "6 14", className: "cov-flow", interactive: false }) }).addTo(map);
+
+    // Nomes dos municípios e cidades vizinhas
+    const labels = [];
+    Object.entries(CONFIG.mapaRotulos || {}).forEach(([nome, p], i) => {
+      labels.push(L.marker(p, { interactive: false, keyboard: false,
+        icon: L.divIcon({ className: "cov-label", html: '<span style="--d:' + (0.6 + i * 0.25) + 's">' + nome + "</span>", iconSize: null }) }).addTo(map));
     });
-    const fit = () => {
-      const w = mapa.clientWidth;
-      // margem maior à direita para caber o rótulo de Niterói
-      map.fitBounds(L.latLngBounds(pts), {
-        paddingTopLeft: w < 420 ? [40, 40] : [60, 50],
-        paddingBottomRight: w < 420 ? [70, 40] : [110, 50],
-        maxZoom: 12,
+    (CONFIG.mapaVizinhos || []).forEach(([nome, lat, lng]) =>
+      L.marker([lat, lng], { interactive: false, keyboard: false, icon: L.divIcon({ className: "cov-near", html: nome, iconSize: null }) }).addTo(map));
+
+    // Base (ponto de partida) com rotas animadas até cada município
+    const B = CONFIG.mapaBase;
+    if (B) {
+      Object.values(CONFIG.mapaRotulos || {}).forEach(([lat, lng]) => {
+        const a = [B.lat, B.lng], b = [lat, lng], pts = [];
+        const mid = [(a[0] + b[0]) / 2 + (b[1] - a[1]) * 0.18, (a[1] + b[1]) / 2 - (b[0] - a[0]) * 0.18];
+        for (let t = 0; t <= 1.0001; t += 0.05) {
+          pts.push([(1 - t) * (1 - t) * a[0] + 2 * (1 - t) * t * mid[0] + t * t * b[0], (1 - t) * (1 - t) * a[1] + 2 * (1 - t) * t * mid[1] + t * t * b[1]]);
+        }
+        L.polyline(pts, { color: "#fbe3a0", weight: 1.6, opacity: 0.85, dashArray: "2 9", lineCap: "round", className: "cov-route", interactive: false }).addTo(map);
       });
+      L.marker([B.lat, B.lng], { keyboard: false, title: B.nome,
+        icon: L.divIcon({ className: "cov-base", html: "<span></span><em>" + B.nome + "</em>", iconSize: [16, 16], iconAnchor: [8, 8] }) }).addTo(map);
+    }
+
+    const fit = (animate) => {
+      const w = mapa.clientWidth;
+      const opts = { paddingTopLeft: w < 420 ? [12, 64] : [24, 70], paddingBottomRight: w < 420 ? [12, 48] : [24, 40] };
+      if (animate) map.flyToBounds(bounds, { ...opts, duration: 2.2 }); else map.fitBounds(bounds, opts);
     };
-    fit();
-    let lastW = 0;
+    // "voa" até a região quando o mapa aparece na tela
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const start = () => { mapa.classList.add("cov--on"); fit(!reduce); };
+    if ("IntersectionObserver" in window && !reduce) {
+      const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { io.disconnect(); start(); } }, { threshold: 0.35 });
+      io.observe(mapa);
+    } else start();
+    let lastW = mapa.clientWidth;
     new ResizeObserver(() => {
       if (Math.abs(mapa.clientWidth - lastW) < 2) return;
-      lastW = mapa.clientWidth; map.invalidateSize(); fit();
+      lastW = mapa.clientWidth; map.invalidateSize(); if (mapa.classList.contains("cov--on")) fit(false);
     }).observe(mapa);
   }
   if (CONFIG.horario) $$("[data-horario]").forEach((el) => (el.textContent = CONFIG.horario));
