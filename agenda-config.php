@@ -14,11 +14,11 @@ return [
 
     // ID da agenda onde você marca os horários DISPONÍVEIS.
     // Google Agenda > Configurações da agenda "GR Scan – Disponível" > Integrar agenda > ID da agenda
-    'AGENDA_DISPONIVEL' => 'xxxxxxxx@group.calendar.google.com',
+    'AGENDA_DISPONIVEL' => 'de2a2c3598689aea2746ebe0557aa6954c595c694956b667a839819a9668c7c2@group.calendar.google.com',
 
     // ID da agenda onde os agendamentos são criados e que bloqueia horários ocupados
     // (normalmente o seu Gmail, que é o ID da agenda principal).
-    'AGENDA_COMPROMISSOS' => 'seu-email@gmail.com',
+    'AGENDA_COMPROMISSOS' => 'drgabrielchevalier@gmail.com',
 
     // Outras agendas suas que também devem bloquear horários (opcional). Ex.: ['familia@group.calendar.google.com']
     'AGENDAS_EXTRAS_OCUPADO' => [],

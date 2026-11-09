@@ -44,8 +44,10 @@ const CONFIG = {
 
   // Página de reservas do Google Agenda ("Agenda de agendamentos").
   // Preenchido: o botão "Agendar" abre essa página dentro do site, com os horários livres da sua agenda.
-  // Vazio (""): usa o formulário próprio do site.
-  googleAgendamentoUrl: "https://calendar.google.com/calendar/appointments/schedules/AcZssZ25gLU9mfg06dVwexH09kKzk3KGn9nSaVpUgUGZgBxkSkKDm_N5woDil1dccoPBrSu8D1IzscS0?gv=true",
+  // Vazio (""): usa o formulário próprio do site, conectado ao Google Agenda pela conta de serviço (agenda-config.php).
+  // Para voltar à página de reservas do Google, cole entre as aspas:
+  // https://calendar.google.com/calendar/appointments/schedules/AcZssZ25gLU9mfg06dVwexH09kKzk3KGn9nSaVpUgUGZgBxkSkKDm_N5woDil1dccoPBrSu8D1IzscS0?gv=true
+  googleAgendamentoUrl: "",
 };
 /* ============================================================ */
 
