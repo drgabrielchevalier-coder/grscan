@@ -8,8 +8,12 @@ const CONFIG = {
   email: "",       // Ex.: "contato@grscan.com.br" (aparece no rodapé)
   instagram: "",   // Ex.: "grscan"
 
-  // Região atendida (aparece no texto e no mapa). Ex.: "Recife e Região Metropolitana"
-  regiao: "",
+  // Região atendida (aparece no texto)
+  regiao: "Rio de Janeiro e Região Metropolitana",
+  // O que o mapa mostra e o zoom (quanto menor o número, mais área aparece)
+  mapaBusca: "Rio de Janeiro, RJ",
+  mapaCentro: "-22.86,-43.28", // latitude,longitude do centro do mapa ("" = automático)
+  mapaZoom: 10,
   // Horário de atendimento (texto). Ex.: "Segunda a sexta, das 8h às 18h, com hora marcada."
   horario: "",
 
@@ -49,13 +53,15 @@ document.documentElement.classList.remove("no-js");
   setLinks("[data-instagram]", CONFIG.instagram && "https://instagram.com/" + CONFIG.instagram);
 
   // ---------- Região, horário e mapa ----------
-  if (CONFIG.regiao) {
-    $$("[data-regiao]").forEach((el) => (el.textContent = CONFIG.regiao));
-    const mapa = $("#mapa");
-    if (mapa) {
-      mapa.innerHTML = '<iframe title="Mapa da região atendida" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=' +
-        encodeURIComponent(CONFIG.regiao) + '&z=11&output=embed"></iframe>';
-    }
+  if (CONFIG.regiao) $$("[data-regiao]").forEach((el) => (el.textContent = CONFIG.regiao));
+  const mapaBusca = CONFIG.mapaBusca || CONFIG.regiao;
+  const mapa = $("#mapa");
+  if (mapa && mapaBusca) {
+    mapa.innerHTML =
+      '<iframe title="Mapa da região atendida: ' + mapaBusca + '" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=' +
+      encodeURIComponent(mapaBusca) + (CONFIG.mapaCentro ? "&ll=" + CONFIG.mapaCentro : "") +
+      "&z=" + (CONFIG.mapaZoom || 10) + '&hl=pt-BR&output=embed"></iframe>' +
+      '<span class="map__tint" aria-hidden="true"></span>';
   }
   if (CONFIG.horario) $$("[data-horario]").forEach((el) => (el.textContent = CONFIG.horario));
 

@@ -9,7 +9,8 @@ Edite o bloco `CONFIG` no início de `script.js`:
   (Google Agenda → Criar → Agenda de agendamentos → Compartilhar → Incorporar no site → copie o `src` do iframe).
 - `whatsapp`: número com DDI + DDD, só dígitos (ex.: `5511999999999`).
 - `email` e `instagram`.
-- `regiao`: cidade/região atendida (mostra no texto e no mapa). Ex.: `Recife e Região Metropolitana`.
+- `regiao`: região atendida, mostrada no texto (hoje: Rio de Janeiro e Região Metropolitana).
+- `mapaBusca`, `mapaCentro` e `mapaZoom`: o que o mapa mostra, o centro (latitude,longitude) e o zoom.
 - `horario`: horário de atendimento.
 
 Itens não preenchidos ficam ocultos automaticamente.
