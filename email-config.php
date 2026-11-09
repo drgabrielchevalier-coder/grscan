@@ -7,6 +7,6 @@
               ex.: contato@implantstore.com.br. Usar Gmail aqui faz cair no spam.
 */
 return [
-    'DESTINO'   => 'seu-email@exemplo.com',
-    'REMETENTE' => 'contato@implantstore.com.br',
+    'DESTINO'   => 'grscan@implantstore.com.br',
+    'REMETENTE' => 'grscan@implantstore.com.br',
 ];
