@@ -65,3 +65,11 @@ Com isso você marca os horários livres no Google Agenda e o site mostra e rese
 2. Em `agenda-config.php`, preencha `AGENDA_DISPONIVEL` e `AGENDA_COMPROMISSOS` e ajuste duração, intervalo e folga.
 3. Envie `agenda-config.php`, `agenda-google.php`, `disponibilidade.php`, `agendar.php` e `.htaccess` junto com o site.
 4. Teste abrindo `https://seu-site/disponibilidade.php`: deve aparecer `"ok":true` com os dias e horários.
+
+## Deslocamento automático
+O dentista informa o endereço da clínica (passo 2). O site localiza o endereço (OpenStreetMap), calcula a rota de carro
+a partir de `ORIGEM` (Xerém) e só oferece horários em que cabem a ida antes e a volta depois.
+Ex.: agenda livre a partir das 14:00 e 40 min de viagem → primeiro horário 14:40.
+Ao reservar, são criados 3 eventos: "🚗 Deslocamento (ida)", "Escaneamento" e "🚗 Deslocamento (volta)".
+Ajustes em `agenda-config.php`: `ORIGEM`, `FATOR_TRANSITO` (+30% por padrão, pois a rota gratuita não considera trânsito),
+`MARGEM_DESLOCAMENTO_MIN`, `DESLOCAMENTO_PADRAO_MIN` e, opcionalmente, `GOOGLE_MAPS_API_KEY` (Routes API, com trânsito real).

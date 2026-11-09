@@ -33,11 +33,12 @@ function ag_janelas_expediente(DateTimeImmutable $de, DateTimeImmutable $ate, ar
 
 function ag_b64url($s) { return rtrim(strtr(base64_encode($s), '+/', '-_'), '='); }
 
-function ag_http($method, $url, $token = null, $body = null, $form = false) {
+function ag_http($method, $url, $token = null, $body = null, $form = false, $extraHeaders = []) {
     // Só para testes locais: aponta as chamadas para um simulador da API (ignorado em produção).
-    if ($base = getenv('GRSCAN_TEST_API')) $url = preg_replace('#^https://[a-z0-9.]+googleapis\.com#', rtrim($base, '/'), $url);
+    if ($base = getenv('GRSCAN_TEST_API')) $url = preg_replace('#^https://[a-z0-9.]+(googleapis\.com|openstreetmap\.org|project-osrm\.org)#', rtrim($base, '/'), $url);
     $ch = curl_init($url);
-    $h = [];
+    curl_setopt($ch, CURLOPT_USERAGENT, 'GRScan-agenda/1.0 (+https://grscan.implantstore.com.br)');
+    $h = $extraHeaders;
     if ($token) $h[] = 'Authorization: Bearer ' . $token;
     if ($body !== null) {
         if ($form) { $h[] = 'Content-Type: application/x-www-form-urlencoded'; $payload = http_build_query($body); }
@@ -130,23 +131,53 @@ function ag_ocupados(DateTimeImmutable $de, DateTimeImmutable $ate) {
 
 /**
  * Calcula os horários livres. Função pura (testável): recebe janelas e ocupados.
+ * Sem $deslocMin: usa a folga fixa DESLOCAMENTO_MIN antes/depois de cada compromisso.
+ * Com $deslocMin (minutos de viagem até o local do atendimento): o horário só aparece se couber
+ * a ida antes e a volta depois, sem encostar em nenhum compromisso. Ex.: livre a partir das 14:00
+ * e 40 min de viagem => primeiro horário 14:40.
  * Retorna ['Y-m-d' => ['HH:MM', ...], ...]
  */
-function ag_calcular_horarios(array $janelas, array $ocupados, DateTimeImmutable $agora, array $c) {
+function ag_calcular_horarios(array $janelas, array $ocupados, DateTimeImmutable $agora, array $c, $deslocMin = null) {
     $tz = new DateTimeZone($c['FUSO']);
-    $dur = $c['DURACAO_MIN'] * 60; $passo = $c['INTERVALO_MIN'] * 60; $folga = $c['DESLOCAMENTO_MIN'] * 60;
+    $dur = $c['DURACAO_MIN'] * 60; $passo = $c['INTERVALO_MIN'] * 60;
     $minInicio = $agora->getTimestamp() + $c['ANTECEDENCIA_HORAS'] * 3600;
-    $occ = array_map(fn($o) => [$o[0]->getTimestamp() - $folga, $o[1]->getTimestamp() + $folga], $ocupados);
     $dias = [];
-    foreach ($janelas as [$ini, $fim]) {
-        $a = $ini->getTimestamp(); $b = $fim->getTimestamp();
-        for ($t = $a; $t + $dur <= $b; $t += $passo) {
-            if ($t < $minInicio) continue;
-            $livre = true;
-            foreach ($occ as [$oa, $ob]) { if ($t < $ob && $t + $dur > $oa) { $livre = false; break; } }
-            if (!$livre) continue;
-            $dt = (new DateTimeImmutable('@' . $t))->setTimezone($tz);
-            $dias[$dt->format('Y-m-d')][$dt->format('H:i')] = true;
+    $add = function ($t) use (&$dias, $tz) {
+        $dt = (new DateTimeImmutable('@' . $t))->setTimezone($tz);
+        $dias[$dt->format('Y-m-d')][$dt->format('H:i')] = true;
+    };
+
+    if ($deslocMin !== null) {
+        $T = (int)$deslocMin * 60;
+        $occ = array_map(fn($o) => [$o[0]->getTimestamp(), $o[1]->getTimestamp()], $ocupados);
+        usort($occ, fn($x, $y) => $x[0] <=> $y[0]);
+        foreach ($janelas as [$ini, $fim]) {
+            // intervalos livres dentro da janela
+            $livres = []; $cur = $ini->getTimestamp(); $b = $fim->getTimestamp();
+            foreach ($occ as [$oa, $ob]) {
+                if ($ob <= $cur || $oa >= $b) continue;
+                if ($oa > $cur) $livres[] = [$cur, $oa];
+                $cur = max($cur, $ob);
+            }
+            if ($cur < $b) $livres[] = [$cur, $b];
+            foreach ($livres as [$g0, $g1]) {
+                $t = (int)(ceil(($g0 + $T) / 300) * 300); // chegada, arredondada para 5 min
+                for (; $t + $dur + $T <= $g1; $t += $passo) {
+                    if ($t >= $minInicio) $add($t);
+                }
+            }
+        }
+    } else {
+        $folga = $c['DESLOCAMENTO_MIN'] * 60;
+        $occ = array_map(fn($o) => [$o[0]->getTimestamp() - $folga, $o[1]->getTimestamp() + $folga], $ocupados);
+        foreach ($janelas as [$ini, $fim]) {
+            $a = $ini->getTimestamp(); $b = $fim->getTimestamp();
+            for ($t = $a; $t + $dur <= $b; $t += $passo) {
+                if ($t < $minInicio) continue;
+                $livre = true;
+                foreach ($occ as [$oa, $ob]) { if ($t < $ob && $t + $dur > $oa) { $livre = false; break; } }
+                if ($livre) $add($t);
+            }
         }
     }
     ksort($dias);
@@ -154,21 +185,89 @@ function ag_calcular_horarios(array $janelas, array $ocupados, DateTimeImmutable
     return $dias;
 }
 
-/** Horários livres consultando o Google Agenda. */
-function ag_horarios_livres() {
+/** Horários livres consultando o Google Agenda. $deslocMin = minutos de viagem até o local (ou null). */
+function ag_horarios_livres($deslocMin = null) {
     $c = ag_config(); $tz = new DateTimeZone($c['FUSO']);
     $agora = new DateTimeImmutable('now', $tz);
     $de = $agora->setTime(0, 0); $ate = $de->modify('+' . (int)$c['DIAS_NO_FUTURO'] . ' days');
     $janelas = ag_modo() === 'blocos' ? ag_janelas($de, $ate) : ag_janelas_expediente($de, $ate, $c);
-    return ag_calcular_horarios($janelas, ag_ocupados($de, $ate), $agora, $c);
+    return ag_calcular_horarios($janelas, ag_ocupados($de, $ate), $agora, $c, $deslocMin);
 }
 
-/** Cria o evento do agendamento na agenda de compromissos. */
-function ag_criar_evento(DateTimeImmutable $inicio, DateTimeImmutable $fim, $titulo, $local, $descricao) {
+/* ---------------- Deslocamento (a partir da ORIGEM) ---------------- */
+
+function ag_cache_get($chave, $validadeSeg) {
+    $f = sys_get_temp_dir() . '/grscan_' . md5($chave);
+    if (is_file($f) && filemtime($f) > time() - $validadeSeg) return json_decode((string)file_get_contents($f), true);
+    return null;
+}
+function ag_cache_set($chave, $valor) { @file_put_contents(sys_get_temp_dir() . '/grscan_' . md5($chave), json_encode($valor)); }
+
+/** Localiza um endereço (OpenStreetMap/Nominatim). Retorna ['lat','lng','nome','aproximado'] ou null. */
+function ag_geocodificar($endereco, $cidade) {
+    $chave = 'geo|' . mb_strtolower(trim($endereco) . '|' . trim($cidade));
+    if ($r = ag_cache_get($chave, 30 * 86400)) return $r ?: null;
+    $tentativas = [[trim("$endereco, $cidade, RJ, Brasil"), false], [trim("$cidade, RJ, Brasil"), true]];
+    foreach ($tentativas as [$q, $aprox]) {
+        if ($q === '' || $q === ', RJ, Brasil') continue;
+        $url = 'https://nominatim.openstreetmap.org/search?' . http_build_query([
+            'format' => 'jsonv2', 'limit' => 1, 'countrycodes' => 'br', 'accept-language' => 'pt-BR', 'q' => $q,
+        ]);
+        try { $res = ag_http('GET', $url); } catch (Throwable $e) { $res = []; }
+        if (!empty($res[0]['lat'])) {
+            $r = ['lat' => (float)$res[0]['lat'], 'lng' => (float)$res[0]['lon'], 'nome' => $res[0]['display_name'] ?? $q, 'aproximado' => $aprox];
+            ag_cache_set($chave, $r);
+            return $r;
+        }
+        usleep(1100000); // política do Nominatim: no máximo 1 consulta por segundo
+    }
+    return null;
+}
+
+/** Tempo de viagem de carro (minutos, sem trânsito) e distância (km) entre dois pontos. */
+function ag_rota($o, $d) {
+    $c = ag_config();
+    $chave = 'rota|' . round($o['lat'], 4) . ',' . round($o['lng'], 4) . '|' . round($d['lat'], 4) . ',' . round($d['lng'], 4);
+    if ($r = ag_cache_get($chave, 30 * 86400)) return $r;
+    if (!empty($c['GOOGLE_MAPS_API_KEY'])) {
+        // Google Routes API (considera o trânsito típico)
+        $res = ag_http('POST', 'https://routes.googleapis.com/directions/v2:computeRoutes', null, [
+            'origin' => ['location' => ['latLng' => ['latitude' => $o['lat'], 'longitude' => $o['lng']]]],
+            'destination' => ['location' => ['latLng' => ['latitude' => $d['lat'], 'longitude' => $d['lng']]]],
+            'travelMode' => 'DRIVE', 'routingPreference' => 'TRAFFIC_AWARE',
+        ], false, ['X-Goog-Api-Key: ' . $c['GOOGLE_MAPS_API_KEY'], 'X-Goog-FieldMask: routes.duration,routes.distanceMeters']);
+        $r = ['min' => (int)ceil(((int)rtrim($res['routes'][0]['duration'] ?? '0s', 's')) / 60), 'km' => round(($res['routes'][0]['distanceMeters'] ?? 0) / 1000), 'fonte' => 'google'];
+    } else {
+        // OSRM (OpenStreetMap), gratuito, sem trânsito
+        $res = ag_http('GET', "https://router.project-osrm.org/route/v1/driving/{$o['lng']},{$o['lat']};{$d['lng']},{$d['lat']}?overview=false");
+        if (($res['code'] ?? '') !== 'Ok') throw new RuntimeException('Rota não encontrada.');
+        $r = ['min' => (int)ceil($res['routes'][0]['duration'] / 60), 'km' => round($res['routes'][0]['distance'] / 1000), 'fonte' => 'osm'];
+    }
+    ag_cache_set($chave, $r);
+    return $r;
+}
+
+/**
+ * Deslocamento estimado da ORIGEM até o endereço do atendimento, já com fator de trânsito e margem,
+ * arredondado para 5 min. Se não conseguir calcular, usa DESLOCAMENTO_PADRAO_MIN.
+ */
+function ag_deslocamento($endereco, $cidade) {
+    $c = ag_config();
+    $padrao = ['min' => (int)$c['DESLOCAMENTO_PADRAO_MIN'], 'km' => null, 'destino' => trim("$endereco, $cidade"), 'estimado' => false, 'aproximado' => true];
+    $dest = ag_geocodificar($endereco, $cidade);
+    if (!$dest) return $padrao;
+    try { $rota = ag_rota($c['ORIGEM'], $dest); } catch (Throwable $e) { return $padrao; }
+    $fator = $rota['fonte'] === 'google' ? 1.0 : (float)$c['FATOR_TRANSITO'];
+    $min = (int)(ceil(($rota['min'] * $fator + $c['MARGEM_DESLOCAMENTO_MIN']) / 5) * 5);
+    return ['min' => max($min, (int)$c['DESLOCAMENTO_MINIMO_MIN']), 'km' => $rota['km'], 'destino' => $dest['nome'], 'estimado' => true, 'aproximado' => $dest['aproximado']];
+}
+
+/** Cria um evento na agenda de compromissos. */
+function ag_criar_evento(DateTimeImmutable $inicio, DateTimeImmutable $fim, $titulo, $local, $descricao, $cor = null) {
     $c = ag_config();
     $url = 'https://www.googleapis.com/calendar/v3/calendars/' . rawurlencode($c['AGENDA_COMPROMISSOS']) . '/events';
     return ag_http('POST', $url, ag_token(), [
-        'summary' => $titulo, 'location' => $local, 'description' => $descricao, 'colorId' => $c['COR_EVENTO'],
+        'summary' => $titulo, 'location' => $local, 'description' => $descricao, 'colorId' => $cor ?? $c['COR_EVENTO'],
         'start' => ['dateTime' => $inicio->format(DATE_RFC3339), 'timeZone' => $c['FUSO']],
         'end'   => ['dateTime' => $fim->format(DATE_RFC3339), 'timeZone' => $c['FUSO']],
         'reminders' => ['useDefault' => false, 'overrides' => [['method' => 'popup', 'minutes' => 120]]],

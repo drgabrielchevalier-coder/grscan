@@ -57,4 +57,18 @@ return [
 
     // Cor do evento criado no seu Google Agenda (1 a 11). 5 = amarelo/banana.
     'COR_EVENTO' => '5',
+
+    /* ---------- Deslocamento automático ----------
+       O site calcula a rota de carro da ORIGEM até o endereço informado pelo dentista e só oferece
+       horários em que cabem a ida antes e a volta depois. Ao reservar, cria na agenda os eventos
+       "Deslocamento (ida)" e "Deslocamento (volta)". */
+    'ORIGEM' => ['nome' => 'Xerém, Duque de Caxias - RJ', 'lat' => -22.5757, 'lng' => -43.3063],
+    'FATOR_TRANSITO'          => 1.3, // a rota gratuita não considera trânsito: 1.3 = +30%
+    'MARGEM_DESLOCAMENTO_MIN' => 10,  // minutos extras (estacionar, subir até a sala…)
+    'DESLOCAMENTO_MINIMO_MIN' => 15,  // nunca considera menos que isso
+    'DESLOCAMENTO_PADRAO_MIN' => 60,  // usado se não for possível localizar o endereço
+    'CRIAR_EVENTOS_DESLOCAMENTO' => true,
+    'COR_DESLOCAMENTO' => '8',        // 8 = cinza (grafite)
+    // Opcional: chave da Google Maps (Routes API) para considerar o trânsito real. Vazio = rota gratuita do OpenStreetMap.
+    'GOOGLE_MAPS_API_KEY' => '',
 ];

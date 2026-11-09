@@ -36,16 +36,30 @@ if (!ag_ativa()) {
     exit;
 }
 
-// cache curto (60 s) para não consultar o Google a cada visitante
 $c = ag_config();
-$cache = sys_get_temp_dir() . '/grscan_disp_' . md5($c['AGENDA_DISPONIVEL'] . $c['AGENDA_COMPROMISSOS']);
+$endereco = mb_substr(trim((string)($_GET['endereco'] ?? '')), 0, 200);
+$cidade   = mb_substr(trim((string)($_GET['cidade'] ?? '')), 0, 80);
+
+// Sem endereço: só avisa que a agenda está conectada (os horários dependem do deslocamento)
+if ($endereco === '' || $cidade === '') {
+    echo json_encode(['ok' => true, 'precisa_endereco' => true, 'origem' => $c['ORIGEM']['nome']], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// cache curto (60 s) por endereço, para não consultar o Google a cada visitante
+$cache = sys_get_temp_dir() . '/grscan_disp_' . md5($c['AGENDA_COMPROMISSOS'] . '|' . mb_strtolower("$endereco|$cidade"));
 if (is_file($cache) && filemtime($cache) > time() - 60) {
     readfile($cache);
     exit;
 }
 
 try {
-    $out = json_encode(['ok' => true, 'fuso' => $c['FUSO'], 'duracao' => $c['DURACAO_MIN'], 'dias' => ag_horarios_livres()], JSON_UNESCAPED_UNICODE);
+    $desl = ag_deslocamento($endereco, $cidade);
+    $out = json_encode([
+        'ok' => true, 'fuso' => $c['FUSO'], 'duracao' => $c['DURACAO_MIN'],
+        'deslocamento' => $desl + ['origem' => $c['ORIGEM']['nome']],
+        'dias' => (object)ag_horarios_livres($desl['min']),
+    ], JSON_UNESCAPED_UNICODE);
     @file_put_contents($cache, $out);
     echo $out;
 } catch (Throwable $e) {

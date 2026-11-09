@@ -282,24 +282,77 @@ document.documentElement.classList.remove("no-js");
       if (e.target.name !== "dia") return;
       dateInput.value = e.target.value; renderSlots();
     });
+    // Aviso do deslocamento calculado (aparece no passo 3)
+    const travel = document.createElement("p");
+    travel.className = "bk__travel"; travel.hidden = true;
+    dateInput.closest("fieldset").querySelector("legend").after(travel);
+
+    let gMode = false, gKey = null, gReq = 0;
+    const enterGoogleMode = () => {
+      if (gMode) return;
+      gMode = true;
+      form.classList.add("is-google");
+      dateInput.hidden = true; days.hidden = false;
+      dateInput.closest(".field").classList.add("field--full");
+      slots.closest(".field").classList.add("field--full");
+      $("#bk-submit").textContent = "Reservar horário";
+      const sub = $(".bk-modal__head p");
+      if (sub) sub.textContent = "Os horários já consideram o tempo de deslocamento até a sua clínica e são reservados na hora.";
+    };
+    const addrKey = () => {
+      const e = form.elements.endereco.value.trim(), c = form.elements.cidade.value.trim();
+      return e.length >= 4 && c.length >= 2 ? e + "|" + c : "";
+    };
     const loadAvailability = async (force) => {
       if (!CONFIG.endpointDisponibilidade || !location.protocol.startsWith("http")) return;
-      if (!force && G && Date.now() - gLoadedAt < 60000) return;
+      const key = addrKey();
+      if (!force && G && key === gKey && Date.now() - gLoadedAt < 60000) return;
+      const req = ++gReq;
+      let url = CONFIG.endpointDisponibilidade + "?t=" + Date.now();
+      if (key) {
+        url += "&endereco=" + encodeURIComponent(form.elements.endereco.value.trim()) + "&cidade=" + encodeURIComponent(form.elements.cidade.value.trim());
+        if (gMode) {
+          days.innerHTML = '<p class="bk__hint bk__loading">Calculando o deslocamento e os horários livres…</p>';
+          slots.innerHTML = ""; travel.hidden = true;
+        }
+      }
       try {
-        const r = await fetch(CONFIG.endpointDisponibilidade + "?t=" + Date.now(), { cache: "no-store" });
+        const r = await fetch(url, { cache: "no-store" });
         const j = await r.json();
-        if (!j.ok || !j.dias) return; // agenda não conectada: segue com as regras fixas
-        G = j.dias; gLoadedAt = Date.now();
-        form.classList.add("is-google");
-        dateInput.hidden = true; days.hidden = false;
-        dateInput.closest(".field").classList.add("field--full");
-        slots.closest(".field").classList.add("field--full");
-        $("#bk-submit").textContent = "Reservar horário";
-        const sub = $(".bk-modal__head p"); if (sub) sub.textContent = "Os horários mostrados estão livres e são reservados na hora.";
+        if (req !== gReq) return; // chegou uma resposta mais nova
+        if (!j.ok) return; // agenda não conectada: segue com as regras fixas
+        enterGoogleMode();
+        gKey = key; gLoadedAt = Date.now();
+        if (j.precisa_endereco) {
+          G = {}; travel.hidden = true; dateInput.value = "";
+          days.innerHTML = '<p class="bk__hint">Preencha o <strong>endereço da clínica</strong> (passo 2) para ver os horários. ' +
+            "O tempo de deslocamento é calculado automaticamente.</p>";
+          slots.innerHTML = "";
+          return;
+        }
+        G = j.dias || {};
+        const d = j.deslocamento;
+        if (d) {
+          travel.innerHTML = "";
+          const txt = document.createElement("span");
+          txt.textContent = d.estimado
+            ? "Deslocamento estimado desde " + (d.origem || "a base") + ": " + d.min + " min" + (d.km ? " (" + d.km + " km)" : "") +
+              ". Os horários abaixo já consideram a ida e a volta." + (d.aproximado ? " Endereço localizado pela cidade; confira a rua e o número." : "")
+            : "Não localizamos o endereço exato; consideramos " + d.min + " min de deslocamento.";
+          travel.append(txt); travel.hidden = false;
+        }
         renderDays();
-      } catch (_) { /* mantém o modo sem agenda */ }
+      } catch (_) { /* mantém o modo atual */ }
     };
     document.addEventListener("bk:open", () => loadAvailability(false));
+    // recalcula quando o endereço muda
+    let addrTimer;
+    ["endereco", "cidade"].forEach((n) => {
+      const el = form.elements[n];
+      const go = () => { clearTimeout(addrTimer); addrTimer = setTimeout(() => { if (gMode && addrKey() !== gKey) loadAvailability(true); }, 900); };
+      el.addEventListener("input", go);
+      el.addEventListener("change", go);
+    });
 
     // limpa marca de erro ao editar
     form.addEventListener("input", (e) => {

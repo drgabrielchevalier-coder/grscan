@@ -77,22 +77,35 @@ $fone = preg_replace('/\D/', '', $v['telefone']);
 if (strlen($fone) <= 11) $fone = '55' . $fone;
 $texto .= "\nResponder pelo WhatsApp: https://wa.me/{$fone}\n";
 
-// Google Agenda: confere se o horário continua livre e cria o evento
+// Google Agenda: calcula o deslocamento, confere se o horário continua livre e cria os eventos
 $reservado = false;
+$desl = null;
 if ($agendaAtiva) {
     try {
-        $livres = ag_horarios_livres();
-        if (!in_array($v['hora'], $livres[$v['data']] ?? [], true)) {
-            responder(false, 'Esse horário acabou de ser reservado. Escolha outro, por favor.', 409, ['ocupado' => true]);
-        }
         $c = ag_config();
-        $ini = new DateTimeImmutable($v['data'] . ' ' . $v['hora'], new DateTimeZone($c['FUSO']));
-        ag_criar_evento($ini, $ini->modify('+' . (int)$c['DURACAO_MIN'] . ' minutes'),
-            'Escaneamento — ' . $v['clinica'] . ' (' . $v['trabalho'] . ')',
-            $v['endereco'] . ', ' . $v['cidade'], trim($texto));
+        $desl = ag_deslocamento($v['endereco'], $v['cidade']);
+        $livres = ag_horarios_livres($desl['min']);
+        if (!in_array($v['hora'], $livres[$v['data']] ?? [], true)) {
+            responder(false, 'Esse horário não está mais disponível. Escolha outro, por favor.', 409, ['ocupado' => true]);
+        }
+        $tz = new DateTimeZone($c['FUSO']);
+        $ini = new DateTimeImmutable($v['data'] . ' ' . $v['hora'], $tz);
+        $fimEsc = $ini->modify('+' . (int)$c['DURACAO_MIN'] . ' minutes');
+        $T = (int)$desl['min'];
+        $infoDesl = "Deslocamento estimado a partir de {$c['ORIGEM']['nome']}: {$T} min" . ($desl['km'] ? " ({$desl['km']} km)" : '') .
+            ($desl['aproximado'] ? ' — endereço localizado só pela cidade, confira.' : '');
+        $texto .= "\n" . $infoDesl . "\n";
+        $local = $v['endereco'] . ', ' . $v['cidade'];
+        ag_criar_evento($ini, $fimEsc, 'Escaneamento — ' . $v['clinica'] . ' (' . $v['trabalho'] . ')', $local, trim($texto));
+        if (!empty($c['CRIAR_EVENTOS_DESLOCAMENTO']) && $T > 0) {
+            ag_criar_evento($ini->modify("-{$T} minutes"), $ini, "🚗 Deslocamento (ida) → {$v['clinica']}", $local,
+                $infoDesl . "\nSaída: " . $c['ORIGEM']['nome'], $c['COR_DESLOCAMENTO']);
+            ag_criar_evento($fimEsc, $fimEsc->modify("+{$T} minutes"), "🚗 Deslocamento (volta) ← {$v['clinica']}", $c['ORIGEM']['nome'],
+                $infoDesl, $c['COR_DESLOCAMENTO']);
+        }
         $reservado = true;
         // descarta o cache de horários para o site atualizar na hora
-        @unlink(sys_get_temp_dir() . '/grscan_disp_' . md5($c['AGENDA_DISPONIVEL'] . $c['AGENDA_COMPROMISSOS']));
+        foreach (glob(sys_get_temp_dir() . '/grscan_disp_*') ?: [] as $f) @unlink($f);
     } catch (Throwable $e) {
         error_log('[GR Scan] Google Agenda: ' . $e->getMessage());
         if (!$emailAtivo) responder(false, 'Não foi possível reservar agora. Tente novamente em instantes.', 502);
@@ -151,4 +164,4 @@ if ($f = @fopen($csv, 'a')) {
     fclose($f);
 }
 
-responder(true, '', 200, ['reservado' => $reservado]);
+responder(true, '', 200, ['reservado' => $reservado, 'deslocamento_min' => $desl['min'] ?? null]);
