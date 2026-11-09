@@ -10,10 +10,17 @@ const CONFIG = {
 
   // Região atendida (aparece no texto)
   regiao: "Rio de Janeiro e Região Metropolitana",
-  // O que o mapa mostra e o zoom (quanto menor o número, mais área aparece)
-  mapaBusca: "Rio de Janeiro, RJ",
-  mapaCentro: "-22.86,-43.28", // latitude,longitude do centro do mapa ("" = automático)
-  mapaZoom: 10,
+  // Locais marcados no mapa. "rotulo" = onde o nome aparece: "top", "bottom", "left" ou "right".
+  // O mapa se ajusta sozinho para mostrar todos.
+  mapaLocais: [
+    { nome: "Rio de Janeiro", lat: -22.9068, lng: -43.1729, rotulo: "left" },
+    { nome: "Niterói", lat: -22.8832, lng: -43.1034, rotulo: "right" },
+    { nome: "Duque de Caxias", lat: -22.7856, lng: -43.3117, rotulo: "right" },
+    { nome: "Nova Iguaçu", lat: -22.7592, lng: -43.4511, rotulo: "top" },
+    { nome: "Campo Grande", lat: -22.9035, lng: -43.5592, rotulo: "bottom" },
+  ],
+  // Raio aproximado de atendimento ao redor de cada local, em km (0 = sem círculo)
+  mapaRaioKm: 5,
   // Horário de atendimento (texto). Ex.: "Segunda a sexta, das 8h às 18h, com hora marcada."
   horario: "",
 
@@ -54,14 +61,46 @@ document.documentElement.classList.remove("no-js");
 
   // ---------- Região, horário e mapa ----------
   if (CONFIG.regiao) $$("[data-regiao]").forEach((el) => (el.textContent = CONFIG.regiao));
-  const mapaBusca = CONFIG.mapaBusca || CONFIG.regiao;
   const mapa = $("#mapa");
-  if (mapa && mapaBusca) {
-    mapa.innerHTML =
-      '<iframe title="Mapa da região atendida: ' + mapaBusca + '" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=' +
-      encodeURIComponent(mapaBusca) + (CONFIG.mapaCentro ? "&ll=" + CONFIG.mapaCentro : "") +
-      "&z=" + (CONFIG.mapaZoom || 10) + '&hl=pt-BR&output=embed"></iframe>' +
-      '<span class="map__tint" aria-hidden="true"></span>';
+  const locais = CONFIG.mapaLocais || [];
+  if (mapa && locais.length && window.L) {
+    mapa.innerHTML = '<div class="map__canvas" role="region" aria-label="Mapa da área de atendimento"></div>';
+    const L = window.L;
+    const map = L.map($(".map__canvas", mapa), { zoomSnap: 0.25,
+      scrollWheelZoom: false, zoomControl: true, attributionControl: true, tap: false,
+    });
+    // Mapa do OpenStreetMap (escurecido no CSS para combinar com o site)
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+    const OFFSETS = { top: [0, -10], bottom: [0, 10], left: [-10, 0], right: [10, 0] };
+    const pts = [];
+    locais.forEach((l, i) => {
+      const p = [l.lat, l.lng]; pts.push(p);
+      if (CONFIG.mapaRaioKm) {
+        L.circle(p, { radius: CONFIG.mapaRaioKm * 1000, color: "#d9a441", weight: 1, opacity: 0.5, fillColor: "#d9a441", fillOpacity: 0.12, interactive: false }).addTo(map);
+      }
+      const icon = L.divIcon({ className: "map-pin", html: '<span style="animation-delay:' + i * 0.3 + 's"></span>', iconSize: [18, 18], iconAnchor: [9, 9] });
+      L.marker(p, { icon, title: l.nome, keyboard: false })
+        .bindTooltip(l.nome, { permanent: true, direction: l.rotulo || "top", offset: OFFSETS[l.rotulo || "top"], className: "map-tip" })
+        .addTo(map);
+    });
+    const fit = () => {
+      const w = mapa.clientWidth;
+      // margem maior à direita para caber o rótulo de Niterói
+      map.fitBounds(L.latLngBounds(pts), {
+        paddingTopLeft: w < 420 ? [40, 40] : [60, 50],
+        paddingBottomRight: w < 420 ? [70, 40] : [110, 50],
+        maxZoom: 12,
+      });
+    };
+    fit();
+    let lastW = 0;
+    new ResizeObserver(() => {
+      if (Math.abs(mapa.clientWidth - lastW) < 2) return;
+      lastW = mapa.clientWidth; map.invalidateSize(); fit();
+    }).observe(mapa);
   }
   if (CONFIG.horario) $$("[data-horario]").forEach((el) => (el.textContent = CONFIG.horario));
 
