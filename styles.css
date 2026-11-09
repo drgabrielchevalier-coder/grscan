@@ -147,6 +147,12 @@ h3 { font-size: 1rem; font-weight: 700; }
 .pcard__img::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 1px; height: 45%; background: linear-gradient(transparent, var(--gold-2)); opacity: .6; }
 .pcard__img--2 { background: radial-gradient(220px 200px at 50% 45%, rgba(251,227,160,.28), transparent 70%), linear-gradient(200deg, #2a2621, #0c0b09 70%); }
 .pcard__img .ico { width: 42%; height: auto; color: var(--gold-1); stroke-width: 1.1; filter: drop-shadow(0 0 14px rgba(217,164,65,.6)); }
+.pcard__img--photo::after { display: none; }
+.pcard__img--photo img {
+  position: absolute; left: 1%; bottom: 0; width: 104%; max-width: none; height: auto;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,.6)); transition: transform .6s ease;
+}
+.pcard:hover .pcard__img--photo img { transform: translate(-3%, -2%) rotate(-2deg); }
 .pcard:hover .pcard__img { transform: translateY(-6px); box-shadow: 0 40px 60px -30px rgba(217,164,65,.45); }
 
 /* Experiência / pilares */
