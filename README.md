@@ -73,3 +73,9 @@ Ex.: agenda livre a partir das 14:00 e 40 min de viagem → primeiro horário 14
 Ao reservar, são criados 3 eventos: "🚗 Deslocamento (ida)", "Escaneamento" e "🚗 Deslocamento (volta)".
 Ajustes em `agenda-config.php`: `ORIGEM`, `FATOR_TRANSITO` (+30% por padrão, pois a rota gratuita não considera trânsito),
 `MARGEM_DESLOCAMENTO_MIN`, `DESLOCAMENTO_PADRAO_MIN` e, opcionalmente, `GOOGLE_MAPS_API_KEY` (Routes API, com trânsito real).
+
+## Solicitar orçamento
+O botão "Solicitar orçamento" abre um formulário próprio (tipo de trabalho, dentes no odontograma FDI, arcadas,
+nº de pacientes, prazo, frequência, laboratório, formato, local, observações e contato).
+O pedido é enviado por `orcamento.php` para o e-mail definido em `email-config.php` (o mesmo usado pelo agendamento),
+com cópia de confirmação para o dentista e registro em `orcamentos-grscan.csv` fora da pasta pública.

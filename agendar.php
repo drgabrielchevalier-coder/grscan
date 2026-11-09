@@ -2,14 +2,12 @@
 /* ============================================================
    GR Scan — recebe as solicitações de agendamento do site
    ============================================================
-   CONFIGURAÇÃO: edite as 3 linhas abaixo.
-   - $DESTINO: e-mail que recebe os agendamentos (pode ser o seu Gmail).
-   - $REMETENTE: um e-mail do PRÓPRIO domínio do site, criado na Hostinger
-     (ex.: agenda@implantstore.com.br). Usar Gmail aqui faz o e-mail cair no spam.
-   - $DURACAO_MIN: duração reservada para cada atendimento, em minutos.
+   Os e-mails (destino e remetente) ficam em email-config.php.
+   - $DURACAO_MIN: duração usada no convite .ics quando a agenda não está conectada.
 */
-$DESTINO     = 'seu-email@exemplo.com';
-$REMETENTE   = 'agenda@implantstore.com.br';
+$emailCfg    = require __DIR__ . '/email-config.php';
+$DESTINO     = $emailCfg['DESTINO'];
+$REMETENTE   = $emailCfg['REMETENTE'];
 $DURACAO_MIN = 60;
 /* ============================================================ */
 

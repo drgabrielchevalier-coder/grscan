@@ -429,6 +429,33 @@ body.modal-open { overflow: hidden; }
 .bk__footer { display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .bk__error { color: #f09a86; font-size: .88rem; min-height: 1.2em; margin: 0; text-align: center; }
 .btn[disabled] { opacity: .6; pointer-events: none; }
+/* Orçamento: odontograma */
+.bk__step legend .opt { font-style: normal; font-weight: 400; font-size: .8rem; color: var(--text-soft); }
+.chip input[type=checkbox] { position: absolute; opacity: 0; pointer-events: none; }
+.chip input[type=checkbox]:checked + span {
+  color: #1a1206; font-weight: 600; border-color: transparent; background: linear-gradient(180deg, #f7cf6a, #d99a2b);
+}
+.odonto { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: .2rem 0 1.2rem; padding: 14px 10px; border-radius: 12px; background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.06); overflow-x: auto; }
+.odonto__lbl { font-size: .68rem; text-transform: uppercase; letter-spacing: .12em; color: var(--text-soft); }
+.odonto__row { display: flex; align-items: center; gap: 4px; }
+.odonto__half { display: flex; gap: 4px; }
+.odonto__row:nth-child(2) { border-bottom: 1px dashed rgba(217,164,65,.35); padding-bottom: 6px; }
+.odonto__mid { width: 1px; height: 30px; background: rgba(217,164,65,.45); margin: 0 6px; }
+.tooth {
+  width: 34px; height: 34px; flex: 0 0 auto; border-radius: 9px 9px 12px 12px; cursor: pointer; font: 600 .72rem var(--sans);
+  color: var(--text); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.16); transition: all .15s;
+}
+.tooth:hover { border-color: var(--gold-2); }
+.tooth[aria-pressed=true] { color: #1a1206; border-color: transparent; background: linear-gradient(180deg, #f7cf6a, #d99a2b); box-shadow: 0 4px 12px -4px rgba(217,164,65,.9); }
+.tooth:focus-visible { outline: 2px solid var(--gold-1); outline-offset: 2px; }
+@media (max-width: 560px) {
+  .odonto__row { flex-direction: column; gap: 6px; }
+  .odonto__row:nth-child(2) .odonto__half:first-child { order: 0; }
+  .odonto__half { display: flex; gap: 4px; }
+  .odonto__mid { display: none; }
+  .tooth { width: 34px; height: 32px; font-size: .66rem; }
+}
+
 .bk-done {
   max-width: 620px; margin: 40px auto 0; padding: 44px 32px; text-align: center; border-radius: 14px;
   background: linear-gradient(180deg, #1f1d1b, #151412); border: 1px solid var(--line);

@@ -32,6 +32,8 @@ const CONFIG = {
   // Arquivo que envia a solicitação por e-mail (configure o e-mail dentro de agendar.php).
   // Deixe "" para enviar só pelo WhatsApp.
   endpointAgendamento: "agendar.php",
+  // Recebe os pedidos de orçamento e envia por e-mail (configure em email-config.php)
+  endpointOrcamento: "orcamento.php",
   // Lê os horários livres do Google Agenda (configure em agenda-config.php).
   // Enquanto não estiver configurado, o formulário usa as regras de "agenda" acima.
   endpointDisponibilidade: "disponibilidade.php",
@@ -449,6 +451,106 @@ document.documentElement.classList.remove("no-js");
       if (G) renderDays(); else renderSlots();
       $("#bk-done").hidden = true; form.hidden = false;
       form.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  // ---------- Janela de orçamento ----------
+  const qModal = $("#qt-modal"), qForm = $("#qt");
+  if (qModal && qForm) {
+    const openQuote = (e) => {
+      if (e) e.preventDefault();
+      if (qModal.open) return;
+      if (typeof qModal.showModal === "function") qModal.showModal(); else qModal.setAttribute("open", "");
+      document.body.classList.add("modal-open");
+      const box = $(".bk-modal__box", qModal); if (box) box.scrollTop = 0;
+    };
+    const closeQuote = () => {
+      if (typeof qModal.close === "function" && qModal.open) qModal.close(); else qModal.removeAttribute("open");
+      document.body.classList.remove("modal-open");
+    };
+    qModal.addEventListener("close", () => document.body.classList.remove("modal-open"));
+    qModal.addEventListener("click", (e) => { if (e.target === qModal) closeQuote(); });
+    $$("[data-close-quote]").forEach((b) => b.addEventListener("click", closeQuote));
+    $$("[data-open-quote]").forEach((b) => b.addEventListener("click", openQuote));
+    if (location.hash === "#orcamento") setTimeout(openQuote, 400);
+
+    // "Outro" mostra campo de descrição
+    const outro = $('#qt-chips input[value="Outro"]');
+    outro.addEventListener("change", () => { $("#qt-outro").hidden = !outro.checked; });
+
+    // Odontograma: clicar nos dentes preenche o campo
+    const dentes = qForm.elements.dentes, elementos = qForm.elements.elementos;
+    const syncTeeth = () => {
+      const sel = $$(".tooth[aria-pressed=true]", qForm).map((b) => b.dataset.t);
+      dentes.value = sel.join(", ");
+      elementos.value = sel.length || "";
+    };
+    $$(".tooth", qForm).forEach((b) => b.addEventListener("click", () => {
+      b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+      syncTeeth();
+    }));
+
+    const qErr = $("#qt-error");
+    qForm.addEventListener("input", (e) => {
+      qErr.textContent = "";
+      const f = e.target.closest(".field"); if (f) f.classList.remove("is-invalid");
+      const c = e.target.closest(".chips"); if (c) c.classList.remove("is-invalid");
+    });
+    const qFail = (el, msg) => {
+      (el.closest(".field") || el).classList.add("is-invalid");
+      qErr.textContent = msg;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (el.focus) el.focus({ preventScroll: true });
+      return false;
+    };
+    const qValidate = () => {
+      const f = qForm.elements;
+      if (!$$('input[name="trabalhos"]:checked', qForm).length) return qFail($("#qt-chips"), "Escolha ao menos um tipo de trabalho.");
+      if (!f.nome.value.trim()) return qFail(f.nome, "Informe o nome do dentista responsável.");
+      if (f.telefone.value.replace(/\D/g, "").length < 10) return qFail(f.telefone, "Informe um WhatsApp com DDD.");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim())) return qFail(f.email, "Informe um e-mail válido.");
+      return true;
+    };
+    const qCollect = () => {
+      const d = {};
+      new FormData(qForm).forEach((v, k) => {
+        v = String(v).trim();
+        if (k === "trabalhos") (d[k] = d[k] || []).push(v); else d[k] = v;
+      });
+      return d;
+    };
+    const qWaText = (d) => "Olá! Gostaria de um orçamento de escaneamento intraoral com a GR Scan.\n\n" +
+      "*Trabalho:* " + (d.trabalhos || []).join(", ") + (d.outro_trabalho ? " (" + d.outro_trabalho + ")" : "") +
+      "\n*Arcadas:* " + d.arcadas + (d.dentes ? "\n*Dentes:* " + d.dentes : "") + "\n*Pacientes:* " + d.pacientes +
+      "\n*Prazo:* " + d.prazo + (d.local ? "\n*Local:* " + d.local : "") + (d.obs ? "\n*Obs.:* " + d.obs : "") +
+      "\n\n*Dentista:* " + d.nome + (d.clinica ? " — " + d.clinica : "") + "\n*Contato:* " + d.telefone + " · " + d.email;
+
+    qForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      qErr.textContent = "";
+      if (!qValidate()) return;
+      const d = qCollect();
+      const btn = $("#qt-submit"), label = btn.textContent;
+      btn.disabled = true; btn.textContent = "Enviando…";
+      let ok = false, j = {};
+      if (CONFIG.endpointOrcamento && location.protocol.startsWith("http")) {
+        try {
+          const r = await fetch(CONFIG.endpointOrcamento, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) });
+          j = await r.json().catch(() => ({})); ok = r.ok && j.ok;
+        } catch (_) { ok = false; }
+      }
+      btn.disabled = false; btn.textContent = label;
+      const done = () => { qForm.hidden = true; $("#qt-done").hidden = false; $(".bk-modal__box", qModal).scrollTop = 0; };
+      if (ok) {
+        $("#qt-done-text").textContent = "Recebemos sua solicitação e enviamos uma cópia para " + d.email + ". Vamos responder em breve por " + d.preferencia + ".";
+        return done();
+      }
+      if (CONFIG.whatsapp) {
+        window.open(waLink(qWaText(d)), "_blank", "noopener");
+        $("#qt-done-text").textContent = "Finalize o envio da mensagem no WhatsApp para concluir o pedido.";
+        return done();
+      }
+      qErr.textContent = j.message || "Não foi possível enviar agora. Tente novamente em instantes.";
     });
   }
 
