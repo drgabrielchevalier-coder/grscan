@@ -310,6 +310,22 @@ h3 { font-size: 1rem; font-weight: 700; }
 }
 
 
+/* Modelos 3D reais */
+model-viewer { --poster-color: transparent; --progress-bar-color: var(--gold-2); background: transparent; }
+.model3d-hero { position: relative; width: 100%; max-width: 520px; aspect-ratio: 1; margin-left: auto; display: grid; place-items: center; }
+.mv--hero { width: 100%; height: 100%; position: relative; z-index: 2; filter: drop-shadow(0 30px 40px rgba(0,0,0,.7)); }
+.halo { position: absolute; inset: 8%; border-radius: 50%; background: radial-gradient(circle, rgba(217,164,65,.45), rgba(217,164,65,.08) 50%, transparent 70%); animation: breathe 6s ease-in-out infinite; }
+.orbit-ring { position: absolute; inset: 4%; border-radius: 50%; border: 1px solid rgba(217,164,65,.25); animation: spin 40s linear infinite; }
+.orbit-ring--2 { inset: 14%; border-style: dashed; border-color: rgba(217,164,65,.18); animation-duration: 60s; animation-direction: reverse; }
+.beam {
+  position: absolute; left: 6%; right: 6%; top: 20%; height: 3px; z-index: 3; pointer-events: none; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #b8e9ff, #e7b6ff, transparent); box-shadow: 0 0 18px 4px rgba(159,224,255,.45);
+  animation: beam2 4.5s ease-in-out infinite; mix-blend-mode: screen;
+}
+@keyframes beam2 { 0%, 100% { top: 22%; opacity: 0; } 10%, 90% { opacity: .9; } 50% { top: 74%; } }
+.model-tag { position: absolute; bottom: 4%; z-index: 3; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-soft); padding: .45em 1em; border: 1px solid var(--line); border-radius: 999px; background: rgba(10,9,7,.6); backdrop-filter: blur(6px); }
+.mv--laptop { flex: 1; height: 300px; }
+
 /* Ajustes das ilustrações herdadas */
 .scan-art { width: 100%; max-width: 470px; margin-left: auto; filter: drop-shadow(0 30px 60px rgba(0,0,0,.6)); }
 .ico { width: 48px; height: 48px; color: var(--gold-2); }
@@ -335,7 +351,8 @@ h3 { font-size: 1rem; font-weight: 700; }
   .hero__inner, .office, .tech, .exp, .faqwrap { grid-template-columns: 1fr; gap: 40px; }
   .hero { padding-top: 110px; }
   .hero__visual { order: -1; }
-  .scan-art { max-width: 320px; margin: 0 auto; }
+  .scan-art, .model3d-hero { max-width: 340px; margin: 0 auto; }
+  .mv--laptop { height: 220px; }
   .hero__mark { width: 380px; top: 4%; }
   .strip { grid-template-columns: 1fr 1fr; }
   .strip__title { grid-column: 1 / -1; }
