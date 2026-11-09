@@ -12,7 +12,28 @@ return [
     // Só mude se você guardou o arquivo em outro lugar.
     'ARQUIVO_CHAVE' => dirname(__DIR__) . '/grscan-google.json',
 
-    // ID da agenda onde você marca os horários DISPONÍVEIS.
+    // Como o site descobre os horários livres:
+    //  'livre'  = todo horário VAZIO na sua agenda principal, dentro do EXPEDIENTE abaixo (padrão).
+    //  'blocos' = só os blocos marcados como eventos na agenda AGENDA_DISPONIVEL.
+    'MODO' => 'livre',
+
+    // Expediente (usado no modo 'livre'). 1 = segunda … 6 = sábado, 7 = domingo.
+    // Cada dia aceita um ou mais períodos. Para ter intervalo de almoço: [['08:00','12:00'], ['13:00','18:00']]
+    // Dia que não aparece aqui = sem atendimento.
+    'EXPEDIENTE' => [
+        1 => [['08:00', '18:00']],
+        2 => [['08:00', '18:00']],
+        3 => [['08:00', '18:00']],
+        4 => [['08:00', '18:00']],
+        5 => [['08:00', '18:00']],
+        6 => [['08:00', '13:00']],
+    ],
+
+    // Dias sem atendimento (feriados, férias). Formato 'AAAA-MM-DD'.
+    // Dica: você também pode só criar um evento de dia inteiro na agenda principal para bloquear o dia.
+    'DATAS_BLOQUEADAS' => ['2026-12-25', '2027-01-01'],
+
+    // (modo 'blocos') ID da agenda onde você marca os horários DISPONÍVEIS.
     // Google Agenda > Configurações da agenda "GR Scan – Disponível" > Integrar agenda > ID da agenda
     'AGENDA_DISPONIVEL' => 'de2a2c3598689aea2746ebe0557aa6954c595c694956b667a839819a9668c7c2@group.calendar.google.com',
 

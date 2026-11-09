@@ -16,8 +16,12 @@ if (isset($_GET['diagnostico'])) {
         try { ag_token(); $r['4_login_google'] = 'ok'; }
         catch (Throwable $e) { $r['4_login_google'] = 'ERRO: ' . $e->getMessage(); }
         if (($r['4_login_google'] ?? '') === 'ok') {
-            try { $r['5_agenda_disponivel'] = 'ok (' . count(ag_janelas($de, $ate)) . ' blocos nos próximos 7 dias)'; }
-            catch (Throwable $e) { $r['5_agenda_disponivel'] = 'ERRO: ' . $e->getMessage(); }
+            if (ag_modo() === 'blocos') {
+                try { $r['5_agenda_disponivel'] = 'ok (' . count(ag_janelas($de, $ate)) . ' blocos nos próximos 7 dias)'; }
+                catch (Throwable $e) { $r['5_agenda_disponivel'] = 'ERRO: ' . $e->getMessage(); }
+            } else {
+                $r['5_expediente'] = 'modo livre: ' . count(ag_janelas_expediente($de, $ate, $c)) . ' períodos de expediente nos próximos 7 dias';
+            }
             try { $r['6_agenda_principal'] = 'ok (' . count(ag_ocupados($de, $ate)) . ' compromissos nos próximos 7 dias)'; }
             catch (Throwable $e) { $r['6_agenda_principal'] = 'ERRO: ' . $e->getMessage(); }
         }

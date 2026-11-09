@@ -11,8 +11,24 @@ function ag_config() {
 function ag_ativa() {
     $c = ag_config();
     return is_readable($c['ARQUIVO_CHAVE'])
-        && strpos($c['AGENDA_DISPONIVEL'], 'xxxxxxxx') === false
+        && (ag_modo() === 'livre' || strpos($c['AGENDA_DISPONIVEL'], 'xxxxxxxx') === false)
         && strpos($c['AGENDA_COMPROMISSOS'], 'seu-email') === false;
+}
+
+function ag_modo() { return (ag_config()['MODO'] ?? 'livre') === 'blocos' ? 'blocos' : 'livre'; }
+
+/** Janelas do expediente padrão (modo 'livre'), dia a dia. */
+function ag_janelas_expediente(DateTimeImmutable $de, DateTimeImmutable $ate, array $c) {
+    $tz = new DateTimeZone($c['FUSO']); $out = [];
+    $bloq = $c['DATAS_BLOQUEADAS'] ?? [];
+    for ($d = $de->setTimezone($tz)->setTime(0, 0); $d < $ate; $d = $d->modify('+1 day')) {
+        $ymd = $d->format('Y-m-d');
+        if (in_array($ymd, $bloq, true)) continue;
+        foreach ($c['EXPEDIENTE'][(int)$d->format('N')] ?? [] as [$i, $f]) {
+            $out[] = [new DateTimeImmutable("$ymd $i", $tz), new DateTimeImmutable("$ymd $f", $tz)];
+        }
+    }
+    return $out;
 }
 
 function ag_b64url($s) { return rtrim(strtr(base64_encode($s), '+/', '-_'), '='); }
@@ -143,7 +159,8 @@ function ag_horarios_livres() {
     $c = ag_config(); $tz = new DateTimeZone($c['FUSO']);
     $agora = new DateTimeImmutable('now', $tz);
     $de = $agora->setTime(0, 0); $ate = $de->modify('+' . (int)$c['DIAS_NO_FUTURO'] . ' days');
-    return ag_calcular_horarios(ag_janelas($de, $ate), ag_ocupados($de, $ate), $agora, $c);
+    $janelas = ag_modo() === 'blocos' ? ag_janelas($de, $ate) : ag_janelas_expediente($de, $ate, $c);
+    return ag_calcular_horarios($janelas, ag_ocupados($de, $ate), $agora, $c);
 }
 
 /** Cria o evento do agendamento na agenda de compromissos. */
