@@ -13,6 +13,11 @@ const CONFIG = {
   whatsappMessage: "Olá! Gostaria de solicitar um orçamento de escaneamento intraoral com a GR Scan.",
 
   email: "",       // Ex.: "contato@grscan.com.br"
+
+  // Região atendida (aparece no texto e no mapa). Ex.: "Recife e Região Metropolitana"
+  regiao: "",
+  // Horário de atendimento. Ex.: "Segunda a sexta, das 8h às 18h, com hora marcada."
+  horario: "",
   instagram: "",   // Ex.: "grscan"
 };
 /* ============================================================ */
@@ -55,19 +60,16 @@ document.documentElement.classList.remove("no-js");
     else fbBtn.hidden = true;
   }
 
-  // Menu mobile
-  const toggle = document.querySelector(".nav-toggle");
-  const nav = document.getElementById("menu");
-  toggle.addEventListener("click", () => {
-    const open = nav.classList.toggle("is-open");
-    toggle.setAttribute("aria-expanded", open);
-  });
-  nav.querySelectorAll("a").forEach((a) =>
-    a.addEventListener("click", () => {
-      nav.classList.remove("is-open");
-      toggle.setAttribute("aria-expanded", "false");
-    })
-  );
+  // Região, horário e mapa
+  if (CONFIG.regiao) {
+    document.querySelectorAll("[data-regiao]").forEach((el) => (el.textContent = CONFIG.regiao));
+    const mapa = document.getElementById("mapa");
+    if (mapa) {
+      mapa.innerHTML = '<iframe title="Mapa da região atendida" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=' +
+        encodeURIComponent(CONFIG.regiao) + '&z=11&output=embed"></iframe>';
+    }
+  }
+  if (CONFIG.horario) document.querySelectorAll("[data-horario]").forEach((el) => (el.textContent = CONFIG.horario));
 
   // Ano no rodapé
   document.getElementById("ano").textContent = new Date().getFullYear();
