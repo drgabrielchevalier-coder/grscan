@@ -34,5 +34,10 @@ texto, visual), siga este fluxo. Pedidos pequenos e totalmente claros
 - O site em produção fica em outra conta da Hostinger que o Claude não acessa:
   ao terminar, gerar um `.zip` só com os arquivos alterados e dizer onde substituir
   (`public_html` do site grscan.implantstore.com.br).
+- **Versão de cada deploy:** todo deploy (pacote `.zip` ou commit no branch de produção) sobe a
+  versão em 0,1 (2.0 → 2.1 → … → 2.9 → 2.10; 3.0 só por decisão do dono do site) em `index.html`
+  (meta `grscan-versao` + `data-data` + `data-resumo`), `styles.css` (`--grscan-versao`),
+  `script.js` (`GRSCAN_VERSAO`), nos `?v=` e no `CHANGELOG.md`. Depois de publicar, conferir em
+  `/?versao` (barra verde = os três arquivos na mesma versão).
 - Nunca gravar chaves, senhas ou o `.json` da conta de serviço no repositório.
 - Escaneamentos de pacientes: publicar sem nome/número do caso e lembrar da autorização (LGPD).

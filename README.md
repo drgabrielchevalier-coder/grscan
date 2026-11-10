@@ -17,7 +17,22 @@ Edite o bloco `CONFIG` no início de `script.js`:
 Itens não preenchidos ficam ocultos automaticamente.
 
 ## Publicar
-Basta enviar `index.html`, `styles.css`, `script.js` e a pasta `assets/` para qualquer hospedagem estática (Hostinger, GitHub Pages, Netlify etc.).
+Envie `index.html`, `styles.css`, `script.js`, `robots.txt`, `sitemap.xml`, `.htaccess`, os arquivos `.php` e a pasta `assets/`
+(incluindo `assets/vendor/`, com o Leaflet e o decodificador Draco servidos pelo próprio site).
+Cada deploy sobe a versão em 0,1 (2.0 → 2.1 → 2.2…) nos três arquivos, nos `?v=` e no `CHANGELOG.md`
+(regra completa no `CLAUDE.md`); o `?v=` novo faz os navegadores baixarem os arquivos atualizados.
+
+## Conferir a versão publicada
+Abra `https://grscan.implantstore.com.br/?versao`. Aparece no topo uma barra (só para quem usar esse endereço):
+- **Escura com ponto dourado:** `index.html`, `styles.css` e `script.js` estão na mesma versão — o deploy subiu inteiro.
+- **Vermelha, "deploy incompleto":** algum arquivo está em outra versão (✗) ou não carregou. Envie de novo o arquivo marcado
+  e recarregue a página (se continuar, limpe o cache do navegador ou da Hostinger).
+O botão "fechar" tira a barra. Sem `?versao` no endereço, os visitantes não veem nada.
+
+## Testes de regressão
+Com o site rodando localmente (`php -S 127.0.0.1:8090`), execute `node tests/regressao.js http://127.0.0.1:8090`.
+O teste usa o Playwright, intercepta os PHP (nenhum e-mail é enviado) e verifica agendamento, orçamento, odontograma,
+mapa, modelos 3D, links diretos e responsividade. Histórico de mudanças em `CHANGELOG.md`.
 
 ## Agendamento direto (formulário)
 O formulário da seção "Agende seu escaneamento" pede trabalho, arcadas, local, data, horário e dados do dentista.
