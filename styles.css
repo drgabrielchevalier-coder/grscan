@@ -647,3 +647,129 @@ model-viewer { --poster-color: transparent; --progress-bar-color: var(--gold-2);
   .bk__row { grid-template-columns: 1fr; }
   .field--wide { grid-column: auto; }
 }
+
+/* ============================================================
+   Spotlight (adaptado do componente "Spotlight" do 21st.dev)
+   Luz que segue o cursor + borda iluminada perto do cursor.
+   ============================================================ */
+[data-spotlight] { position: relative; isolation: isolate; }
+.spot-light, .spot-ring {
+  pointer-events: none; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
+  opacity: 0; transition: opacity .3s;
+}
+.spot-light { background: radial-gradient(var(--spot-size, 320px) circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(233,181,74,.14), transparent 70%); }
+.spot-ring {
+  inset: -1px; padding: 1px; z-index: 2;
+  background: radial-gradient(var(--spot-size, 320px) circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(251,227,160,.75), transparent 60%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude;
+}
+[data-spotlight]:hover > .spot-light, [data-spotlight]:hover > .spot-ring,
+[data-spotlight]:focus-within > .spot-light, [data-spotlight]:focus-within > .spot-ring { opacity: 1; }
+@media (hover: none) { .spot-light, .spot-ring { display: none; } }
+
+/* ============================================================
+   Bento grid (adaptado do "bento grid 01" do 21st.dev)
+   ============================================================ */
+.bento { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 210px; gap: 16px; }
+.bento__tile {
+  grid-column: span 2; display: flex; flex-direction: column; overflow: hidden; border-radius: 16px; padding: 22px 24px;
+  background: linear-gradient(180deg, #1c1a17, #131210); border: 1px solid rgba(255,255,255,.07);
+  transition: transform .45s cubic-bezier(.16,1,.3,1), border-color .3s, box-shadow .45s;
+}
+.bento__tile--tall { grid-row: span 2; }
+.bento__tile--wide { grid-column: span 3; }
+.bento__tile:hover { transform: translateY(-4px); border-color: rgba(217,164,65,.28); box-shadow: 0 30px 50px -30px rgba(0,0,0,.9); }
+.bento__vis { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; position: relative; }
+.bento__txt h3 { font-size: 1.02rem; margin: 0 0 .3em; color: var(--text); }
+.bento__txt p { margin: 0; font-size: .84rem; color: var(--text-soft); line-height: 1.5; }
+.bento .reveal:nth-child(2) { transition-delay: .08s; } .bento .reveal:nth-child(3) { transition-delay: .16s; }
+.bento .reveal:nth-child(4) { transition-delay: .24s; } .bento .reveal:nth-child(5) { transition-delay: .32s; }
+.bento .reveal:nth-child(6) { transition-delay: .4s; }
+
+/* 1. coroa assentando no preparo */
+.vis-crown svg { width: min(62%, 190px); height: auto; overflow: visible; }
+.vis-crown path { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.vc-prep { stroke: rgba(239,233,223,.55); fill: rgba(255,255,255,.03) !important; }
+.vc-crown { stroke: #f6d886; fill: rgba(217,164,65,.16) !important; filter: drop-shadow(0 0 12px rgba(233,181,74,.55)); animation: vcSeat 4s cubic-bezier(.16,1,.3,1) infinite; }
+.vc-scan { stroke: #7fe8dc; stroke-width: 1.6 !important; opacity: .8; filter: drop-shadow(0 0 6px #7fe8dc); animation: vcScan 4s ease-in-out infinite; }
+@keyframes vcSeat { 0%, 15% { transform: translateY(-34px); opacity: .25; } 55%, 85% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(0); opacity: 1; } }
+@keyframes vcScan { 0%, 50% { transform: translateY(-50px); opacity: 0; } 60% { opacity: .9; } 90% { transform: translateY(60px); opacity: 0; } 100% { opacity: 0; } }
+
+/* 2. dentes se alinhando */
+.vis-align { gap: 7px; }
+.vis-align span {
+  width: 22px; height: 34px; border-radius: 9px 9px 12px 12px; background: linear-gradient(180deg, #fbf4e6, #d8ccb6);
+  box-shadow: 0 4px 10px rgba(0,0,0,.4); animation: vaAlign 3.2s cubic-bezier(.16,1,.3,1) infinite alternate;
+}
+.vis-align span:nth-child(1) { --r: -14deg; --y: 8px; } .vis-align span:nth-child(2) { --r: 9deg; --y: -7px; }
+.vis-align span:nth-child(3) { --r: -6deg; --y: 10px; } .vis-align span:nth-child(4) { --r: 12deg; --y: -5px; }
+.vis-align span:nth-child(5) { --r: -10deg; --y: 6px; } .vis-align span:nth-child(6) { --r: 7deg; --y: -9px; }
+.vis-align::after { content: ""; position: absolute; left: 50%; top: 50%; width: 190px; height: 2px; transform: translate(-50%, 24px); background: linear-gradient(90deg, transparent, rgba(217,164,65,.7), transparent); }
+@keyframes vaAlign { 0%, 20% { transform: translateY(var(--y)) rotate(var(--r)); } 80%, 100% { transform: none; } }
+
+/* 3. arquivo digital com pulsos */
+.vis-file i { position: absolute; width: 84px; height: 84px; border-radius: 50%; border: 1.5px solid rgba(233,181,74,.45); animation: vfPulse 3.2s ease-out infinite; }
+.vis-file i:nth-child(2) { animation-delay: .8s; } .vis-file i:nth-child(3) { animation-delay: 1.6s; } .vis-file i:nth-child(4) { animation-delay: 2.4s; }
+@keyframes vfPulse { from { transform: scale(.6); opacity: 1; } to { transform: scale(2.8); opacity: 0; } }
+.vf-doc { position: relative; z-index: 1; width: 84px; height: 84px; border-radius: 22px; display: grid; place-items: center; background: linear-gradient(180deg, #f7cf6a, #d99a2b); box-shadow: 0 14px 30px -10px rgba(217,164,65,.8); }
+.vf-doc svg { width: 46px; height: 46px; fill: none; stroke: #1a1206; stroke-width: 2.2; stroke-linejoin: round; }
+.vf-tags { position: absolute; bottom: 8px; display: flex; gap: 8px; }
+.vf-tags b { font-size: .7rem; letter-spacing: .08em; padding: .35em .7em; border-radius: 6px; color: var(--gold-1); background: rgba(10,9,7,.7); border: 1px solid var(--line); animation: vfTag 3s ease-in-out infinite; }
+.vf-tags b:nth-child(2) { animation-delay: .4s; } .vf-tags b:nth-child(3) { animation-delay: .8s; }
+@keyframes vfTag { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+/* 4. velocidade */
+.vis-speed { flex-direction: column; gap: 14px; }
+.vs-num { position: relative; height: 44px; display: grid; place-items: center; }
+.vs-num b { font-size: 2.1rem; font-weight: 700; color: #fff; letter-spacing: -.02em; opacity: 0; filter: blur(6px); transform: translateY(14px); }
+.vs-num small { font-size: .9rem; font-weight: 500; color: var(--text-soft); }
+.vs-skel { position: absolute; width: 110px; height: 34px; border-radius: 8px; background: rgba(255,255,255,.08); animation: vsSkel 1s ease-in-out infinite; }
+.vs-bar { width: 140px; height: 6px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+.vs-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #d99a2b, #fbe3a0); }
+.is-visible .vs-skel { animation: vsSkel 1s ease-in-out 2, vsOut .3s 1.6s forwards; }
+.is-visible .vs-num b { animation: vsIn .6s 1.8s cubic-bezier(.16,1,.3,1) forwards; }
+.is-visible .vs-bar i { animation: vsBar 1.2s 1.9s cubic-bezier(.34,1.3,.5,1) forwards; }
+@keyframes vsSkel { 50% { opacity: .45; } }
+@keyframes vsOut { to { opacity: 0; transform: translateY(-14px); } }
+@keyframes vsIn { to { opacity: 1; filter: none; transform: none; } }
+@keyframes vsBar { to { width: 100%; } }
+
+/* 5. implantes acendendo em sequência */
+.vis-implants { gap: 14px; }
+.vis-implants span { width: 64px; height: 64px; border-radius: 14px; display: grid; place-items: center; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); animation: viOn 3.6s infinite; }
+.vis-implants span:nth-child(2) { animation-delay: .9s; } .vis-implants span:nth-child(3) { animation-delay: 1.8s; }
+.vis-implants svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; color: #6b6255; transition: color .3s; }
+@keyframes viOn {
+  0%, 100% { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.08); color: #6b6255; transform: scale(1); }
+  20%, 60% { background: rgba(217,164,65,.18); border-color: rgba(233,181,74,.6); color: var(--gold-1); transform: scale(1.08); box-shadow: 0 0 22px -4px rgba(233,181,74,.6); }
+}
+.vis-implants span svg { color: inherit; }
+
+/* 6. envio ao laboratório */
+.vis-send { gap: 12px; }
+.vsd-node { padding: .55em 1em; border-radius: 10px; font-size: .78rem; font-weight: 600; color: var(--text); background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); white-space: nowrap; }
+.vsd-node--lab { color: #1a1206; border-color: transparent; background: linear-gradient(180deg, #f7cf6a, #d99a2b); }
+.vsd-line { position: relative; flex: 1; max-width: 220px; height: 2px; background: repeating-linear-gradient(90deg, rgba(217,164,65,.5) 0 6px, transparent 6px 12px); }
+.vsd-line i { position: absolute; top: 50%; left: 0; width: 10px; height: 10px; margin-top: -5px; border-radius: 3px; background: #7fe8dc; box-shadow: 0 0 12px #7fe8dc; animation: vsdGo 2.4s linear infinite; }
+.vsd-line i:nth-child(2) { animation-delay: .8s; } .vsd-line i:nth-child(3) { animation-delay: 1.6s; }
+@keyframes vsdGo { from { left: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } to { left: calc(100% - 10px); opacity: 0; } }
+
+@media (max-width: 960px) {
+  .bento { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 200px; }
+  .bento__tile, .bento__tile--wide { grid-column: span 1; }
+  .bento__tile--wide { grid-column: span 2; }
+}
+@media (max-width: 560px) {
+  .bento { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 12px; }
+  .bento__tile, .bento__tile--wide { grid-column: span 1; }
+  .bento__tile--tall { grid-row: span 1; }
+  .bento__vis { flex: none; height: 150px; margin-bottom: 14px; }
+  .vis-crown svg { width: auto; height: 130px; }
+  .vis-file i { width: 64px; height: 64px; }
+  .vf-doc { width: 70px; height: 70px; border-radius: 18px; }
+  .vf-tags { bottom: -4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vs-num b { opacity: 1; filter: none; transform: none; } .vs-skel { display: none; } .vs-bar i { width: 100%; }
+}

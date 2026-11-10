@@ -554,6 +554,25 @@ document.documentElement.classList.remove("no-js");
     });
   }
 
+  // ---------- Spotlight (adaptado do componente "Spotlight" do 21st.dev) ----------
+  // Luz dourada que segue o cursor dentro do card e acende a borda mais próxima.
+  // Só atualiza duas variáveis CSS por quadro; em telas de toque fica desligado.
+  $$(".pcard__img, .strip, .faqcta, .bk-launch, [data-spotlight]").forEach((el) => {
+    el.setAttribute("data-spotlight", "");
+    el.insertAdjacentHTML("afterbegin", '<span class="spot-light" aria-hidden="true"></span><span class="spot-ring" aria-hidden="true"></span>');
+    let raf = 0;
+    el.addEventListener("pointermove", (e) => {
+      if (e.pointerType === "touch") return;
+      const { clientX, clientY } = e;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const r = el.getBoundingClientRect();
+        el.style.setProperty("--spot-x", clientX - r.left + "px");
+        el.style.setProperty("--spot-y", clientY - r.top + "px");
+      });
+    });
+  });
+
   // ---------- Cabeçalho, ano e animações ----------
   document.getElementById("ano").textContent = new Date().getFullYear();
   const header = $(".header");
