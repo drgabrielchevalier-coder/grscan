@@ -38,7 +38,7 @@ async function init(host) {
   const key = new THREE.DirectionalLight(0xffe2b0, 1.6); key.position.set(0.3, 0.6, 0.4); scene.add(key);
   const rim = new THREE.DirectionalLight(0x40d7c8, 0.8); rim.position.set(-0.4, 0.2, -0.3); scene.add(rim);
 
-  const draco = new DRACOLoader().setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.6/");
+  const draco = new DRACOLoader().setDecoderPath(new URL("vendor/draco/", import.meta.url).href);
   const loader = new GLTFLoader().setDRACOLoader(draco);
   const base = new URL(".", import.meta.url).href;
   const [arch, wand] = await Promise.all([

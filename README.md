@@ -17,7 +17,14 @@ Edite o bloco `CONFIG` no início de `script.js`:
 Itens não preenchidos ficam ocultos automaticamente.
 
 ## Publicar
-Basta enviar `index.html`, `styles.css`, `script.js` e a pasta `assets/` para qualquer hospedagem estática (Hostinger, GitHub Pages, Netlify etc.).
+Envie `index.html`, `styles.css`, `script.js`, `robots.txt`, `sitemap.xml`, `.htaccess`, os arquivos `.php` e a pasta `assets/`
+(incluindo `assets/vendor/`, com o Leaflet e o decodificador Draco servidos pelo próprio site).
+Ao alterar `styles.css` ou `script.js`, aumente o número em `?v=` no `index.html` para os navegadores baixarem a nova versão.
+
+## Testes de regressão
+Com o site rodando localmente (`php -S 127.0.0.1:8090`), execute `node tests/regressao.js http://127.0.0.1:8090`.
+O teste usa o Playwright, intercepta os PHP (nenhum e-mail é enviado) e verifica agendamento, orçamento, odontograma,
+mapa, modelos 3D, links diretos e responsividade. Histórico de mudanças em `CHANGELOG.md`.
 
 ## Agendamento direto (formulário)
 O formulário da seção "Agende seu escaneamento" pede trabalho, arcadas, local, data, horário e dados do dentista.
