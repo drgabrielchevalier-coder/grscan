@@ -54,11 +54,15 @@ document.documentElement.classList.remove("no-js");
   const waLink = (text) => "https://wa.me/" + CONFIG.whatsapp + "?text=" + encodeURIComponent(text);
 
   // ---------- Links de contato ----------
+  // Sem o contato configurado: botões com data-fallback-label viram "Solicitar orçamento"
+  // (abrem o formulário de orçamento); os demais ficam ocultos. Nenhum botão finge ser WhatsApp.
   const setLinks = (selector, href) => {
     $$(selector).forEach((a) => {
-      if (href) { a.href = href; a.target = "_blank"; a.rel = "noopener"; }
-      else if (a.classList.contains("btn")) { a.href = "#agendar"; }
-      else { a.hidden = true; }
+      if (href) { a.href = href; a.target = "_blank"; a.rel = "noopener"; return; }
+      const label = a.dataset.fallbackLabel;
+      if (label && a.classList.contains("btn")) {
+        a.href = "#orcamento"; a.setAttribute("data-open-quote", ""); a.textContent = label;
+      } else { a.hidden = true; }
     });
   };
   setLinks("[data-whatsapp]", CONFIG.whatsapp && waLink(CONFIG.whatsappMessage));
@@ -68,7 +72,26 @@ document.documentElement.classList.remove("no-js");
   // ---------- Região, horário e mapa ----------
   if (CONFIG.regiao) $$("[data-regiao]").forEach((el) => (el.textContent = CONFIG.regiao));
   const mapa = $("#mapa");
-  if (mapa && window.L) initCoverageMap(mapa).catch((e) => console.warn("Mapa:", e));
+  // Leaflet (cerca de 150 KB) e as imagens de satélite só carregam quando o mapa se aproxima da tela.
+  // O CSS do Leaflet entra na camada "vendor", abaixo dos estilos do site.
+  const loadLeaflet = () => {
+    if (window.L) return Promise.resolve();
+    const css = document.createElement("style");
+    css.textContent = '@import url("assets/vendor/leaflet/leaflet.css") layer(vendor);';
+    document.head.append(css);
+    return new Promise((res, rej) => {
+      const js = document.createElement("script");
+      js.src = "assets/vendor/leaflet/leaflet.js"; js.onload = res; js.onerror = rej;
+      document.head.append(js);
+    });
+  };
+  const startMap = () => loadLeaflet().then(() => initCoverageMap(mapa)).catch((e) => console.warn("Mapa:", e));
+  if (mapa) {
+    if ("IntersectionObserver" in window) {
+      const mio = new IntersectionObserver((es) => { if (es[0].isIntersecting) { mio.disconnect(); startMap(); } }, { rootMargin: "600px 0px" });
+      mio.observe(mapa);
+    } else startMap();
+  }
 
   async function initCoverageMap(mapa) {
     const L = window.L;
@@ -557,7 +580,7 @@ document.documentElement.classList.remove("no-js");
   // ---------- Spotlight (adaptado do componente "Spotlight" do 21st.dev) ----------
   // Luz dourada que segue o cursor dentro do card e acende a borda mais próxima.
   // Só atualiza duas variáveis CSS por quadro; em telas de toque fica desligado.
-  $$(".pcard__img, .strip, .faqcta, .bk-launch, [data-spotlight]").forEach((el) => {
+  $$(".bk-launch, [data-spotlight]").forEach((el) => {
     el.setAttribute("data-spotlight", "");
     el.insertAdjacentHTML("afterbegin", '<span class="spot-light" aria-hidden="true"></span><span class="spot-ring" aria-hidden="true"></span>');
     let raf = 0;
@@ -579,6 +602,45 @@ document.documentElement.classList.remove("no-js");
   const onScroll = () => header.classList.toggle("is-scrolled", window.scrollY > 20);
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
+
+  // Menu (celular e tablet)
+  const toggle = $(".nav-toggle");
+  const setMenu = (open) => {
+    if (!toggle) return;
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+    header.classList.toggle("is-menu-open", open);
+    document.body.classList.toggle("menu-open", open);
+  };
+  if (toggle) {
+    toggle.addEventListener("click", () => setMenu(toggle.getAttribute("aria-expanded") !== "true"));
+    $$("#menu a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && header.classList.contains("is-menu-open")) { setMenu(false); toggle.focus(); } });
+    const wide = matchMedia("(min-width: 1081px)");
+    if (wide.addEventListener) wide.addEventListener("change", (m) => { if (m.matches) setMenu(false); });
+  }
+  // Marca no menu a seção visível
+  const navLinks = $$('.nav__list a[href^="#"]');
+  if ("IntersectionObserver" in window && navLinks.length) {
+    const byId = new Map(navLinks.map((a) => [a.getAttribute("href").slice(1), a]));
+    const sio = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        const a = byId.get(e.target.id);
+        if (a && e.isIntersecting) { navLinks.forEach((l) => l.removeAttribute("aria-current")); a.setAttribute("aria-current", "true"); }
+      });
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    byId.forEach((_, id) => { const sec = document.getElementById(id); if (sec) sio.observe(sec); });
+  }
+
+  // Cena 3D de escaneamento (Three.js) só carrega quando se aproxima da tela
+  const scan = $("#scanscene");
+  if (scan) {
+    const loadScene = () => import("./assets/cena-escaneamento.js").catch((e) => { console.warn("Cena 3D indisponível:", e); scan.classList.add("is-fallback"); });
+    if ("IntersectionObserver" in window) {
+      const tio = new IntersectionObserver((es) => { if (es[0].isIntersecting) { tio.disconnect(); loadScene(); } }, { rootMargin: "500px 0px" });
+      tio.observe(scan);
+    } else loadScene();
+  }
 
   const els = $$(".reveal, .fade-up");
   if ("IntersectionObserver" in window) {
