@@ -1,6 +1,6 @@
 # Registro de alterações — GR Scan
 
-## 2.0.0 (em desenvolvimento, branch `claude/wonderful-brown-n36zeo`)
+## 2.0 — 10/11/2026 — Linha de Precisão
 Etapa 3, primeira entrega: estrutura, navegação, hierarquia, tipografia e organização das seções
 na direção "Linha de Precisão". Animações 3D avançadas ficam para a próxima etapa.
 

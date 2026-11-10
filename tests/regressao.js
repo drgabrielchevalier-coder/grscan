@@ -24,6 +24,24 @@ const isoPlus = (n) => { const d = new Date(); d.setDate(d.getDate() + n); retur
 const nextWeekday = () => { for (let i = 1; i < 10; i++) { const d = new Date(); d.setDate(d.getDate() + i); if (d.getDay() >= 1 && d.getDay() <= 5) return isoPlus(i); } };
 
 (async () => {
+  // ---------- Versão do deploy (arquivos do repositório) ----------
+  {
+    const fs = require("fs"), path = require("path");
+    const raiz = path.join(__dirname, "..");
+    const ler = (f) => fs.readFileSync(path.join(raiz, f), "utf8");
+    const html = ler("index.html"), css = ler("styles.css"), js = ler("script.js"), log = ler("CHANGELOG.md");
+    const vHtml = (html.match(/<meta name="grscan-versao" content="([^"]*)"/) || [])[1];
+    const vCss = ((css.match(/--grscan-versao:\s*([^;]*);/) || [])[1] || "").trim().replace(/^['"]|['"]$/g, "");
+    const vJs = (js.match(/var GRSCAN_VERSAO = "([^"]*)"/) || [])[1];
+    const vQueryCss = (html.match(/styles\.css\?v=([^"]*)"/) || [])[1];
+    const vQueryJs = (html.match(/script\.js\?v=([^"]*)"/) || [])[1];
+    const changelogPrimeiroTitulo = (log.match(/^## .*$/m) || [""])[0];
+    ok("versão: index.html, styles.css e script.js iguais", vHtml && vHtml === vCss && vCss === vJs, [vHtml, vCss, vJs]);
+    ok("versão: ?v= de styles.css e script.js igual à versão", vQueryCss === vHtml && vQueryJs === vHtml, [vQueryCss, vQueryJs]);
+    ok("versão: CHANGELOG começa pela versão atual", changelogPrimeiroTitulo.startsWith("## " + vHtml + " "), changelogPrimeiroTitulo);
+    ok("versão: formato MAIOR.MENOR", /^\d+\.\d+$/.test(vHtml || ""), vHtml);
+  }
+
   const b = await chromium.launch();
 
   // ---------- Carregamento e estrutura (desktop) ----------
