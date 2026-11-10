@@ -138,6 +138,65 @@ const nextWeekday = () => { for (let i = 1; i < 10; i++) { const d = new Date();
   ok("movimento reduzido: conteúdo visível sem animação", await p.evaluate(() => [...document.querySelectorAll(".reveal, .fade-up")].every((e) => getComputedStyle(e).opacity === "1")));
   await p.context().close();
 
+  // ---------- Barra de versão (/?versao) ----------
+  {
+    const barra = async (p) => p.evaluate(() => {
+      const el = document.getElementById("versao-barra");
+      if (!el) return null;
+      const item = (k) => (el.querySelector('[data-arquivo="' + k + '"]') || {}).textContent || "";
+      return { estado: el.dataset.estado, texto: el.textContent, role: el.getAttribute("role"), estilos: item("estilos"), scripts: item("scripts") };
+    });
+    const trocaCss = (p, valor) => p.route("**/styles.css*", async (r) => {
+      const res = await r.fetch(); const body = (await res.text()).replace(/--grscan-versao:[^;]*;/, "--grscan-versao: " + valor + ";");
+      await r.fulfill({ response: res, body });
+    });
+    const abre = async (p, url) => { await p.goto(BASE + url, { waitUntil: "load" }); await p.waitForTimeout(600); };
+
+    p = await newPage(b, { width: 1280, height: 800 });
+    await abre(p, "/");
+    ok("versão: sem ?versao não há barra", (await p.locator("#versao-barra").count()) === 0);
+    await abre(p, "/?versao");
+    let r = await barra(p);
+    ok("versão: com ?versao mostra 2.0 ok", r && r.estado === "ok" && r.texto.includes("Versão 2.0") && r.texto.includes("10/11/2026") && r.role === "status", JSON.stringify(r));
+    await abre(p, "/?versao=1&x=y");
+    ok("versão: ?versao=1&x=y também abre", (await p.locator("#versao-barra").count()) === 1);
+    ok("versão: barra sem erros de JS", p.errors.length === 0, p.errors.join(" | "));
+    await p.context().close();
+
+    p = await newPage(b, { width: 1280, height: 800 });
+    await trocaCss(p, '"1.9"');
+    await abre(p, "/?versao");
+    r = await barra(p);
+    ok("versão: CSS de outra versão → incompleto", r && r.estado === "incompleto" && r.estilos.includes("1.9 ✗") && r.texto.includes("deploy incompleto"), JSON.stringify(r));
+    await p.context().close();
+
+    p = await newPage(b, { width: 1280, height: 800 });
+    await trocaCss(p, " '2.0' ");
+    await abre(p, "/?versao");
+    r = await barra(p);
+    ok("versão: aspas e espaços normalizados", r && r.estado === "ok", JSON.stringify(r));
+    await p.context().close();
+
+    p = await newPage(b, { width: 1280, height: 800 });
+    await p.route("**/script.js*", (rt) => rt.fulfill({ status: 404, body: "" }));
+    await abre(p, "/?versao");
+    r = await barra(p);
+    ok("versão: script.js 404 → incompleto", r && r.estado === "incompleto" && r.scripts.includes("não carregado ✗"), JSON.stringify(r));
+    await p.context().close();
+
+    p = await newPage(b, { width: 1280, height: 800 });
+    await p.goto(BASE + "/?versao#agendar", { waitUntil: "load" }); await p.waitForTimeout(1200);
+    ok("versão: /?versao#agendar abre o agendamento", await p.evaluate(() => document.getElementById("bk-modal").open));
+    await p.context().close();
+
+    p = await newPage(b, { width: 320, height: 640 }, { mobile: true });
+    await abre(p, "/?versao");
+    ok("versão: 320px com barra sem rolagem horizontal", (await p.locator("#versao-barra").count()) === 1 && !(await p.evaluate(() => document.documentElement.scrollWidth > innerWidth)), await p.evaluate(() => document.documentElement.scrollWidth));
+    if (await p.locator("#versao-fechar").count()) await p.click("#versao-fechar");
+    ok("versão: fechar remove a barra", (await p.locator("#versao-fechar").count()) === 0 && (await p.locator("#versao-barra").count()) === 0);
+    await p.context().close();
+  }
+
   await b.close();
   const fails = results.filter((r) => !r.pass);
   results.forEach((r) => console.log((r.pass ? "PASS " : "FAIL ") + r.name + (r.pass ? "" : "  -> " + r.info)));

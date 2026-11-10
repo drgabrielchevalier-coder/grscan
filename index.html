@@ -648,5 +648,58 @@
   <a class="wa-float" data-whatsapp href="#" aria-label="Falar no WhatsApp"><svg class="i-wa" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-1-2.2-1-.3-.1-.5-.2-.7.1l-1 1.2c-.2.2-.4.3-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.6.3-.6v-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.8 1.1 3.3.9 3.9.8.6 0 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6l-.8-.3Z" fill="currentColor"/></svg></a>
 
   <script src="script.js?v=2.0"></script>
+  <script>
+    /* Barra de versão do deploy: só aparece com ?versao no endereço (ver CLAUDE.md).
+       Fica aqui, e não no script.js, para funcionar mesmo se styles.css ou script.js forem de outra versão. */
+    (function () {
+      if (!new URLSearchParams(location.search).has("versao")) return;
+      addEventListener("load", function () {
+        var meta = document.querySelector('meta[name="grscan-versao"]');
+        var ref = meta ? meta.content : "";
+        var limpa = function (v) { return String(v || "").trim().replace(/^['"]|['"]$/g, "").trim(); };
+        var itens = [
+          ["pagina", "página", ref],
+          ["estilos", "estilos", limpa(getComputedStyle(document.documentElement).getPropertyValue("--grscan-versao"))],
+          ["scripts", "scripts", limpa(window.GRSCAN_VERSAO)]
+        ];
+        var ok = itens.every(function (i) { return i[2] && i[2] === ref; });
+        var d = (meta && meta.dataset.data || "").split("-");
+        var data = d.length === 3 ? d[2] + "/" + d[1] + "/" + d[0] : "data não informada";
+        var cor = ok ? "#d9a441" : "#ff6b6b";
+        var bar = document.createElement("div");
+        bar.id = "versao-barra";
+        bar.setAttribute("role", "status");
+        bar.dataset.estado = ok ? "ok" : "incompleto";
+        bar.style.cssText = "position:fixed;inset:0 0 auto 0;z-index:2147483000;box-sizing:border-box;max-width:100%;" +
+          "display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;padding:10px 16px;" +
+          "font:14px/1.4 system-ui,-apple-system,'Segoe UI',sans-serif;color:#efe9df;" +
+          "background:" + (ok ? "#15130f" : "#5a1414") + ";border-bottom:1px solid " + cor + ";overflow-wrap:anywhere";
+        var linha = document.createElement("p");
+        linha.style.cssText = "margin:0;flex:1 1 100%;font-weight:600";
+        var ponto = document.createElement("span");
+        ponto.setAttribute("aria-hidden", "true");
+        ponto.style.cssText = "display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;background:" + cor;
+        linha.appendChild(ponto);
+        linha.appendChild(document.createTextNode("Versão " + (ref || "?") + " · publicada em " + data +
+          (meta && meta.dataset.resumo ? " · “" + meta.dataset.resumo + "”" : "") + (ok ? "" : " — deploy incompleto")));
+        bar.appendChild(linha);
+        itens.forEach(function (i) {
+          var s = document.createElement("span");
+          s.dataset.arquivo = i[0];
+          s.textContent = i[1] + " " + (!i[2] ? "não carregado ✗" : i[2] === ref ? i[2] + " ✓" : i[2] + " ✗");
+          bar.appendChild(s);
+        });
+        var fechar = document.createElement("button");
+        fechar.id = "versao-fechar";
+        fechar.type = "button";
+        fechar.textContent = "fechar";
+        fechar.setAttribute("aria-label", "Fechar barra de versão");
+        fechar.style.cssText = "margin-left:auto;font:inherit;color:inherit;background:transparent;border:1px solid " + cor + ";border-radius:4px;padding:4px 12px;min-height:32px;cursor:pointer";
+        fechar.addEventListener("click", function () { bar.remove(); });
+        bar.appendChild(fechar);
+        document.body.appendChild(bar);
+      });
+    })();
+  </script>
 </body>
 </html>
