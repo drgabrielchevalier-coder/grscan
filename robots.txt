@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /agendar.php
+Disallow: /orcamento.php
+Disallow: /disponibilidade.php
+
+Sitemap: https://grscan.implantstore.com.br/sitemap.xml

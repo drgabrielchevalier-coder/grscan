@@ -5,3 +5,38 @@
 <FilesMatch "^(agenda-config|agenda-google|email-config|email-template)\.php$">
   Require all denied
 </FilesMatch>
+# Documentação e arquivos internos do projeto (README, CHANGELOG etc.)
+<FilesMatch "\.(md|log|sh|lock)$">
+  Require all denied
+</FilesMatch>
+
+# Tipos de arquivo dos modelos 3D e do mapa
+AddType model/gltf-binary .glb
+AddType application/geo+json .geojson
+AddType application/wasm .wasm
+
+# Cabeçalhos de segurança
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+  Header always set Strict-Transport-Security "max-age=31536000"
+</IfModule>
+
+# Cache do navegador (CSS e JS são versionados com ?v= no index.html)
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 hour"
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType application/json "access plus 0 seconds"
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType text/javascript "access plus 7 days"
+  ExpiresByType image/webp "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType model/gltf-binary "access plus 30 days"
+  ExpiresByType application/wasm "access plus 30 days"
+  ExpiresByType application/geo+json "access plus 7 days"
+</IfModule>
