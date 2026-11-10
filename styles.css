@@ -122,7 +122,7 @@ h3 { font-size: 1rem; font-weight: 700; }
 .is-visible .chart { animation: chart 3s ease forwards; }
 .chart--2 { animation-delay: .4s !important; }
 @keyframes chart { to { stroke-dashoffset: 0; } }
-.split-photo .laptop { position: relative; width: 82%; max-width: 480px; }
+.split-photo .laptop { position: relative; width: 90%; max-width: 580px; }
 .split-photo__inner { display: grid; grid-template-columns: 1fr 1fr; }
 .split-photo__text { grid-column: 2; padding-left: 20px; }
 .split-photo__text > p:not(.gold-sub):not(.label) { color: var(--text-soft); }
@@ -583,6 +583,10 @@ model-viewer { --poster-color: transparent; --progress-bar-color: var(--gold-2);
 @keyframes beam2 { 0%, 100% { top: 22%; opacity: 0; } 10%, 90% { opacity: .9; } 50% { top: 74%; } }
 .model-tag { position: absolute; bottom: 4%; z-index: 3; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--text-soft); padding: .45em 1em; border: 1px solid var(--line); border-radius: 999px; background: rgba(10,9,7,.6); backdrop-filter: blur(6px); }
 .mv--laptop { flex: 1; height: 300px; }
+.laptop__shot { position: relative; overflow: hidden; border-radius: 6px; aspect-ratio: 1600 / 868; background: #eef4f8; }
+.laptop__shot img { display: block; width: 100%; height: 100%; object-fit: cover; transform-origin: 58% 52%; animation: shotZoom 14s ease-in-out infinite alternate; }
+@keyframes shotZoom { from { transform: scale(1); } to { transform: scale(1.06); } }
+.laptop__glare { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,.18) 0%, transparent 32%, transparent 70%, rgba(255,255,255,.06) 100%); }
 
 /* Ajustes das ilustrações herdadas */
 .scan-art { width: 100%; max-width: 470px; margin-left: auto; filter: drop-shadow(0 30px 60px rgba(0,0,0,.6)); }
