@@ -12,6 +12,7 @@ let falhas = 0;
 const igual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 for (const c of casos) {
   const cfg = JSON.parse(JSON.stringify(padrao));
+  if (c.publico) ["procedimentos", "componentes"].forEach((g) => cfg[g].forEach((x) => { delete x.disponivel; }));
   if (c.indisponivel) cfg.procedimentos.forEach((p) => { if (p.id === c.indisponivel) p.disponivel = false; });
   const pedido = JSON.parse(JSON.stringify(c.pedido));
   const m = typeof pedido.pacientes === "string" && pedido.pacientes.match(/^(\d+)x (\w+)$/);

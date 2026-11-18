@@ -469,124 +469,129 @@
             <header class="bk-modal__head">
               <div>
                 <h2 id="qt-title">Solicitar orçamento</h2>
-                <p>Conte o que você precisa. Respondemos com o valor e a disponibilidade.</p>
+                <p>Monte o orçamento: o valor é calculado na hora.</p>
               </div>
               <button type="button" class="bk-modal__close" data-close-quote aria-label="Fechar formulário">
                 <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
               </button>
             </header>
-            <form class="bk" id="qt" novalidate>
-              <fieldset class="bk__step">
-                <legend><span class="bk__n">1</span> Trabalho</legend>
-                <p class="bk__hint" id="qt-trabalho-lbl">Tipo de trabalho (pode marcar mais de um)</p>
-                <div class="chips" id="qt-chips" role="group" aria-labelledby="qt-trabalho-lbl">
-                  <label class="chip"><input type="checkbox" name="trabalhos" value="Prótese, coroa ou faceta"><span>Prótese, coroa ou faceta</span></label>
-                  <label class="chip"><input type="checkbox" name="trabalhos" value="Prótese sobre implante"><span>Prótese sobre implante</span></label>
-                  <label class="chip"><input type="checkbox" name="trabalhos" value="Protocolo / reabilitação total"><span>Protocolo / reabilitação total</span></label>
-                  <label class="chip"><input type="checkbox" name="trabalhos" value="Ortodontia / alinhadores"><span>Ortodontia / alinhadores</span></label>
-                  <label class="chip"><input type="checkbox" name="trabalhos" value="Placa ou contenção"><span>Placa ou contenção</span></label>
-                  <label class="chip"><input type="checkbox" name="trabalhos" value="Guia cirúrgico / planejamento"><span>Guia cirúrgico / planejamento</span></label>
-                  <label class="chip"><input type="checkbox" name="trabalhos" value="Documentação / modelo de estudo"><span>Documentação / modelo de estudo</span></label>
-                  <label class="chip"><input type="checkbox" name="trabalhos" value="Outro"><span>Outro</span></label>
+            <form class="bk qt" id="qt" novalidate>
+              <p class="qt-status" id="qt-status" role="status">Carregando a tabela de preços…</p>
+              <div class="qt-falha" id="qt-falha" role="alert" hidden>
+                <p><b>Não foi possível carregar a tabela de preços.</b> Tente novamente em instantes ou fale com a GR Scan.</p>
+                <div class="qt-falha__acoes">
+                  <button type="button" class="btn btn--line" id="qt-recarregar">Tentar de novo</button>
+                  <a class="btn btn--line" href="#agendar" data-close-quote data-open-booking>Agendar escaneamento</a>
                 </div>
-                <label class="field field--full" id="qt-outro" hidden><span>Qual?</span>
-                  <input type="text" name="outro_trabalho" maxlength="120" placeholder="Descreva o trabalho">
-                </label>
-                <div class="bk__row">
-                  <label class="field"><span>Arcadas</span>
-                    <select name="arcadas">
-                      <option>Ambas (superior e inferior)</option><option>Superior</option><option>Inferior</option><option>Apenas os dentes indicados</option>
-                    </select>
-                  </label>
-                  <label class="field"><span>Nº de pacientes</span>
-                    <input type="number" name="pacientes" min="1" max="200" value="1">
-                  </label>
-                  <label class="field"><span>Prazo desejado</span>
-                    <select name="prazo">
-                      <option>Sem urgência</option><option>Nesta semana</option><option>Em até 48 horas</option><option>Urgente (hoje/amanhã)</option>
-                    </select>
-                  </label>
-                </div>
-              </fieldset>
+              </div>
 
-              <fieldset class="bk__step">
-                <legend><span class="bk__n">2</span> Dentes envolvidos <em class="opt">(opcional)</em></legend>
-                <p class="bk__hint">Toque nos dentes (numeração FDI) ou escreva abaixo.</p>
-                <div class="odonto" role="group" aria-label="Odontograma">
+              <div class="qt-conteudo" id="qt-conteudo" hidden>
+                <fieldset class="bk__step">
+                  <legend><span class="bk__n">1</span> Região da clínica</legend>
+                  <label class="field qt-regiao"><span>Bairro ou cidade</span>
+                    <select name="regiao" id="qt-regiao" required><option value="">Escolha a região</option></select>
+                  </label>
+                  <p class="bk__hint">Uma taxa de deslocamento por visita, qualquer que seja o número de pacientes.</p>
+                </fieldset>
+
+                <fieldset class="bk__step">
+                  <legend><span class="bk__n">2</span> Pacientes</legend>
+                  <p class="bk__hint">Cada escaneamento inclui as duas arcadas (inclusive a antagonista) e o registro oclusal, quando clinicamente viáveis.</p>
+                  <div class="qt-pacientes" id="qt-pacientes"></div>
+                  <button type="button" class="btn btn--line qt-add" id="qt-add">+ Adicionar paciente</button>
+                  <p class="qt-faixas" id="qt-faixas"></p>
+                </fieldset>
+
+                <fieldset class="bk__step">
+                  <legend><span class="bk__n">3</span> Resumo</legend>
+                  <div class="qt-resumo" id="qt-resumo" aria-live="polite"></div>
+                  <p class="qt-desconto" id="qt-desconto" hidden></p>
+                  <p class="qt-aviso" id="qt-aviso">Valores sujeitos à confirmação da disponibilidade, da compatibilidade dos componentes e da viabilidade técnica. TiBase só quando solicitada, com compatibilidade confirmada pela GR Scan.</p>
+                </fieldset>
+
+                <fieldset class="bk__step">
+                  <legend><span class="bk__n">4</span> Detalhes <em class="opt">(opcional)</em></legend>
+                  <p class="bk__hint">Toque nos dentes (numeração FDI) ou escreva abaixo.</p>
+                  <div class="odonto" role="group" aria-label="Odontograma">
                   <div class="odonto__lbl">Superior</div>
                   <div class="odonto__row"><span class="odonto__half"><button type="button" class="tooth" data-t="18" aria-pressed="false">18</button><button type="button" class="tooth" data-t="17" aria-pressed="false">17</button><button type="button" class="tooth" data-t="16" aria-pressed="false">16</button><button type="button" class="tooth" data-t="15" aria-pressed="false">15</button><button type="button" class="tooth" data-t="14" aria-pressed="false">14</button><button type="button" class="tooth" data-t="13" aria-pressed="false">13</button><button type="button" class="tooth" data-t="12" aria-pressed="false">12</button><button type="button" class="tooth" data-t="11" aria-pressed="false">11</button></span><i class="odonto__mid"></i><span class="odonto__half"><button type="button" class="tooth" data-t="21" aria-pressed="false">21</button><button type="button" class="tooth" data-t="22" aria-pressed="false">22</button><button type="button" class="tooth" data-t="23" aria-pressed="false">23</button><button type="button" class="tooth" data-t="24" aria-pressed="false">24</button><button type="button" class="tooth" data-t="25" aria-pressed="false">25</button><button type="button" class="tooth" data-t="26" aria-pressed="false">26</button><button type="button" class="tooth" data-t="27" aria-pressed="false">27</button><button type="button" class="tooth" data-t="28" aria-pressed="false">28</button></span></div>
                   <div class="odonto__row"><span class="odonto__half"><button type="button" class="tooth" data-t="48" aria-pressed="false">48</button><button type="button" class="tooth" data-t="47" aria-pressed="false">47</button><button type="button" class="tooth" data-t="46" aria-pressed="false">46</button><button type="button" class="tooth" data-t="45" aria-pressed="false">45</button><button type="button" class="tooth" data-t="44" aria-pressed="false">44</button><button type="button" class="tooth" data-t="43" aria-pressed="false">43</button><button type="button" class="tooth" data-t="42" aria-pressed="false">42</button><button type="button" class="tooth" data-t="41" aria-pressed="false">41</button></span><i class="odonto__mid"></i><span class="odonto__half"><button type="button" class="tooth" data-t="31" aria-pressed="false">31</button><button type="button" class="tooth" data-t="32" aria-pressed="false">32</button><button type="button" class="tooth" data-t="33" aria-pressed="false">33</button><button type="button" class="tooth" data-t="34" aria-pressed="false">34</button><button type="button" class="tooth" data-t="35" aria-pressed="false">35</button><button type="button" class="tooth" data-t="36" aria-pressed="false">36</button><button type="button" class="tooth" data-t="37" aria-pressed="false">37</button><button type="button" class="tooth" data-t="38" aria-pressed="false">38</button></span></div>
                   <div class="odonto__lbl">Inferior</div>
                 </div>
-                <div class="bk__row">
-                  <label class="field field--wide"><span>Dentes / região</span>
-                    <input type="text" name="dentes" maxlength="300" placeholder="Ex.: 11, 21 ou região anterior superior">
-                  </label>
-                  <label class="field"><span>Nº de elementos</span>
-                    <input type="number" name="elementos" min="0" max="32" placeholder="—">
-                  </label>
-                </div>
-              </fieldset>
+                  <div class="bk__row">
+                    <label class="field field--wide"><span>Dentes / região</span>
+                      <input type="text" name="dentes" maxlength="300" placeholder="Ex.: 11, 21 ou região anterior superior">
+                    </label>
+                    <label class="field"><span>Nº de elementos</span>
+                      <input type="number" name="elementos" min="0" max="32" placeholder="—">
+                    </label>
+                    <label class="field"><span>Data desejada</span>
+                      <input type="date" name="data_desejada">
+                    </label>
+                    <label class="field field--wide"><span>Observações</span>
+                      <textarea name="obs" rows="2" maxlength="1200" placeholder="Ex.: laboratório de destino, formato do arquivo, pilar personalizado…"></textarea>
+                    </label>
+                  </div>
+                </fieldset>
 
-              <fieldset class="bk__step">
-                <legend><span class="bk__n">3</span> Detalhes</legend>
-                <div class="bk__row">
-                  <label class="field"><span>Frequência</span>
-                    <select name="frequencia">
-                      <option>Avulso (caso pontual)</option><option>Algumas vezes por mês</option><option>Semanal</option><option>Parceria recorrente</option>
-                    </select>
-                  </label>
-                  <label class="field"><span>Laboratório de destino <em>(opcional)</em></span>
-                    <input type="text" name="laboratorio" maxlength="120" placeholder="Nome do laboratório">
-                  </label>
-                  <label class="field"><span>Formato do arquivo</span>
-                    <select name="formato"><option>STL</option><option>PLY (com cor)</option><option>Envio direto ao laboratório</option><option>Não sei / tanto faz</option></select>
-                  </label>
-                  <label class="field field--full"><span>Bairro / cidade da clínica</span>
-                    <input type="text" name="local" maxlength="160" placeholder="Ex.: Icaraí, Niterói">
-                  </label>
-                  <label class="field field--full"><span>Observações <em>(opcional)</em></span>
-                    <textarea name="obs" rows="3" maxlength="1200" placeholder="Ex.: transferentes de implante, registro de mordida, pilar personalizado…"></textarea>
-                  </label>
-                </div>
-              </fieldset>
+                <fieldset class="bk__step">
+                  <legend><span class="bk__n">5</span> Seus dados</legend>
+                  <div class="bk__row">
+                    <label class="field"><span>Dentista responsável</span>
+                      <input type="text" name="nome" maxlength="100" required autocomplete="name">
+                    </label>
+                    <label class="field"><span>Clínica <em>(opcional)</em></span>
+                      <input type="text" name="clinica" maxlength="120" autocomplete="organization">
+                    </label>
+                    <label class="field"><span>CRO <em>(opcional)</em></span>
+                      <input type="text" name="cro" maxlength="30" placeholder="Ex.: RJ-12345">
+                    </label>
+                    <label class="field"><span>WhatsApp</span>
+                      <input type="tel" name="telefone" maxlength="20" required placeholder="(00) 00000-0000" autocomplete="tel">
+                    </label>
+                    <label class="field"><span>E-mail</span>
+                      <input type="email" name="email" maxlength="120" required autocomplete="email">
+                    </label>
+                    <label class="field"><span>Prefere contato por</span>
+                      <select name="preferencia"><option>WhatsApp</option><option>E-mail</option><option>Ligação</option></select>
+                    </label>
+                  </div>
+                  <label class="qt-aceite"><input type="checkbox" name="aceite_privacidade" value="1"> <span>Concordo com o uso destes dados pela GR Scan para responder a este orçamento.</span></label>
+                  <label class="hp" aria-hidden="true">Não preencha<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+                </fieldset>
 
-              <fieldset class="bk__step">
-                <legend><span class="bk__n">4</span> Seus dados</legend>
-                <div class="bk__row">
-                  <label class="field"><span>Dentista responsável</span>
-                    <input type="text" name="nome" maxlength="100" required autocomplete="name">
-                  </label>
-                  <label class="field"><span>Clínica <em>(opcional)</em></span>
-                    <input type="text" name="clinica" maxlength="120" autocomplete="organization">
-                  </label>
-                  <label class="field"><span>CRO <em>(opcional)</em></span>
-                    <input type="text" name="cro" maxlength="30" placeholder="Ex.: RJ-12345">
-                  </label>
-                  <label class="field"><span>WhatsApp</span>
-                    <input type="tel" name="telefone" maxlength="20" required placeholder="(00) 00000-0000" autocomplete="tel">
-                  </label>
-                  <label class="field"><span>E-mail</span>
-                    <input type="email" name="email" maxlength="120" required autocomplete="email">
-                  </label>
-                  <label class="field"><span>Prefere contato por</span>
-                    <select name="preferencia"><option>WhatsApp</option><option>E-mail</option><option>Ligação</option></select>
-                  </label>
+                <div class="qt-barra">
+                  <p class="qt-total" id="qt-total" aria-live="polite">—</p>
+                  <p class="bk__error" id="qt-error" role="alert"></p>
+                  <div class="qt-barra__acoes">
+                    <button type="button" class="btn btn--line" id="qt-whatsapp">Enviar pelo WhatsApp</button>
+                    <button type="submit" class="btn btn--gold" id="qt-submit">Enviar para a GR Scan</button>
+                  </div>
+                  <p class="bk__privacy">Os dados ficam registrados com a GR Scan e são usados só para responder a este orçamento.</p>
                 </div>
-                <label class="hp" aria-hidden="true">Não preencha<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
-              </fieldset>
-
-              <div class="bk__footer">
-                <p class="bk__privacy">Os dados informados são enviados por e-mail à equipe GR Scan para responder a esta solicitação.</p>
-                <p class="bk__error" id="qt-error" role="alert"></p>
-                <button type="submit" class="btn btn--gold btn--lg" id="qt-submit">Enviar pedido de orçamento</button>
               </div>
             </form>
 
+            <template id="qt-tpl-paciente">
+              <div class="qt-paciente">
+                <div class="qt-paciente__head">
+                  <b class="qt-paciente__n">Paciente 1</b>
+                  <button type="button" class="qt-remover" aria-label="Remover paciente">Remover</button>
+                </div>
+                <div class="qt-paciente__campos">
+                  <label class="field qt-proc"><span>Procedimento</span><select data-campo="procedimento"></select></label>
+                  <label class="field qt-imp" hidden><span>Implantes</span><input type="number" data-campo="implantes" min="1" max="32" value="1" inputmode="numeric"></label>
+                  <label class="field qt-imp qt-comp" data-comp="transfer" hidden><span>Transfers digitais</span><input type="number" data-campo="transfers" min="0" max="1" value="0" inputmode="numeric"></label>
+                  <label class="field qt-imp qt-comp" data-comp="tibase" hidden><span>TiBases</span><input type="number" data-campo="tibases" min="0" max="1" value="0" inputmode="numeric"></label>
+                </div>
+              </div>
+            </template>
+
             <div class="bk-done" id="qt-done" hidden>
               <svg viewBox="0 0 48 48" class="ico ico--ok"><circle class="draw" cx="24" cy="24" r="20"/><path class="draw" d="M15 24l6 6 12-12"/></svg>
-              <h3>Pedido enviado!</h3>
-              <p id="qt-done-text">Recebemos sua solicitação de orçamento e vamos responder em breve.</p>
+              <h3>Orçamento enviado!</h3>
+              <p class="qt-numero" id="qt-numero"></p>
+              <p id="qt-done-text">Recebemos seu orçamento e vamos responder em breve.</p>
               <div class="bk-done__actions">
                 <button type="button" class="btn btn--line" data-close-quote>Fechar</button>
               </div>
@@ -647,6 +652,7 @@
 
   <a class="wa-float" data-whatsapp href="#" aria-label="Falar no WhatsApp"><svg class="i-wa" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3Zm0 23.7c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.7 10.7 0 1 1 16 26.7Zm5.9-8c-.3-.2-1.9-1-2.2-1-.3-.1-.5-.2-.7.1l-1 1.2c-.2.2-.4.3-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.6.3-.6v-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.8 1.1 3.3.9 3.9.8.6 0 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6l-.8-.3Z" fill="currentColor"/></svg></a>
 
+  <script src="assets/orcamento-calculo.js?v=2.0"></script>
   <script src="script.js?v=2.0"></script>
   <script>
     /* Barra de versão do deploy: só aparece com ?versao no endereço (ver CLAUDE.md).

@@ -53,5 +53,9 @@
    "esperado": {"erro": true}},
   {"nome": "Procedimento inexistente: erro",
    "pedido": {"regiao": "barra", "pacientes": [{"procedimento": "nao_existe"}]},
-   "esperado": {"erro": true}}
+   "esperado": {"erro": true}},
+  {"nome": "Tabela no formato público (sem o campo disponivel)",
+   "publico": true,
+   "pedido": {"regiao": "niteroi", "pacientes": [{"procedimento": "implante", "implantes": 1, "transfers": 1, "tibases": 1}, {"procedimento": "orto"}]},
+   "esperado": {"erro": false, "totais": [19000, 2500, 8000, 17000, 9000], "subtotal": 55500, "total": 55500, "pendente": false}}
 ]

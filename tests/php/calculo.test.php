@@ -12,6 +12,7 @@ function caso_expandir(array $pedido): array {
 $casos = json_decode(file_get_contents(__DIR__ . '/../orcamento-casos.json'), true);
 foreach ($casos as $c) {
     $cfg = precos_padrao();
+    if (!empty($c['publico'])) foreach (['procedimentos', 'componentes'] as $g) foreach ($cfg[$g] as &$x) { unset($x['disponivel']); } unset($x);
     if (!empty($c['indisponivel'])) foreach ($cfg['procedimentos'] as &$p) { if ($p['id'] === $c['indisponivel']) $p['disponivel'] = false; } unset($p);
     $r = orcamento_calcular($cfg, caso_expandir($c['pedido']));
     $e = $c['esperado'];

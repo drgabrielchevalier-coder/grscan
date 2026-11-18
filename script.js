@@ -37,6 +37,7 @@ const CONFIG = {
   endpointAgendamento: "agendar.php",
   // Recebe os pedidos de orçamento e envia por e-mail (configure em email-config.php)
   endpointOrcamento: "orcamento.php",
+  endpointPrecos: "precos-publicos.php",
   // Lê os horários livres do Google Agenda (configure em agenda-config.php).
   // Enquanto não estiver configurado, o formulário usa as regras de "agenda" acima.
   endpointDisponibilidade: "disponibilidade.php",
@@ -480,15 +481,22 @@ document.documentElement.classList.remove("no-js");
     });
   }
 
-  // ---------- Janela de orçamento ----------
+  // ---------- Janela de orçamento (cálculo automático) ----------
+  // Preços vêm de precos-publicos.php (tabela administrável no painel); a prévia usa
+  // assets/orcamento-calculo.js e o servidor recalcula tudo ao enviar.
   const qModal = $("#qt-modal"), qForm = $("#qt");
   if (qModal && qForm) {
+    const CALC = window.GRSCAN_CALC;
+    const brl = (c) => CALC.formatarBRL(c);
+    let tabela = null, carregando = null;
+
     const openQuote = (e) => {
       if (e) e.preventDefault();
       if (qModal.open) return;
       if (typeof qModal.showModal === "function") qModal.showModal(); else qModal.setAttribute("open", "");
       document.body.classList.add("modal-open");
       const box = $(".bk-modal__box", qModal); if (box) box.scrollTop = 0;
+      carregarTabela();
     };
     const closeQuote = () => {
       if (typeof qModal.close === "function" && qModal.open) qModal.close(); else qModal.removeAttribute("open");
@@ -499,10 +507,6 @@ document.documentElement.classList.remove("no-js");
     $$("[data-close-quote]").forEach((b) => b.addEventListener("click", closeQuote));
     $$("[data-open-quote]").forEach((b) => b.addEventListener("click", openQuote));
     if (location.hash === "#orcamento") setTimeout(openQuote, 400);
-
-    // "Outro" mostra campo de descrição
-    const outro = $('#qt-chips input[value="Outro"]');
-    outro.addEventListener("change", () => { $("#qt-outro").hidden = !outro.checked; });
 
     // Odontograma: clicar nos dentes preenche o campo
     const dentes = qForm.elements.dentes, elementos = qForm.elements.elementos;
@@ -515,15 +519,169 @@ document.documentElement.classList.remove("no-js");
       b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
       syncTeeth();
     }));
+    const hoje = new Date(); hoje.setMinutes(hoje.getMinutes() - hoje.getTimezoneOffset());
+    qForm.elements.data_desejada.min = hoje.toISOString().slice(0, 10);
 
-    const qErr = $("#qt-error");
-    qForm.addEventListener("input", (e) => {
+    const status = $("#qt-status"), falha = $("#qt-falha"), conteudo = $("#qt-conteudo");
+    const lista = $("#qt-pacientes"), tpl = $("#qt-tpl-paciente"), regiao = $("#qt-regiao");
+    const qErr = $("#qt-error"), totalEl = $("#qt-total"), resumo = $("#qt-resumo"), descontoEl = $("#qt-desconto");
+
+    const carregarTabela = () => {
+      if (tabela || carregando) return carregando;
+      status.hidden = false; falha.hidden = true; conteudo.hidden = true;
+      carregando = fetch(CONFIG.endpointPrecos, { cache: "no-store" })
+        .then((r) => r.ok ? r.json() : Promise.reject(r.status))
+        .then((j) => { if (!j || !j.ok) throw new Error("tabela"); tabela = j; montar(); status.hidden = true; conteudo.hidden = false; })
+        .catch(() => { status.hidden = true; falha.hidden = false; })
+        .finally(() => { carregando = null; });
+      return carregando;
+    };
+    $("#qt-recarregar").addEventListener("click", carregarTabela);
+
+    const procPorId = (id) => tabela.procedimentos.find((p) => p.id === id);
+    const temComp = (id) => tabela.componentes.some((c) => c.id === id);
+    const usaImplantes = (valor) => valor === "implante" || !!(procPorId(valor) && procPorId(valor).implantes);
+
+    const opcoesProcedimento = () => {
+      const ops = []; let implanteIncluido = false;
+      tabela.procedimentos.forEach((p) => {
+        if (p.grupo === "implante") {
+          if (!implanteIncluido) { ops.push(["implante", "Implante(s)"]); implanteIncluido = true; }
+          return;
+        }
+        ops.push([p.id, p.nome + (p.sob_avaliacao || p.preco === null ? " · sob avaliação" : " · " + brl(p.preco))]);
+      });
+      return ops;
+    };
+
+    const montar = () => {
+      regiao.length = 1;
+      tabela.regioes.forEach((r) => {
+        const o = document.createElement("option");
+        o.value = r.id;
+        o.textContent = r.nome + " · " + (r.sob_consulta || r.taxa === null ? "sob consulta" : r.taxa === 0 ? "grátis" : brl(r.taxa));
+        regiao.append(o);
+      });
+      const faixas = tabela.faixas_desconto.slice().sort((a, b) => a.min - b.min);
+      const txt = faixas.map((f, i) => {
+        const prox = faixas[i + 1];
+        const qtd = !prox ? f.min + " ou mais pacientes" : prox.min - 1 > f.min ? f.min + " a " + (prox.min - 1) + " pacientes" : f.min + (f.min > 1 ? " pacientes" : " paciente");
+        return qtd + ": " + brl(f.preco);
+      });
+      $("#qt-faixas").textContent = faixas.length > 1 ? "Valor clínica por escaneamento convencional, conforme o total de pacientes da visita: " + txt.join(" · ") + "." : "";
+      lista.innerHTML = "";
+      adicionarPaciente();
+    };
+
+    const renumerar = () => {
+      $$(".qt-paciente", lista).forEach((el, i) => {
+        $(".qt-paciente__n", el).textContent = "Paciente " + (i + 1);
+        const rm = $(".qt-remover", el);
+        rm.setAttribute("aria-label", "Remover paciente " + (i + 1));
+        rm.hidden = lista.children.length === 1;
+      });
+      $("#qt-add").hidden = lista.children.length >= tabela.limite_pacientes;
+    };
+
+    const ajustarPaciente = (el) => {
+      const sel = $("[data-campo=procedimento]", el), imp = $("[data-campo=implantes]", el);
+      const ehImp = usaImplantes(sel.value);
+      $$(".qt-imp", el).forEach((l) => { l.hidden = !ehImp || (l.dataset.comp && !temComp(l.dataset.comp)); });
+      const max = Math.max(1, Math.min(32, parseInt(imp.value, 10) || 1));
+      $$(".qt-comp input", el).forEach((inp) => {
+        if (!ehImp) inp.value = "0";
+        inp.max = String(max);
+        if ((parseInt(inp.value, 10) || 0) > max) inp.value = String(max);
+      });
+      if (!ehImp) imp.value = "1";
+    };
+
+    const adicionarPaciente = () => {
+      const el = tpl.content.firstElementChild.cloneNode(true);
+      const sel = $("[data-campo=procedimento]", el);
+      opcoesProcedimento().forEach(([v, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.append(o); });
+      lista.append(el);
+      ajustarPaciente(el); renumerar(); atualizar();
+      return el;
+    };
+    $("#qt-add").addEventListener("click", () => { const el = adicionarPaciente(); $("select", el).focus(); });
+    lista.addEventListener("click", (e) => {
+      const rm = e.target.closest(".qt-remover"); if (!rm) return;
+      rm.closest(".qt-paciente").remove(); renumerar(); atualizar();
+      $("#qt-add").focus();
+    });
+    lista.addEventListener("change", (e) => { const p = e.target.closest(".qt-paciente"); if (p) ajustarPaciente(p); atualizar(); });
+    lista.addEventListener("input", (e) => { const p = e.target.closest(".qt-paciente"); if (p && e.target.dataset.campo === "implantes") ajustarPaciente(p); atualizar(); });
+    regiao.addEventListener("change", atualizar);
+
+    const pedido = () => ({
+      regiao: regiao.value,
+      pacientes: $$(".qt-paciente", lista).map((el) => {
+        const v = $("[data-campo=procedimento]", el).value, p = { procedimento: v };
+        if (usaImplantes(v)) {
+          p.implantes = $("[data-campo=implantes]", el).value;
+          if (temComp("transfer")) p.transfers = $("[data-campo=transfers]", el).value;
+          if (temComp("tibase")) p.tibases = $("[data-campo=tibases]", el).value;
+        }
+        return p;
+      }),
+    });
+
+    let ultimo = null;
+    function atualizar() {
+      if (!tabela) return;
       qErr.textContent = "";
+      const calc = CALC.calcular(tabela, pedido());
+      ultimo = calc;
+      const semRegiao = !regiao.value;
+      const errosReais = calc.erros.filter((m) => !(semRegiao && /região/.test(m)));
+      resumo.innerHTML = "";
+      const ul = document.createElement("ul"); ul.className = "qt-itens";
+      calc.itens.forEach((it) => {
+        const li = document.createElement("li");
+        if (it.tipo === "deslocamento") li.className = "qt-item--desloc";
+        const d = document.createElement("span"); d.className = "qt-item__desc";
+        d.textContent = (it.paciente ? "P" + it.paciente + " · " : "") + it.descricao + (it.qtd > 1 ? " × " + it.qtd : "");
+        const v = document.createElement("span"); v.className = "qt-item__valor";
+        v.textContent = it.total === null ? (it.tipo === "deslocamento" ? "sob consulta" : "sob avaliação") : it.total === 0 && it.tipo === "deslocamento" ? "grátis" : brl(it.total);
+        if (it.desconto > 0) { const s = document.createElement("s"); s.textContent = brl(it.preco_base * it.qtd); v.prepend(s, " "); }
+        li.append(d, v); ul.append(li);
+      });
+      if (calc.itens.length) resumo.append(ul);
+      if (errosReais.length) { const p = document.createElement("p"); p.className = "qt-resumo__erro"; p.textContent = errosReais[0]; resumo.append(p); }
+      const comDesconto = calc.itens.filter((i) => i.desconto > 0).length;
+      descontoEl.hidden = !comDesconto;
+      if (comDesconto) descontoEl.textContent = "Desconto clínica: " + calc.pacientes + " pacientes na mesma visita → " + brl(calc.faixa.preco) + " por escaneamento elegível.";
+      if (errosReais.length) totalEl.innerHTML = "<span>Total</span> <b>—</b>";
+      else if (semRegiao) totalEl.innerHTML = "<span>Subtotal</span> <b>" + brl(calc.subtotal) + "</b> <small>escolha a região para incluir o deslocamento</small>";
+      else if (calc.pendente) totalEl.innerHTML = "<span>Subtotal</span> <b>" + brl(calc.subtotal) + "</b> <small>total sob confirmação da GR Scan</small>";
+      else totalEl.innerHTML = "<span>Total</span> <b>" + brl(calc.total) + "</b>";
+    }
+
+    const textoWhatsApp = () => {
+      const c = ultimo, f = qForm.elements;
+      let t = "Olá! Orçamento de escaneamento intraoral GR Scan:\n\n";
+      c.itens.forEach((it) => {
+        t += "• " + (it.paciente ? "Paciente " + it.paciente + ": " : "") + it.descricao + (it.qtd > 1 ? " × " + it.qtd : "") + " — " +
+          (it.total === null ? "sob consulta" : it.total === 0 && it.tipo === "deslocamento" ? "grátis" : brl(it.total)) + "\n";
+      });
+      t += c.pendente || !regiao.value ? "\n*Subtotal: " + brl(c.subtotal) + "* (total sob confirmação)\n" : "\n*Total: " + brl(c.total) + "*\n";
+      if (f.dentes.value) t += "Dentes: " + f.dentes.value + "\n";
+      if (f.nome.value.trim()) t += "\nDentista: " + f.nome.value.trim() + (f.clinica.value.trim() ? " — " + f.clinica.value.trim() : "");
+      t += "\n\nValores sujeitos à confirmação da disponibilidade, da compatibilidade dos componentes e da viabilidade técnica.";
+      return t;
+    };
+    $("#qt-whatsapp").addEventListener("click", () => {
+      if (!ultimo || !ultimo.itens.length) return;
+      const url = CONFIG.whatsapp ? waLink(textoWhatsApp()) : "https://wa.me/?text=" + encodeURIComponent(textoWhatsApp());
+      window.open(url, "_blank", "noopener");
+    });
+
+    qForm.addEventListener("input", (e) => {
       const f = e.target.closest(".field"); if (f) f.classList.remove("is-invalid");
-      const c = e.target.closest(".chips"); if (c) c.classList.remove("is-invalid");
     });
     const qFail = (el, msg) => {
-      (el.closest(".field") || el).classList.add("is-invalid");
+      (el.closest(".field") || el.closest("label") || el).classList.add("is-invalid");
       qErr.textContent = msg;
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       if (el.focus) el.focus({ preventScroll: true });
@@ -531,52 +689,44 @@ document.documentElement.classList.remove("no-js");
     };
     const qValidate = () => {
       const f = qForm.elements;
-      if (!$$('input[name="trabalhos"]:checked', qForm).length) return qFail($("#qt-chips"), "Escolha ao menos um tipo de trabalho.");
+      if (!regiao.value) return qFail(regiao, "Escolha a região da clínica.");
+      const c = CALC.calcular(tabela, pedido());
+      if (c.erros.length) return qFail($("#qt-pacientes"), c.erros[0]);
       if (!f.nome.value.trim()) return qFail(f.nome, "Informe o nome do dentista responsável.");
       if (f.telefone.value.replace(/\D/g, "").length < 10) return qFail(f.telefone, "Informe um WhatsApp com DDD.");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim())) return qFail(f.email, "Informe um e-mail válido.");
+      if (!f.aceite_privacidade.checked) return qFail(f.aceite_privacidade, "Confirme o uso dos dados para responder ao orçamento.");
       return true;
     };
-    const qCollect = () => {
-      const d = {};
-      new FormData(qForm).forEach((v, k) => {
-        v = String(v).trim();
-        if (k === "trabalhos") (d[k] = d[k] || []).push(v); else d[k] = v;
-      });
-      return d;
-    };
-    const qWaText = (d) => "Olá! Gostaria de um orçamento de escaneamento intraoral com a GR Scan.\n\n" +
-      "*Trabalho:* " + (d.trabalhos || []).join(", ") + (d.outro_trabalho ? " (" + d.outro_trabalho + ")" : "") +
-      "\n*Arcadas:* " + d.arcadas + (d.dentes ? "\n*Dentes:* " + d.dentes : "") + "\n*Pacientes:* " + d.pacientes +
-      "\n*Prazo:* " + d.prazo + (d.local ? "\n*Local:* " + d.local : "") + (d.obs ? "\n*Obs.:* " + d.obs : "") +
-      "\n\n*Dentista:* " + d.nome + (d.clinica ? " — " + d.clinica : "") + "\n*Contato:* " + d.telefone + " · " + d.email;
 
+    let enviando = false;
     qForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (enviando || !tabela) return;
       qErr.textContent = "";
       if (!qValidate()) return;
-      const d = qCollect();
+      const f = qForm.elements;
+      const d = Object.assign(pedido(), {
+        dentes: f.dentes.value.trim(), elementos: f.elementos.value.trim(), data_desejada: f.data_desejada.value, obs: f.obs.value.trim(),
+        nome: f.nome.value.trim(), clinica: f.clinica.value.trim(), cro: f.cro.value.trim(), telefone: f.telefone.value.trim(),
+        email: f.email.value.trim(), preferencia: f.preferencia.value, aceite_privacidade: f.aceite_privacidade.checked, website: f.website.value,
+      });
       const btn = $("#qt-submit"), label = btn.textContent;
-      btn.disabled = true; btn.textContent = "Enviando…";
+      enviando = true; btn.disabled = true; btn.textContent = "Enviando…";
       let ok = false, j = {};
-      if (CONFIG.endpointOrcamento && location.protocol.startsWith("http")) {
-        try {
-          const r = await fetch(CONFIG.endpointOrcamento, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) });
-          j = await r.json().catch(() => ({})); ok = r.ok && j.ok;
-        } catch (_) { ok = false; }
-      }
-      btn.disabled = false; btn.textContent = label;
-      const done = () => { qForm.hidden = true; $("#qt-done").hidden = false; $(".bk-modal__box", qModal).scrollTop = 0; };
+      try {
+        const r = await fetch(CONFIG.endpointOrcamento, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) });
+        j = await r.json().catch(() => ({})); ok = r.ok && j.ok;
+      } catch (_) { ok = false; }
+      enviando = false; btn.disabled = false; btn.textContent = label;
       if (ok) {
-        $("#qt-done-text").textContent = "Recebemos sua solicitação e enviamos uma cópia para " + d.email + ". Vamos responder em breve por " + d.preferencia + ".";
-        return done();
+        $("#qt-numero").textContent = (j.numero ? "Orçamento " + j.numero + " · " : "") +
+          (j.pendente ? "subtotal " + brl(j.subtotal) + " (total sob confirmação)" : "total " + brl(j.total));
+        $("#qt-done-text").textContent = "Enviamos uma cópia para " + d.email + ". A GR Scan confirma disponibilidade e responde por " + d.preferencia + ".";
+        qForm.hidden = true; $("#qt-done").hidden = false; $(".bk-modal__box", qModal).scrollTop = 0;
+        return;
       }
-      if (CONFIG.whatsapp) {
-        window.open(waLink(qWaText(d)), "_blank", "noopener");
-        $("#qt-done-text").textContent = "Finalize o envio da mensagem no WhatsApp para concluir o pedido.";
-        return done();
-      }
-      qErr.textContent = j.message || "Não foi possível enviar agora. Tente novamente em instantes.";
+      qErr.textContent = j.message || "Não foi possível enviar agora. Tente novamente em instantes ou compartilhe pelo WhatsApp.";
     });
   }
 

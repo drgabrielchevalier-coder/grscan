@@ -44,12 +44,12 @@ function orcamento_calcular(array $cfg, array $pedido): array {
         if ($escolha === 'implante') {
             foreach ($procs as $x) {
                 $r = $x['implantes'] ?? null;
-                if (($x['grupo'] ?? '') === 'implante' && !empty($x['disponivel']) && $r
+                if (($x['grupo'] ?? '') === 'implante' && ($x['disponivel'] ?? true) !== false && $r
                     && $implantes >= $r['min'] && ($r['max'] === null || $implantes <= $r['max'])) { $proc = $x; break; }
             }
             $descricao = $proc ? $proc['nome'] : 'Implantes';
             $descricao .= ' · ' . $implantes . ($implantes === 1 ? ' implante' : ' implantes');
-        } elseif (isset($procs[$escolha]) && !empty($procs[$escolha]['disponivel'])) {
+        } elseif (isset($procs[$escolha]) && ($procs[$escolha]['disponivel'] ?? true) !== false) {
             $proc = $procs[$escolha];
             $descricao = $proc['nome'] . ($implantes !== null && $implantes > 1 ? ' · ' . $implantes . ' implantes' : '');
         } else {
@@ -76,7 +76,7 @@ function orcamento_calcular(array $cfg, array $pedido): array {
             if ($implantes === null) { $erros[] = "Paciente $num: transfers e TiBases só para implantes."; continue; }
             if ($q > $implantes) { $erros[] = "Paciente $num: no máximo $implantes $campo (um por implante)."; continue; }
             $c = $comps[$cid] ?? null;
-            if (!$c || empty($c['disponivel'])) { $erros[] = "Paciente $num: componente indisponível."; continue; }
+            if (!$c || ($c['disponivel'] ?? true) === false) { $erros[] = "Paciente $num: componente indisponível."; continue; }
             $sob = !empty($c['sob_avaliacao']) || $c['preco'] === null;
             $itens[] = ['paciente' => $num, 'tipo' => $cid, 'id' => $cid, 'descricao' => $c['nome'], 'qtd' => $q,
                         'unitario' => $sob ? null : (int)$c['preco'], 'total' => $sob ? null : $q * (int)$c['preco'],

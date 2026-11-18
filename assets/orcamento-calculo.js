@@ -40,10 +40,10 @@
       if (escolha === "implante") {
         for (const x of cfg.procedimentos || []) {
           const r = x.implantes;
-          if (x.grupo === "implante" && x.disponivel && r && implantes >= r.min && (r.max === null || implantes <= r.max)) { proc = x; break; }
+          if (x.grupo === "implante" && x.disponivel !== false && r && implantes >= r.min && (r.max === null || implantes <= r.max)) { proc = x; break; }
         }
         descricao = (proc ? proc.nome : "Implantes") + " · " + implantes + (implantes === 1 ? " implante" : " implantes");
-      } else if (procs[escolha] && procs[escolha].disponivel) {
+      } else if (procs[escolha] && procs[escolha].disponivel !== false) {
         proc = procs[escolha];
         descricao = proc.nome + (implantes !== null && implantes > 1 ? " · " + implantes + " implantes" : "");
       } else {
@@ -67,7 +67,7 @@
         if (implantes === null) { erros.push("Paciente " + num + ": transfers e TiBases só para implantes."); return; }
         if (q > implantes) { erros.push("Paciente " + num + ": no máximo " + implantes + " " + campo + " (um por implante)."); return; }
         const c = comps[cid];
-        if (!c || !c.disponivel) { erros.push("Paciente " + num + ": componente indisponível."); return; }
+        if (!c || c.disponivel === false) { erros.push("Paciente " + num + ": componente indisponível."); return; }
         const sob = !!c.sob_avaliacao || c.preco === null;
         itens.push({ paciente: num, tipo: cid, id: cid, descricao: c.nome, qtd: q, unitario: sob ? null : c.preco, total: sob ? null : q * c.preco, preco_base: sob ? null : c.preco, desconto: 0, sob_avaliacao: sob });
       });
