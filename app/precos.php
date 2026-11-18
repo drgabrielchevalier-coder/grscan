@@ -47,7 +47,7 @@ function precos_validar(array $c): array {
     $mins = [];
     foreach ($c['faixas_desconto'] as $f) {
         $min = $f['min'] ?? null;
-        if (!is_int($min) || $min < 1) $e[] = 'Faixa de desconto: quantidade mínima inválida.';
+        if (!is_int($min) || $min < 2) $e[] = 'Faixa de desconto: a partir de 2 pacientes (com 1 paciente vale o preço da tabela).';
         elseif (in_array($min, $mins, true)) $e[] = "Faixa de desconto repetida ($min pacientes).";
         $mins[] = $min;
         $preco($f['preco'] ?? null, 'Faixa de desconto', false);
@@ -75,4 +75,59 @@ function precos_salvar(array $cfg, ?int $adminId, string $nota): int {
     $st = db()->prepare('INSERT INTO precos_versoes (json, criado_em, admin_id, nota) VALUES (?, ?, ?, ?)');
     $st->execute([json_enc($cfg), agora(), $adminId, mb_substr($nota, 0, 300)]);
     return (int)db()->lastInsertId();
+}
+
+/* "1.234,56", "180", "R$ 90,00" → centavos; vazio → null; inválido → false */
+function dinheiro_para_centavos(string $txt) {
+    $t = trim(str_replace(['R$', ' ', "\u{a0}"], '', $txt));
+    if ($t === '') return null;
+    if (!preg_match('/^(\d{1,3}(\.\d{3})+|\d+)(,\d{1,2})?$/', $t)) return false;
+    [$int, $dec] = array_pad(explode(',', $t), 2, '');
+    $c = (int)str_replace('.', '', $int) * 100 + (int)str_pad($dec, 2, '0');
+    return $c <= 100000000 ? $c : false;
+}
+
+/* Identificador a partir do nome, sem repetir os existentes */
+function id_de_nome(string $nome, array $existentes): string {
+    $base = strtolower(trim(preg_replace('/[^a-z0-9]+/i', '_', iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $nome) ?: ''), '_'));
+    $base = substr($base !== '' ? $base : 'item', 0, 36);
+    $id = $base; $n = 2;
+    while (in_array($id, $existentes, true)) $id = $base . '_' . $n++;
+    return $id;
+}
+
+/* Lista legível do que mudou entre duas versões da tabela */
+function precos_diferencas(array $a, array $b): array {
+    $brl = fn($c) => $c === null ? 'sob consulta' : 'R$ ' . number_format($c / 100, 2, ',', '.');
+    $sn = fn($v) => $v ? 'sim' : 'não';
+    $out = [];
+    $campos = ['nome' => ['nome', fn($v) => (string)$v], 'preco' => ['preço', $brl], 'disponivel' => ['disponível', $sn],
+               'sob_avaliacao' => ['sob avaliação', $sn], 'desconto_volume' => ['desconto por volume', $sn],
+               'taxa' => ['taxa', $brl], 'sob_consulta' => ['sob consulta', $sn]];
+    foreach (['procedimentos' => 'Procedimento', 'componentes' => 'Componente', 'regioes' => 'Região'] as $sec => $rotulo) {
+        $va = array_column($a[$sec] ?? [], null, 'id'); $vb = array_column($b[$sec] ?? [], null, 'id');
+        foreach ($vb as $id => $x) {
+            if (!isset($va[$id])) {
+                $valor = $sec === 'regioes' ? ($x['taxa'] ?? null) : ($x['preco'] ?? null);
+                $out[] = ($sec === 'regioes' ? 'Região incluída' : "$rotulo incluído") . ': ' . $x['nome'] . ' (' . $brl($valor) . ')';
+                continue;
+            }
+            foreach ($campos as $k => [$nomeCampo, $fmt]) {
+                if (!array_key_exists($k, $x) && !array_key_exists($k, $va[$id])) continue;
+                $de = $va[$id][$k] ?? null; $para = $x[$k] ?? null;
+                if (in_array($k, ['disponivel', 'sob_avaliacao', 'desconto_volume', 'sob_consulta'], true)) { $de = !empty($de); $para = !empty($para); }
+                if ($de !== $para) $out[] = $va[$id]['nome'] . " · $nomeCampo: " . $fmt($de) . ' → ' . $fmt($para);
+            }
+            if (($va[$id]['implantes'] ?? null) != ($x['implantes'] ?? null)) $out[] = $x['nome'] . ' · faixa de implantes alterada';
+        }
+        foreach ($va as $id => $x) if (!isset($vb[$id])) $out[] = ($sec === 'regioes' ? 'Região removida' : "$rotulo removido") . ': ' . $x['nome'];
+    }
+    $fa = array_column($a['faixas_desconto'] ?? [], 'preco', 'min'); $fb = array_column($b['faixas_desconto'] ?? [], 'preco', 'min');
+    foreach ($fb as $min => $p) {
+        if (!isset($fa[$min])) $out[] = "Faixa incluída: a partir de $min pacientes (" . $brl($p) . ')';
+        elseif ($fa[$min] !== $p) $out[] = "Faixa a partir de $min pacientes · preço: " . $brl($fa[$min]) . ' → ' . $brl($p);
+    }
+    foreach ($fa as $min => $p) if (!isset($fb[$min])) $out[] = "Faixa removida: a partir de $min pacientes";
+    if (($a['limite_pacientes'] ?? null) !== ($b['limite_pacientes'] ?? null)) $out[] = 'Limite de pacientes: ' . ($a['limite_pacientes'] ?? '—') . ' → ' . ($b['limite_pacientes'] ?? '—');
+    return $out;
 }

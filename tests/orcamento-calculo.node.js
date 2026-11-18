@@ -13,6 +13,7 @@ const igual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 for (const c of casos) {
   const cfg = JSON.parse(JSON.stringify(padrao));
   if (c.publico) ["procedimentos", "componentes"].forEach((g) => cfg[g].forEach((x) => { delete x.disponivel; }));
+  Object.entries(c.ajuste_preco || {}).forEach(([id, v]) => cfg.procedimentos.forEach((x) => { if (x.id === id) x.preco = v; }));
   if (c.indisponivel) cfg.procedimentos.forEach((p) => { if (p.id === c.indisponivel) p.disponivel = false; });
   const pedido = JSON.parse(JSON.stringify(c.pedido));
   const m = typeof pedido.pacientes === "string" && pedido.pacientes.match(/^(\d+)x (\w+)$/);

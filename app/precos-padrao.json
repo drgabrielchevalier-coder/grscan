@@ -30,7 +30,6 @@
     {"id": "outras", "nome": "Outras localidades", "taxa": null, "sob_consulta": true}
   ],
   "faixas_desconto": [
-    {"min": 1, "preco": 18000},
     {"min": 2, "preco": 17000},
     {"min": 5, "preco": 16000}
   ],

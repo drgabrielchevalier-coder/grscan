@@ -568,7 +568,7 @@ document.documentElement.classList.remove("no-js");
         const qtd = !prox ? f.min + " ou mais pacientes" : prox.min - 1 > f.min ? f.min + " a " + (prox.min - 1) + " pacientes" : f.min + (f.min > 1 ? " pacientes" : " paciente");
         return qtd + ": " + brl(f.preco);
       });
-      $("#qt-faixas").textContent = faixas.length > 1 ? "Valor clínica por escaneamento convencional, conforme o total de pacientes da visita: " + txt.join(" · ") + "." : "";
+      $("#qt-faixas").textContent = faixas.length ? "Valor clínica por escaneamento convencional, conforme o total de pacientes da visita: 1 paciente: preço da tabela · " + txt.join(" · ") + "." : "";
       lista.innerHTML = "";
       adicionarPaciente();
     };

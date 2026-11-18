@@ -77,8 +77,38 @@ function totp(segredo, t = Date.now() / 1000) {
     await p.waitForURL(/admin\/(index\.php)?$/);
     ok("login: senha + código entram no painel", (await p.textContent("h1")).includes("Painel"));
 
-    // (as tarefas seguintes acrescentam testes aqui, com a sessão aberta)
-    if (global.testesComSessao) await global.testesComSessao({ p, ctx, BASE, ok, totp, segredo, EMAIL, SENHA });
+    // ---------- Preços (Tarefa 6) ----------
+    const precoPublico = async (id) => (await (await p.request.get(BASE + "/precos-publicos.php")).json()).procedimentos.find((x) => x.id === id);
+    await p.click("nav >> text=Preços"); await p.waitForURL(/precos\.php/);
+    await p.fill('[name="proc[orto][preco]"]', "185,00");
+    await p.fill('[name="nota"]', "Reajuste de teste");
+    await p.click("button[type=submit] >> text=Salvar");
+    ok("preços: salvar mostra confirmação", (await p.textContent(".aviso--ok")).includes("versão"));
+    ok("preços: público passa a usar o valor novo", (await precoPublico("orto")).preco === 18500);
+    const pub = await ctx.newPage();
+    await pub.goto(BASE + "/#orcamento"); await pub.waitForSelector("#qt-conteudo:not([hidden])");
+    await pub.selectOption("#qt-regiao", "barra"); await pub.selectOption(".qt-paciente [data-campo=procedimento]", "orto");
+    ok("preços: orçamento público mostra R$ 185,00", (await pub.textContent("#qt-total")).includes("R$ 185,00"), await pub.textContent("#qt-total"));
+    await p.click("nav >> text=Histórico"); await p.waitForURL(/historico\.php/);
+    const hist = await p.textContent("main");
+    ok("histórico: mostra a mudança, a nota e o administrador", hist.includes("Ortodontia / alinhadores · preço: R$ 180,00 → R$ 185,00") && hist.includes("Reajuste de teste") && hist.includes("Admin Teste"), hist.slice(0, 400));
+    await p.click("nav >> text=Preços");
+    await p.fill('[name="proc[orto][preco]"]', "-5");
+    await p.click("button[type=submit] >> text=Salvar");
+    ok("preços: valor negativo é recusado", (await p.isVisible(".aviso--erro")) && (await precoPublico("orto")).preco === 18500);
+    await p.goto(BASE + "/admin/precos.php");
+    await p.uncheck('[name="comp[tibase][disponivel]"]');
+    await p.fill('[name="novo_comp[nome]"]', "Pilar personalizado"); await p.check('[name="novo_comp[sob_avaliacao]"]');
+    await p.click("button[type=submit] >> text=Salvar");
+    const comps = (await (await p.request.get(BASE + "/precos-publicos.php")).json()).componentes;
+    ok("preços: TiBase indisponível some do público e componente especial entra", !comps.some((c) => c.id === "tibase") && comps.some((c) => c.nome === "Pilar personalizado" && c.sob_avaliacao), JSON.stringify(comps));
+    await pub.reload(); await pub.waitForSelector("#qt-conteudo:not([hidden])");
+    await pub.selectOption(".qt-paciente [data-campo=procedimento]", "implante");
+    ok("preços: campo de TiBase some do orçamento público", !(await pub.isVisible("[data-campo=tibases]")) && (await pub.isVisible("[data-campo=transfers]")));
+    await pub.close();
+    await p.goto(BASE + "/admin/precos.php");
+    await p.check('[name="comp[tibase][disponivel]"]'); await p.click("button[type=submit] >> text=Salvar");
+
 
     // ---------- Bloqueio (por último: bloqueia este e-mail por 15 min) ----------
     await p.click("button.sair"); await p.waitForURL(/entrar\.php/);

@@ -57,5 +57,9 @@
   {"nome": "Tabela no formato público (sem o campo disponivel)",
    "publico": true,
    "pedido": {"regiao": "niteroi", "pacientes": [{"procedimento": "implante", "implantes": 1, "transfers": 1, "tibases": 1}, {"procedimento": "orto"}]},
-   "esperado": {"erro": false, "totais": [19000, 2500, 8000, 17000, 9000], "subtotal": 55500, "total": 55500, "pendente": false}}
+   "esperado": {"erro": false, "totais": [19000, 2500, 8000, 17000, 9000], "subtotal": 55500, "total": 55500, "pendente": false}},
+  {"nome": "Preço da tabela acima da faixa: 1 paciente paga o preço da tabela, 2 pacientes o da faixa",
+   "pedido": {"regiao": "barra", "pacientes": [{"procedimento": "orto"}]},
+   "ajuste_preco": {"orto": 18500},
+   "esperado": {"erro": false, "totais": [18500, 0], "subtotal": 18500, "total": 18500, "pendente": false}}
 ]

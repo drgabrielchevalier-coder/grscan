@@ -73,7 +73,9 @@ public_html/
 - Cada paciente é calculado individualmente.
 - Desconto por volume: só nos procedimentos marcados como elegíveis (hoje, os de R$ 180,00); a faixa
   é escolhida pelo **total de pacientes da visita** (1 = R$ 180; 2 a 4 = R$ 170; 5 ou mais = R$ 160).
-  Faixas e elegibilidade são editáveis no painel.
+  Faixas e elegibilidade são editáveis no painel. Com 1 paciente vale sempre o preço da tabela (assim um
+  reajuste do preço-base não fica preso ao valor da faixa); as faixas começam em 2 pacientes e nunca
+  cobram mais que o preço da tabela.
 - Implantes, arcada edêntula, reescaneamento e componentes nunca recebem desconto automático.
 - Deslocamento: uma taxa por visita, pela região.
 - Total = escaneamentos + transfers + TiBases + deslocamento.
