@@ -5,6 +5,9 @@ const { chromium } = require("playwright");
 const BASE = process.argv[2] || "http://127.0.0.1:8090";
 const OUT = process.argv[3];
 const results = [];
+// Versão e data do deploy lidas do próprio index.html (os testes não mudam a cada versão)
+const META = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8").match(/<meta name="grscan-versao" content="([^"]*)" data-data="(\d{4})-(\d{2})-(\d{2})"/) || [];
+const VERSAO = META[1], DATA_BR = META[4] + "/" + META[3] + "/" + META[2];
 const ok = (name, cond, info = "") => results.push({ name, pass: !!cond, info: String(info).slice(0, 300) });
 
 async function newPage(b, vp, opts = {}) {
@@ -84,22 +87,122 @@ const nextWeekday = () => { for (let i = 1; i < 10; i++) { const d = new Date();
   ok("Esc fecha o modal de agendamento", !(await p.evaluate(() => document.getElementById("bk-modal").open)));
 
   // ---------- Modal de orçamento + odontograma ----------
-  await p.locator("[data-open-quote]:visible").first().click(); await p.waitForTimeout(400);
-  ok("botão de orçamento abre o modal", await p.evaluate(() => document.getElementById("qt-modal").open));
-  await p.click("#qt-submit"); await p.waitForTimeout(200);
-  ok("validação do orçamento", (await p.textContent("#qt-error")).length > 0);
-  await pick(p, '#qt input[name="trabalhos"][value="Outro"]');
-  ok("'Outro' mostra campo de descrição", await p.isVisible("#qt-outro"));
-  await pick(p, '#qt input[name="trabalhos"][value="Prótese sobre implante"]');
+  await p.context().close();
+  const abrirOrc = async (pg) => { await pg.goto(BASE + "/#orcamento", { waitUntil: "load" }); await pg.waitForSelector("#qt-conteudo:not([hidden])", { timeout: 8000 }); };
+  const totalOrc = (pg) => pg.textContent("#qt-total");
+  p = await newPage(b, { width: 1280, height: 800 });
+  await p.route("**/orcamento.php", async (r) => { p.payloads.orcamento = JSON.parse(r.request().postData() || "{}"); await r.fulfill({ json: { ok: true, numero: "GRS-2026-00042", total: 39999, subtotal: 39999, pendente: false } }); });
+  await abrirOrc(p);
+  ok("botão de orçamento abre o modal com a tabela", await p.evaluate(() => document.getElementById("qt-modal").open));
+  await p.selectOption("#qt-regiao", "niteroi");
+  await p.selectOption(".qt-paciente [data-campo=procedimento]", "implante");
+  await p.fill(".qt-paciente [data-campo=transfers]", "1"); await p.fill(".qt-paciente [data-campo=tibases]", "1");
+  ok("orçamento: exemplo Niterói = R$ 385,00", (await totalOrc(p)).includes("R$ 385,00"), await totalOrc(p));
+  await p.selectOption(".qt-paciente [data-campo=procedimento]", "orto");
+  ok("orçamento: trocar implante por orto zera componentes", (await p.inputValue(".qt-paciente [data-campo=transfers]")) === "0" && (await totalOrc(p)).includes("R$ 270,00"), await totalOrc(p));
+  await p.selectOption(".qt-paciente [data-campo=procedimento]", "implante");
+  await p.fill(".qt-paciente [data-campo=transfers]", "1"); await p.fill(".qt-paciente [data-campo=tibases]", "1");
   await p.click('.tooth[data-t="36"]'); await p.click('.tooth[data-t="11"]');
-  ok("odontograma preenche dentes", (await p.inputValue('#qt [name="dentes"]')) === "11, 36" || (await p.inputValue('#qt [name="dentes"]')) === "36, 11", await p.inputValue('#qt [name="dentes"]'));
+  ok("odontograma preenche dentes", ["11, 36", "36, 11"].includes(await p.inputValue('#qt [name="dentes"]')), await p.inputValue('#qt [name="dentes"]'));
   ok("odontograma conta elementos", (await p.inputValue('#qt [name="elementos"]')) === "2");
   ok("odontograma aria-pressed", (await p.getAttribute('.tooth[data-t="36"]', "aria-pressed")) === "true");
+  await p.click("#qt-submit"); await p.waitForTimeout(200);
+  ok("validação do orçamento", (await p.textContent("#qt-error")).length > 0);
   await p.fill('#qt [name="nome"]', "Dr. Teste"); await p.fill('#qt [name="telefone"]', "21999990000"); await p.fill('#qt [name="email"]', "t@exemplo.org");
+  await p.click("#qt-submit"); await p.waitForTimeout(200);
+  ok("orçamento: exige aceite de privacidade", (await p.textContent("#qt-error")).includes("dados") && !p.payloads.orcamento);
+  await p.check('#qt [name="aceite_privacidade"]');
+  await p.context().route("https://wa.me/**", (r) => r.fulfill({ body: "ok", contentType: "text/plain" }));
+  const [popup] = await Promise.all([p.waitForEvent("popup"), p.click("#qt-whatsapp")]);
+  const waUrl = decodeURIComponent(popup.url()); await popup.close();
+  ok("orçamento: WhatsApp leva o orçamento", waUrl.includes("wa.me") && waUrl.includes("R$ 385,00"), waUrl.slice(0, 160));
   await p.click("#qt-submit"); await p.waitForTimeout(600);
-  ok("orçamento: envio ao orcamento.php", p.payloads.orcamento, JSON.stringify(p.payloads.orcamento));
-  ok("orçamento: campos esperados", p.payloads.orcamento && ["trabalhos","outro_trabalho","arcadas","pacientes","prazo","dentes","elementos","frequencia","laboratorio","formato","local","obs","nome","clinica","cro","telefone","email","preferencia","website"].every((k) => k in p.payloads.orcamento), Object.keys(p.payloads.orcamento || {}).join(","));
-  ok("orçamento: confirmação", await p.isVisible("#qt-done"));
+  const po = p.payloads.orcamento || {};
+  ok("orçamento: envio ao orcamento.php com o pedido", po.regiao === "niteroi" && Array.isArray(po.pacientes) && po.pacientes[0].procedimento === "implante" && po.aceite_privacidade === true, JSON.stringify(po).slice(0, 200));
+  ok("orçamento: dados de contato e dentes no envio", ["dentes", "elementos", "data_desejada", "obs", "nome", "clinica", "cro", "telefone", "email", "preferencia", "website"].every((k) => k in po), Object.keys(po).join(","));
+  ok("orçamento: confirmação mostra número e total do servidor", (await p.isVisible("#qt-done")) && (await p.textContent("#qt-numero")).includes("GRS-2026-00042") && (await p.textContent("#qt-numero")).includes("R$ 399,99"), await p.textContent("#qt-numero"));
+  await p.context().close();
+
+  p = await newPage(b, { width: 1280, height: 800 });
+  await abrirOrc(p);
+  await p.selectOption("#qt-regiao", "zona_sul");
+  await p.selectOption(".qt-paciente [data-campo=procedimento]", "orto");
+  await p.click("#qt-add"); await p.click("#qt-add");
+  await p.selectOption(".qt-paciente:nth-child(2) [data-campo=procedimento]", "facetas");
+  await p.selectOption(".qt-paciente:nth-child(3) [data-campo=procedimento]", "implante");
+  ok("orçamento: 3 pacientes com desconto só nos elegíveis", (await totalOrc(p)).includes("R$ 580,00") && (await p.textContent("#qt-desconto")).includes("R$ 170,00"), await totalOrc(p));
+  await p.click(".qt-paciente:nth-child(3) .qt-remover");
+  ok("orçamento: remover paciente recalcula", (await p.locator(".qt-paciente").count()) === 2 && (await totalOrc(p)).includes("R$ 390,00"), await totalOrc(p));
+  await p.selectOption("#qt-regiao", "outras");
+  ok("orçamento: outras localidades = sob confirmação", (await totalOrc(p)).includes("sob confirmação"), await totalOrc(p));
+  ok("orçamento: sem erros de JS", p.errors.length === 0, p.errors.join(" | "));
+  await p.context().close();
+
+  // ---------- Oferta de deslocamento grátis ----------
+  const comOferta = (pg, fimMs, agoraMs) => pg.route("**/precos-publicos.php*", async (r) => {
+    const res = await r.fetch(); const j = await res.json();
+    j.agora = new Date(agoraMs).toISOString(); j.promocao_deslocamento = { fim: new Date(fimMs).toISOString() };
+    await r.fulfill({ json: j });
+  });
+  const montarNiteroi = async (pg) => {
+    await pg.selectOption("#qt-regiao", "niteroi"); await pg.selectOption(".qt-paciente [data-campo=procedimento]", "implante");
+    await pg.fill(".qt-paciente [data-campo=transfers]", "1"); await pg.fill(".qt-paciente [data-campo=tibases]", "1");
+  };
+  p = await newPage(b, { width: 1280, height: 800 });
+  await comOferta(p, Date.now() + 4 * 3600e3, Date.now());
+  await abrirOrc(p); await montarNiteroi(p);
+  ok("oferta: faixa com contagem regressiva", (await p.isVisible("#qt-oferta")) && /0[34]:\d\d:\d\d/.test(await p.textContent("#qt-oferta-tempo")), await p.textContent("#qt-oferta"));
+  ok("oferta: taxa riscada e GRÁTIS no resumo", (await p.textContent(".qt-item--desloc s")).includes("R$ 90,00") && (await p.textContent(".qt-item--desloc")).includes("GRÁTIS"));
+  ok("oferta: total sem deslocamento (R$ 295,00)", (await totalOrc(p)).includes("R$ 295,00"), await totalOrc(p));
+  ok("oferta: região marcada como grátis (oferta)", (await p.textContent('#qt-regiao option[value="niteroi"]')).includes("grátis (oferta)"));
+  await p.context().route("https://wa.me/**", (r) => r.fulfill({ body: "ok", contentType: "text/plain" }));
+  const [pop2] = await Promise.all([p.waitForEvent("popup"), p.click("#qt-whatsapp")]);
+  const wa2 = decodeURIComponent(pop2.url()); await pop2.close();
+  ok("oferta: WhatsApp informa a oferta", wa2.includes("grátis (oferta, de R$ 90,00)"), wa2.slice(0, 300));
+  {
+    const fs2 = require("fs"), path2 = require("path");
+    const axePath = process.env.AXE_PATH;
+    if (axePath && fs2.existsSync(axePath)) {
+      await p.addScriptTag({ content: fs2.readFileSync(axePath, "utf8") });
+      const v = await p.evaluate(async () => (await axe.run(document.getElementById("qt-modal"))).violations.map((x) => x.id));
+      ok("oferta: axe-core sem violações no modal", v.length === 0, v.join(","));
+    }
+  }
+  ok("oferta: sem erros de JS", p.errors.length === 0, p.errors.join(" | "));
+  await p.context().close();
+
+  p = await newPage(b, { width: 1280, height: 800 });
+  await comOferta(p, Date.now() + 3000, Date.now());
+  await abrirOrc(p); await montarNiteroi(p);
+  const antes = await totalOrc(p);
+  await p.waitForTimeout(4500);
+  ok("oferta: ao terminar, a faixa some e a taxa volta", antes.includes("R$ 295,00") && !(await p.isVisible("#qt-oferta")) && (await totalOrc(p)).includes("R$ 385,00"), antes + " → " + (await totalOrc(p)));
+  await p.context().close();
+
+  p = await newPage(b, { width: 1280, height: 800 });
+  const servidor = Date.now() - 2 * 3600e3; // relógio do aparelho 2 h adiantado em relação ao servidor
+  await comOferta(p, servidor + 4 * 3600e3, servidor);
+  await abrirOrc(p); await montarNiteroi(p);
+  ok("oferta: contagem usa a hora do servidor (relógio do aparelho errado)", /^0(3:5\d|4:00)/.test(await p.textContent("#qt-oferta-tempo")) && (await totalOrc(p)).includes("R$ 295,00"), await p.textContent("#qt-oferta-tempo"));
+  await p.context().close();
+
+  p = await newPage(b, { width: 320, height: 640 }, { mobile: true });
+  await comOferta(p, Date.now() + 4 * 3600e3, Date.now());
+  await abrirOrc(p); await montarNiteroi(p);
+  ok("oferta 320px: sem rolagem horizontal e faixa visível", (await p.isVisible("#qt-oferta")) && await p.evaluate(() => { const bx = document.querySelector("#qt-modal .bk-modal__box"); return bx.scrollWidth <= bx.clientWidth + 1; }));
+  await p.context().close();
+
+  p = await newPage(b, { width: 1280, height: 800 });
+  await p.route("**/precos-publicos.php*", (r) => r.fulfill({ status: 500, body: "" }));
+  await p.goto(BASE + "/#orcamento", { waitUntil: "load" }); await p.waitForSelector("#qt-falha:not([hidden])", { timeout: 8000 });
+  ok("orçamento: falha na tabela mostra aviso sem valores", (await p.isVisible("#qt-falha")) && !(await p.isVisible("#qt-conteudo")) && !(await p.textContent("#qt-falha")).includes("R$"));
+  await p.context().close();
+
+  p = await newPage(b, { width: 320, height: 640 }, { mobile: true });
+  await abrirOrc(p);
+  await p.selectOption("#qt-regiao", "barra");
+  ok("orçamento 320px: sem rolagem horizontal no modal", await p.evaluate(() => { const bx = document.querySelector("#qt-modal .bk-modal__box"); return bx.scrollWidth <= bx.clientWidth + 1; }));
+  ok("orçamento 320px: total visível", await p.isVisible("#qt-total") && (await totalOrc(p)).includes("R$ 180,00"), await totalOrc(p));
   await p.context().close();
 
   // ---------- Links diretos ----------
@@ -157,7 +260,7 @@ const nextWeekday = () => { for (let i = 1; i < 10; i++) { const d = new Date();
     ok("versão: sem ?versao não há barra", (await p.locator("#versao-barra").count()) === 0);
     await abre(p, "/?versao");
     let r = await barra(p);
-    ok("versão: com ?versao mostra 2.0 ok", r && r.estado === "ok" && r.texto.includes("Versão 2.0") && r.texto.includes("10/11/2026") && r.role === "status", JSON.stringify(r));
+    ok("versão: com ?versao mostra a versão atual ok", r && r.estado === "ok" && r.texto.includes("Versão " + VERSAO) && r.texto.includes(DATA_BR) && r.role === "status", JSON.stringify(r));
     await abre(p, "/?versao=1&x=y");
     ok("versão: ?versao=1&x=y também abre", (await p.locator("#versao-barra").count()) === 1);
     ok("versão: barra sem erros de JS", p.errors.length === 0, p.errors.join(" | "));
@@ -171,7 +274,7 @@ const nextWeekday = () => { for (let i = 1; i < 10; i++) { const d = new Date();
     await p.context().close();
 
     p = await newPage(b, { width: 1280, height: 800 });
-    await trocaCss(p, " '2.0' ");
+    await trocaCss(p, " '" + VERSAO + "' ");
     await abre(p, "/?versao");
     r = await barra(p);
     ok("versão: aspas e espaços normalizados", r && r.estado === "ok", JSON.stringify(r));

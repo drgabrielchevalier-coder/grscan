@@ -9,6 +9,10 @@
 <FilesMatch "\.(md|log|sh|lock)$">
   Require all denied
 </FilesMatch>
+# Banco de dados e cópias de segurança nunca são servidos (o banco fica fora do public_html)
+<FilesMatch "\.(sqlite|sqlite3|db|bak|sql)$">
+  Require all denied
+</FilesMatch>
 
 # Tipos de arquivo dos modelos 3D e do mapa
 AddType model/gltf-binary .glb

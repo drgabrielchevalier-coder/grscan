@@ -9,7 +9,7 @@
 
 @layer tokens {
   :root {
-    --grscan-versao: "2.0"; /* versão do deploy: não editar à mão (ver CLAUDE.md) */
+    --grscan-versao: "2.1"; /* versão do deploy: não editar à mão (ver CLAUDE.md) */
     --bg: #0a0907;
     --bg-2: #0f0d0a;
     --panel: #15130f;
@@ -527,6 +527,48 @@
 
   /* Odontograma */
   .bk__step legend .opt { font-style: normal; font-weight: 400; font-size: .85rem; color: var(--text-soft); }
+
+  /* Orçamento automático */
+  .qt-status { color: var(--text-soft); margin: 0 0 1rem; }
+  .qt-falha { padding: 20px 22px; border: 1px solid var(--danger); border-radius: var(--r-sm); }
+  .qt-falha p { margin: 0 0 14px; }
+  .qt-falha__acoes { display: flex; flex-wrap: wrap; gap: 10px; }
+  .qt-regiao { max-width: 420px; }
+  .qt-pacientes { display: flex; flex-direction: column; gap: 14px; margin-bottom: 14px; }
+  .qt-paciente { padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--bg-2); }
+  .qt-paciente__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .qt-paciente__n { font-weight: 600; color: var(--gold-1); }
+  .qt-remover { background: none; border: 0; color: var(--text-soft); text-decoration: underline; cursor: pointer; font: inherit; font-size: var(--fs-sm); min-height: 44px; padding: 0 4px; }
+  .qt-remover:hover { color: var(--danger); }
+  .qt-paciente__campos { display: grid; grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .qt-add { margin-bottom: 10px; }
+  .qt-faixas { margin: 0; font-size: var(--fs-sm); color: var(--text-soft); }
+  .qt-itens { list-style: none; margin: 0; padding: 0; }
+  .qt-itens li { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line-soft); font-size: var(--fs-sm); }
+  .qt-item__desc { min-width: 0; }
+  .qt-item__valor { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .qt-item__valor s { color: var(--text-soft); font-size: .85em; }
+  .qt-resumo__erro { color: var(--danger); font-size: var(--fs-sm); margin: 10px 0 0; }
+  .qt-desconto { margin: 12px 0 0; color: var(--gold-1); font-size: var(--fs-sm); }
+  .qt-aviso { margin: 12px 0 0; font-size: var(--fs-xs); color: var(--text-soft); }
+  .qt-aceite { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; font-size: var(--fs-sm); color: var(--text); cursor: pointer; }
+  .qt-aceite input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--gold-2); flex: 0 0 auto; }
+  .qt-aceite.is-invalid span { color: var(--danger); }
+  .qt-barra { position: sticky; bottom: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 -32px -32px; padding: 16px 32px 18px; background: var(--panel); border-top: 1px solid var(--line); }
+  .qt-total { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 4px 10px; }
+  .qt-total span { color: var(--text-soft); font-size: var(--fs-sm); }
+  .qt-total b { font-size: var(--fs-xl); color: var(--gold-1); font-variant-numeric: tabular-nums; }
+  .qt-total small { flex-basis: 100%; text-align: center; color: var(--text-soft); font-size: var(--fs-xs); }
+  .qt-barra__acoes { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .qt-numero { font-weight: 600; color: var(--gold-1); margin: 0 0 6px; }
+  .qt-oferta { display: flex; align-items: center; gap: 12px; margin: 0 0 24px; padding: 14px 18px; border-radius: var(--r-sm); background: var(--gold-grad); color: #1a1206; animation: ofertaIn .6s var(--ease) both; }
+  .qt-oferta svg { flex: 0 0 auto; width: 26px; height: 26px; fill: #1a1206; }
+  .qt-oferta p { margin: 0; font-size: var(--fs-md); line-height: 1.4; }
+  .qt-oferta__prazo { white-space: nowrap; }
+  #qt-oferta-tempo { font-variant-numeric: tabular-nums; }
+  .qt-gratis { color: var(--gold-1); font-weight: 700; letter-spacing: .02em; }
+  .qt-item--desloc s { color: var(--text-soft); text-decoration-color: var(--danger); text-decoration-thickness: 2px; }
+  @keyframes ofertaIn { from { opacity: 0; transform: translateY(-6px); } }
   .odonto { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: .2rem 0 1.2rem; padding: 14px 10px; border-radius: var(--r-sm); background: rgba(0, 0, 0, .25); border: 1px solid var(--line-soft); overflow-x: auto; }
   .odonto__lbl { font-size: .75rem; color: var(--text-soft); }
   .odonto__row { display: flex; align-items: center; gap: 4px; }
@@ -599,6 +641,12 @@
   }
   @media (max-width: 640px) {
     .launchers { grid-template-columns: minmax(0, 1fr); }
+    .qt-paciente__campos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .qt-proc { grid-column: 1 / -1; }
+    .qt-barra { margin: 0 -18px -26px; padding: 12px 18px 14px; }
+    .qt-barra__acoes { width: 100%; flex-wrap: nowrap; }
+    .qt-barra__acoes .btn { flex: 1 1 0; min-width: 0; padding-left: 12px; padding-right: 12px; font-size: .85rem; line-height: 1.25; }
+    .qt-barra .bk__privacy { display: none; }
   }
   @media (max-width: 560px) {
     .hero { padding-top: calc(var(--header-h) + 28px); }

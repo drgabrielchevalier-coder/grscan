@@ -1,5 +1,34 @@
 # Registro de alterações — GR Scan
 
+## 2.1 — 18/11/2026 — Orçamento automático e painel
+Etapa A do sistema de orçamentos e gestão (desenho em `docs/superpowers/specs/2026-11-18-orcamento-e-gestao-design.md`).
+
+### Orçamento automático (site)
+- "Solicitar orçamento" passa a montar o orçamento com preços: região, pacientes, procedimento de cada
+  um, implantes, transfers digitais e TiBases (sempre opcionais), desconto por volume, deslocamento uma
+  vez por visita e total recalculado na hora. Itens sob avaliação mostram subtotal e aviso de confirmação.
+- Envio para a GR Scan com número do orçamento (GRS-AAAA-NNNNN) e e-mail com o detalhamento;
+  compartilhamento pelo WhatsApp. O odontograma e os dados de contato continuam no formulário.
+- O servidor recalcula tudo com a tabela vigente e guarda a cópia da tabela aplicada em cada orçamento.
+- Preços vêm de `precos-publicos.php`, que devolve só campos comerciais.
+
+- Oferta "Deslocamento grátis" com prazo real: aberta e encerrada pelo painel (1 a 24 h ou até data/hora);
+  no orçamento, faixa dourada com contagem regressiva pela hora do servidor e a taxa riscada com "GRÁTIS".
+  O servidor aplica a oferta de verdade e registra no orçamento; ao terminar, tudo volta ao normal sozinho.
+
+### Painel administrativo (`/admin/`)
+- Login com senha e código do aplicativo autenticador (obrigatório), bloqueio após tentativas erradas,
+  proteção CSRF, sessão com expiração por inatividade e código de uso único.
+- Editor de preços com versões e histórico (quem, quando, o que mudou); vale na hora no site.
+- Lista e detalhe dos orçamentos recebidos; cadastro de administradores; registro de auditoria.
+- Dados em SQLite fora do `public_html` (`grscan-dados/`); `app/`, testes e bancos bloqueados na web.
+
+### Mudanças de comportamento
+- O formulário antigo de orçamento (tipos de trabalho em chips, arcadas, prazo, frequência,
+  laboratório, formato) foi substituído; laboratório e formato podem ir nas observações.
+- A planilha `orcamentos-grscan.csv` deixa de ser gravada: os orçamentos ficam no banco.
+
+
 ## 2.0 — 10/11/2026 — Linha de Precisão
 Etapa 3, primeira entrega: estrutura, navegação, hierarquia, tipografia e organização das seções
 na direção "Linha de Precisão". Animações 3D avançadas ficam para a próxima etapa.
