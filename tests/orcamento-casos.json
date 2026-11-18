@@ -61,5 +61,21 @@
   {"nome": "Preço da tabela acima da faixa: 1 paciente paga o preço da tabela, 2 pacientes o da faixa",
    "pedido": {"regiao": "barra", "pacientes": [{"procedimento": "orto"}]},
    "ajuste_preco": {"orto": 18500},
-   "esperado": {"erro": false, "totais": [18500, 0], "subtotal": 18500, "total": 18500, "pendente": false}}
+   "esperado": {"erro": false, "totais": [18500, 0], "subtotal": 18500, "total": 18500, "pendente": false}},
+  {"nome": "Oferta ativa: Niterói com deslocamento grátis",
+   "promocao": "2026-11-18T18:00:00-03:00", "agora": "2026-11-18T14:00:00-03:00",
+   "pedido": {"regiao": "niteroi", "pacientes": [{"procedimento": "implante", "implantes": 1, "transfers": 1, "tibases": 1}]},
+   "esperado": {"erro": false, "totais": [19000, 2500, 8000, 0], "deslocamento": 0, "subtotal": 29500, "total": 29500, "pendente": false, "promocao": true}},
+  {"nome": "Oferta vencida: taxa normal",
+   "promocao": "2026-11-18T18:00:00-03:00", "agora": "2026-11-18T18:00:01-03:00",
+   "pedido": {"regiao": "niteroi", "pacientes": [{"procedimento": "implante", "implantes": 1, "transfers": 1, "tibases": 1}]},
+   "esperado": {"erro": false, "totais": [19000, 2500, 8000, 9000], "subtotal": 38500, "total": 38500, "pendente": false, "promocao": false}},
+  {"nome": "Oferta ativa: outras localidades continua sob consulta",
+   "promocao": "2026-11-18T18:00:00-03:00", "agora": "2026-11-18T14:00:00-03:00",
+   "pedido": {"regiao": "outras", "pacientes": [{"procedimento": "orto"}]},
+   "esperado": {"erro": false, "totais": [18000, null], "subtotal": 18000, "total": null, "pendente": true, "promocao": false}},
+  {"nome": "Oferta ativa: Barra (já grátis) não vira desconto",
+   "promocao": "2026-11-18T18:00:00-03:00", "agora": "2026-11-18T14:00:00-03:00",
+   "pedido": {"regiao": "barra", "pacientes": [{"procedimento": "orto"}]},
+   "esperado": {"erro": false, "totais": [18000, 0], "subtotal": 18000, "total": 18000, "pendente": false, "promocao": false}}
 ]

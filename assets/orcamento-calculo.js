@@ -13,7 +13,13 @@
   }
   function porId(lista) { const m = {}; (lista || []).forEach(function (x) { m[x.id] = x; }); return m; }
 
-  function calcular(cfg, pedido) {
+  function ofertaAtiva(cfg, agoraMs) {
+    const fim = cfg.promocao_deslocamento && cfg.promocao_deslocamento.fim;
+    const t = typeof fim === "string" ? Date.parse(fim) : NaN;
+    return !isNaN(t) && t > (agoraMs === undefined ? Date.now() : agoraMs) ? fim : null;
+  }
+
+  function calcular(cfg, pedido, agoraMs) {
     const erros = [], itens = [];
     const procs = porId(cfg.procedimentos), comps = porId(cfg.componentes), regs = porId(cfg.regioes);
     const limite = cfg.limite_pacientes || 30;
@@ -75,17 +81,19 @@
 
     const regiaoId = pedido && typeof pedido.regiao === "string" ? pedido.regiao : "";
     let deslocamento = null;
+    const oferta = ofertaAtiva(cfg, agoraMs);
     if (!regs[regiaoId]) erros.push("Escolha a região da clínica.");
     else {
       const r = regs[regiaoId], sob = !!r.sob_consulta || r.taxa === null;
-      deslocamento = sob ? null : r.taxa;
-      itens.push({ paciente: null, tipo: "deslocamento", id: r.id, descricao: "Deslocamento · " + r.nome, qtd: 1, unitario: deslocamento, total: deslocamento, preco_base: deslocamento, desconto: 0, sob_avaliacao: sob });
+      const taxa = sob ? null : r.taxa, promo = oferta !== null && taxa !== null && taxa > 0;
+      deslocamento = promo ? 0 : taxa;
+      itens.push({ paciente: null, tipo: "deslocamento", id: r.id, descricao: "Deslocamento · " + r.nome, qtd: 1, unitario: deslocamento, total: deslocamento, preco_base: taxa, desconto: promo ? taxa : 0, sob_avaliacao: sob, promocao: promo });
     }
 
     let subtotal = 0, pendente = false;
     itens.forEach(function (it) { if (it.total === null) pendente = true; else subtotal += it.total; });
     return {
-      itens: itens, faixa: faixa ? { min: faixa.min, preco: faixa.preco } : null, pacientes: n,
+      itens: itens, faixa: faixa ? { min: faixa.min, preco: faixa.preco } : null, pacientes: n, promocao: oferta ? { fim: oferta } : null,
       deslocamento: deslocamento, subtotal: subtotal, total: pendente ? null : subtotal, pendente: pendente, erros: erros,
     };
   }
@@ -96,5 +104,5 @@
     return (neg ? "-" : "") + "R$ " + reais + "," + String(v % 100).padStart(2, "0");
   }
 
-  w.GRSCAN_CALC = { calcular: calcular, formatarBRL: formatarBRL };
+  w.GRSCAN_CALC = { calcular: calcular, formatarBRL: formatarBRL, ofertaAtiva: ofertaAtiva };
 })(typeof window !== "undefined" ? window : this);

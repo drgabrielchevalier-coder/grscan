@@ -5,7 +5,9 @@
 declare(strict_types=1);
 require_once __DIR__ . '/precos.php';
 
-function precos_publicos(array $cfg, int $versao): array {
+function precos_publicos(array $cfg, int $versao, ?int $agora = null): array {
+    require_once __DIR__ . '/calculo.php';
+    $agora ??= time();
     $disp = fn(array $x) => !empty($x['disponivel']);
     $procs = [];
     foreach (array_filter($cfg['procedimentos'] ?? [], $disp) as $p) {
@@ -45,10 +47,12 @@ function precos_publicos(array $cfg, int $versao): array {
     return [
         'ok' => true,
         'versao' => $versao,
+        'agora' => date('c', $agora),
         'procedimentos' => $procs,
         'componentes' => $comps,
         'regioes' => $regs,
         'faixas_desconto' => $faixas,
         'limite_pacientes' => (int)($cfg['limite_pacientes'] ?? 30),
+        'promocao_deslocamento' => ($fim = oferta_deslocamento_ativa($cfg, $agora)) !== null ? ['fim' => $fim] : null,
     ];
 }

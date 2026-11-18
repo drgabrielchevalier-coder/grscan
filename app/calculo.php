@@ -7,7 +7,14 @@
 declare(strict_types=1);
 require_once __DIR__ . '/base.php';
 
-function orcamento_calcular(array $cfg, array $pedido): array {
+/* Oferta de deslocamento grátis ativa no instante $agora? Devolve o término (ISO) ou null */
+function oferta_deslocamento_ativa(array $cfg, ?int $agora = null): ?string {
+    $fim = $cfg['promocao_deslocamento']['fim'] ?? null;
+    if (!is_string($fim) || ($t = strtotime($fim)) === false) return null;
+    return $t > ($agora ?? time()) ? $fim : null;
+}
+
+function orcamento_calcular(array $cfg, array $pedido, ?int $agora = null): array {
     $erros = []; $itens = [];
     $porId = fn(array $lista) => array_column($lista, null, 'id');
     $procs = $porId($cfg['procedimentos'] ?? []);
@@ -87,14 +94,18 @@ function orcamento_calcular(array $cfg, array $pedido): array {
     // Deslocamento: uma taxa por visita
     $regiaoId = is_string($pedido['regiao'] ?? null) ? $pedido['regiao'] : '';
     $deslocamento = null;
+    $oferta = oferta_deslocamento_ativa($cfg, $agora);
     if (!isset($regs[$regiaoId])) {
         $erros[] = 'Escolha a região da clínica.';
     } else {
         $r = $regs[$regiaoId];
         $sob = !empty($r['sob_consulta']) || $r['taxa'] === null;
-        $deslocamento = $sob ? null : (int)$r['taxa'];
+        $taxa = $sob ? null : (int)$r['taxa'];
+        $promo = $oferta !== null && $taxa !== null && $taxa > 0;
+        $deslocamento = $promo ? 0 : $taxa;
         $itens[] = ['paciente' => null, 'tipo' => 'deslocamento', 'id' => $r['id'], 'descricao' => 'Deslocamento · ' . $r['nome'],
-                    'qtd' => 1, 'unitario' => $deslocamento, 'total' => $deslocamento, 'preco_base' => $deslocamento, 'desconto' => 0, 'sob_avaliacao' => $sob];
+                    'qtd' => 1, 'unitario' => $deslocamento, 'total' => $deslocamento, 'preco_base' => $taxa,
+                    'desconto' => $promo ? $taxa : 0, 'sob_avaliacao' => $sob, 'promocao' => $promo];
     }
 
     $subtotal = 0; $pendente = false;
@@ -104,6 +115,7 @@ function orcamento_calcular(array $cfg, array $pedido): array {
         'itens' => $itens,
         'faixa' => $faixa ? ['min' => (int)$faixa['min'], 'preco' => (int)$faixa['preco']] : null,
         'pacientes' => $n,
+        'promocao' => $oferta !== null ? ['fim' => $oferta] : null,
         'deslocamento' => $deslocamento,
         'subtotal' => $subtotal,
         'total' => $pendente ? null : $subtotal,

@@ -18,11 +18,13 @@ for (const c of casos) {
   const pedido = JSON.parse(JSON.stringify(c.pedido));
   const m = typeof pedido.pacientes === "string" && pedido.pacientes.match(/^(\d+)x (\w+)$/);
   if (m) pedido.pacientes = Array.from({ length: +m[1] }, () => ({ procedimento: m[2] }));
-  const r = calc.calcular(cfg, pedido), e = c.esperado;
+  if (c.promocao) cfg.promocao_deslocamento = { fim: c.promocao };
+  const r = calc.calcular(cfg, pedido, c.agora ? Date.parse(c.agora) : undefined), e = c.esperado;
   let ok = (r.erros.length > 0) === e.erro;
   if (!e.erro) {
     if ("totais" in e) ok = ok && igual(r.itens.map((i) => i.total), e.totais);
     for (const k of ["subtotal", "total", "pendente", "deslocamento"]) if (k in e) ok = ok && r[k] === e[k];
+    if ("promocao" in e) ok = ok && r.itens.some((i) => i.promocao) === e.promocao;
     if ("faixa" in e) ok = ok && (r.faixa && r.faixa.preco) === e.faixa;
   }
   if (!ok) falhas++;

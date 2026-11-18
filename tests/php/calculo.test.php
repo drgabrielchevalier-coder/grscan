@@ -15,12 +15,14 @@ foreach ($casos as $c) {
     if (!empty($c['publico'])) foreach (['procedimentos', 'componentes'] as $g) foreach ($cfg[$g] as &$x) { unset($x['disponivel']); } unset($x);
     foreach ($c['ajuste_preco'] ?? [] as $pid => $pv) foreach ($cfg['procedimentos'] as &$x) { if ($x['id'] === $pid) $x['preco'] = $pv; } unset($x);
     if (!empty($c['indisponivel'])) foreach ($cfg['procedimentos'] as &$p) { if ($p['id'] === $c['indisponivel']) $p['disponivel'] = false; } unset($p);
-    $r = orcamento_calcular($cfg, caso_expandir($c['pedido']));
+    if (!empty($c['promocao'])) $cfg['promocao_deslocamento'] = ['fim' => $c['promocao']];
+    $r = orcamento_calcular($cfg, caso_expandir($c['pedido']), isset($c['agora']) ? strtotime($c['agora']) : null);
     $e = $c['esperado'];
     $ok = (count($r['erros']) > 0) === $e['erro'];
     if (!$e['erro']) {
         if (array_key_exists('totais', $e)) $ok = $ok && array_column($r['itens'], 'total') === $e['totais'];
         foreach (['subtotal', 'total', 'pendente', 'deslocamento'] as $k) if (array_key_exists($k, $e)) $ok = $ok && $r[$k] === $e[$k];
+        if (array_key_exists('promocao', $e)) $ok = $ok && (count(array_filter($r['itens'], fn($i) => !empty($i['promocao']))) > 0) === $e['promocao'];
         if (array_key_exists('faixa', $e)) $ok = $ok && ($r['faixa']['preco'] ?? null) === $e['faixa'];
     }
     afirmar($ok, 'cálculo: ' . $c['nome'], ['totais' => array_column($r['itens'], 'total'), 'subtotal' => $r['subtotal'], 'total' => $r['total'], 'pendente' => $r['pendente'], 'erros' => $r['erros']]);

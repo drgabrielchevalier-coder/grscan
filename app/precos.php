@@ -52,6 +52,8 @@ function precos_validar(array $c): array {
         $mins[] = $min;
         $preco($f['preco'] ?? null, 'Faixa de desconto', false);
     }
+    $of = $c['promocao_deslocamento'] ?? null;
+    if ($of !== null && (!is_array($of) || !is_string($of['fim'] ?? null) || strtotime($of['fim']) === false)) $e[] = 'Oferta de deslocamento: data de término inválida.';
     $lim = $c['limite_pacientes'] ?? null;
     if (!is_int($lim) || $lim < 1 || $lim > 200) $e[] = 'Limite de pacientes inválido (1 a 200).';
     return $e;
@@ -128,6 +130,8 @@ function precos_diferencas(array $a, array $b): array {
         elseif ($fa[$min] !== $p) $out[] = "Faixa a partir de $min pacientes · preço: " . $brl($fa[$min]) . ' → ' . $brl($p);
     }
     foreach ($fa as $min => $p) if (!isset($fb[$min])) $out[] = "Faixa removida: a partir de $min pacientes";
+    $oa = $a['promocao_deslocamento']['fim'] ?? null; $ob = $b['promocao_deslocamento']['fim'] ?? null;
+    if ($oa !== $ob) $out[] = $ob === null ? 'Oferta de deslocamento grátis: encerrada' : 'Oferta de deslocamento grátis: aberta até ' . date('d/m/Y H:i', strtotime($ob));
     if (($a['limite_pacientes'] ?? null) !== ($b['limite_pacientes'] ?? null)) $out[] = 'Limite de pacientes: ' . ($a['limite_pacientes'] ?? '—') . ' → ' . ($b['limite_pacientes'] ?? '—');
     return $out;
 }
