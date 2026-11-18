@@ -155,6 +155,32 @@ const nextWeekday = () => { for (let i = 1; i < 10; i++) { const d = new Date();
   ok("convite: origem desconhecida não é guardada", (await p.evaluate(() => { try { return sessionStorage.getItem("grscan_origem"); } catch (e) { return null; } })) === null);
   await p.context().close();
 
+  // ---------- Página /convite/ (prévia no WhatsApp) ----------
+  {
+    const html = await (await fetch(BASE + "/convite/")).text();
+    const meta = (prop) => (html.match(new RegExp('<meta (?:property|name)="' + prop + '" content="([^"]*)"')) || [])[1] || "";
+    ok("convite: metatags da prévia (título, descrição, imagem 1200×630)", meta("og:title").includes("escaneamento iTero") && meta("og:description").length > 20 &&
+      /^https:\/\/.+\/assets\/convite-og\.jpg$/.test(meta("og:image")) && meta("og:image:width") === "1200" && meta("og:image:height") === "630" && meta("twitter:card") === "summary_large_image");
+    const img = await fetch(BASE + "/assets/convite-og.jpg"); const buf = Buffer.from(await img.arrayBuffer());
+    let w = 0, h = 0; for (let i = 2; i < buf.length - 9; ) { if (buf[i] !== 0xff) break; const m = buf[i + 1], len = buf.readUInt16BE(i + 2); if (m >= 0xc0 && m <= 0xc2) { h = buf.readUInt16BE(i + 5); w = buf.readUInt16BE(i + 7); break; } i += 2 + len; }
+    ok("convite: imagem da prévia em JPEG 1200×630 e leve", img.status === 200 && w === 1200 && h === 630 && buf.length < 300 * 1024, `${img.status} ${w}x${h} ${buf.length}`);
+  }
+  p = await newPage(b, { width: 390, height: 844 }, { mobile: true });
+  await p.goto(BASE + "/convite/?r=niteroi", { waitUntil: "load" }); await p.waitForSelector("#qt-conteudo:not([hidden])", { timeout: 8000 });
+  ok("convite: /convite/?r=niteroi abre o orçamento com Niterói", (await p.inputValue("#qt-regiao")) === "niteroi" && (await p.evaluate(() => document.getElementById("qt-modal").open)));
+  ok("convite: origem guardada na aba", (await p.evaluate(() => sessionStorage.getItem("grscan_origem"))) === "convite");
+  await p.context().close();
+  p = await newPage(b, { width: 390, height: 844 }, { mobile: true });
+  await p.goto(BASE + "/convite/?r=%3Cscript%3Ealert(1)%3C/script%3E", { waitUntil: "load" }); await p.waitForSelector("#qt-conteudo:not([hidden])", { timeout: 8000 });
+  ok("convite: região maliciosa no link é ignorada", (await p.inputValue("#qt-regiao")) === "" && p.errors.length === 0, p.errors.join(" | "));
+  await p.context().close();
+  {
+    const ctxSemJs = await b.newContext({ javaScriptEnabled: false }); const pj = await ctxSemJs.newPage();
+    await pj.goto(BASE + "/convite/?r=niteroi");
+    ok("convite: sem JavaScript mostra o botão para o orçamento", await pj.isVisible("text=Ver o valor para a minha clínica"));
+    await ctxSemJs.close();
+  }
+
   // ---------- Oferta de deslocamento grátis ----------
   const comOferta = (pg, fimMs, agoraMs) => pg.route("**/precos-publicos.php*", async (r) => {
     const res = await r.fetch(); const j = await res.json();
