@@ -12,6 +12,10 @@ Etapa A do sistema de orçamentos e gestão (desenho em `docs/superpowers/specs/
 - O servidor recalcula tudo com a tabela vigente e guarda a cópia da tabela aplicada em cada orçamento.
 - Preços vêm de `precos-publicos.php`, que devolve só campos comerciais.
 
+- Oferta "Deslocamento grátis" com prazo real: aberta e encerrada pelo painel (1 a 24 h ou até data/hora);
+  no orçamento, faixa dourada com contagem regressiva pela hora do servidor e a taxa riscada com "GRÁTIS".
+  O servidor aplica a oferta de verdade e registra no orçamento; ao terminar, tudo volta ao normal sozinho.
+
 ### Painel administrativo (`/admin/`)
 - Login com senha e código do aplicativo autenticador (obrigatório), bloqueio após tentativas erradas,
   proteção CSRF, sessão com expiração por inatividade e código de uso único.

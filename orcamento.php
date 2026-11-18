@@ -50,7 +50,7 @@ if (!getenv('GRSCAN_SEM_EMAIL') && strpos($cfg['DESTINO'], 'exemplo.com') === fa
     $aviso = '<p style="margin:0 0 18px;font-size:12px;color:#8a7f6e;">Valores sujeitos à confirmação da disponibilidade, da compatibilidade dos componentes e da viabilidade técnica.</p>';
 
     $texto = "Novo ORÇAMENTO $numero — GR Scan\nRecebido em " . date('d/m/Y H:i') . "\n\n";
-    foreach ($calc['itens'] as $it) $texto .= ($it['paciente'] ? 'Paciente ' . $it['paciente'] . ': ' : '') . $it['descricao'] . ($it['qtd'] > 1 ? ' x' . $it['qtd'] : '') . ' — ' . brl($it['total']) . "\n";
+    foreach ($calc['itens'] as $it) $texto .= ($it['paciente'] ? 'Paciente ' . $it['paciente'] . ': ' : '') . $it['descricao'] . ($it['qtd'] > 1 ? ' x' . $it['qtd'] : '') . ' — ' . (!empty($it['promocao']) ? 'grátis (oferta, de ' . brl($it['preco_base']) . ')' : brl($it['total'])) . "\n";
     $texto .= "\n$valorTxt\n\nDentes: " . ($v['dentes'] ?: '—') . "\nData desejada: " . ($dataFmt ?: '—') . "\nObservações: " . ($v['obs'] ?: '—') .
         "\n\nDentista: {$v['nome']}\nClínica: " . ($v['clinica'] ?: '—') . "\nCRO: " . ($v['cro'] ?: '—') .
         "\nWhatsApp: {$v['telefone']}\nE-mail: {$v['email']}\nPrefere contato por: " . ($v['preferencia'] ?: '—') . "\n";

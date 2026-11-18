@@ -64,11 +64,12 @@ function em_itens(array $calc) {
     foreach ($calc['itens'] as $it) {
         $quem = $it['paciente'] ? 'Paciente ' . (int)$it['paciente'] : '';
         $desc = em_e($it['descricao']) . ($it['qtd'] > 1 ? ' &times; ' . (int)$it['qtd'] : '')
-            . ($it['desconto'] > 0 ? '<br><span style="font-size:12px;color:#8a7f6e;">valor clínica (de ' . $brl($it['preco_base']) . ')</span>' : '');
+            . (!empty($it['promocao']) ? '<br><span style="font-size:12px;color:#b07c3c;">oferta: deslocamento grátis (de ' . $brl($it['preco_base']) . ')</span>'
+               : ($it['desconto'] > 0 ? '<br><span style="font-size:12px;color:#8a7f6e;">valor clínica (de ' . $brl($it['preco_base']) . ')</span>' : ''));
         $rows .= '<tr>'
             . '<td style="padding:8px 0;border-bottom:1px solid #efe8db;font-size:12px;color:#8a7f6e;width:22%;vertical-align:top;">' . em_e($quem) . '</td>'
             . '<td style="padding:8px 0;border-bottom:1px solid #efe8db;font-size:14px;color:#1d1813;vertical-align:top;">' . $desc . '</td>'
-            . '<td style="padding:8px 0;border-bottom:1px solid #efe8db;font-size:14px;color:#1d1813;text-align:right;white-space:nowrap;vertical-align:top;">' . $brl($it['total']) . '</td>'
+            . '<td style="padding:8px 0;border-bottom:1px solid #efe8db;font-size:14px;color:#1d1813;text-align:right;white-space:nowrap;vertical-align:top;">' . (!empty($it['promocao']) ? '<s style="color:#9a8f7f;">' . $brl($it['preco_base']) . '</s> <b style="color:#b07c3c;">grátis</b>' : $brl($it['total'])) . '</td>'
             . '</tr>';
     }
     $fim = $calc['pendente']

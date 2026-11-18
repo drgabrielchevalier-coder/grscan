@@ -561,6 +561,14 @@
   .qt-total small { flex-basis: 100%; text-align: center; color: var(--text-soft); font-size: var(--fs-xs); }
   .qt-barra__acoes { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
   .qt-numero { font-weight: 600; color: var(--gold-1); margin: 0 0 6px; }
+  .qt-oferta { display: flex; align-items: center; gap: 12px; margin: 0 0 24px; padding: 14px 18px; border-radius: var(--r-sm); background: var(--gold-grad); color: #1a1206; animation: ofertaIn .6s var(--ease) both; }
+  .qt-oferta svg { flex: 0 0 auto; width: 26px; height: 26px; fill: #1a1206; }
+  .qt-oferta p { margin: 0; font-size: var(--fs-md); line-height: 1.4; }
+  .qt-oferta__prazo { white-space: nowrap; }
+  #qt-oferta-tempo { font-variant-numeric: tabular-nums; }
+  .qt-gratis { color: var(--gold-1); font-weight: 700; letter-spacing: .02em; }
+  .qt-item--desloc s { color: var(--text-soft); text-decoration-color: var(--danger); text-decoration-thickness: 2px; }
+  @keyframes ofertaIn { from { opacity: 0; transform: translateY(-6px); } }
   .odonto { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: .2rem 0 1.2rem; padding: 14px 10px; border-radius: var(--r-sm); background: rgba(0, 0, 0, .25); border: 1px solid var(--line-soft); overflow-x: auto; }
   .odonto__lbl { font-size: .75rem; color: var(--text-soft); }
   .odonto__row { display: flex; align-items: center; gap: 4px; }

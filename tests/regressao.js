@@ -138,6 +138,60 @@ const nextWeekday = () => { for (let i = 1; i < 10; i++) { const d = new Date();
   ok("orçamento: sem erros de JS", p.errors.length === 0, p.errors.join(" | "));
   await p.context().close();
 
+  // ---------- Oferta de deslocamento grátis ----------
+  const comOferta = (pg, fimMs, agoraMs) => pg.route("**/precos-publicos.php*", async (r) => {
+    const res = await r.fetch(); const j = await res.json();
+    j.agora = new Date(agoraMs).toISOString(); j.promocao_deslocamento = { fim: new Date(fimMs).toISOString() };
+    await r.fulfill({ json: j });
+  });
+  const montarNiteroi = async (pg) => {
+    await pg.selectOption("#qt-regiao", "niteroi"); await pg.selectOption(".qt-paciente [data-campo=procedimento]", "implante");
+    await pg.fill(".qt-paciente [data-campo=transfers]", "1"); await pg.fill(".qt-paciente [data-campo=tibases]", "1");
+  };
+  p = await newPage(b, { width: 1280, height: 800 });
+  await comOferta(p, Date.now() + 4 * 3600e3, Date.now());
+  await abrirOrc(p); await montarNiteroi(p);
+  ok("oferta: faixa com contagem regressiva", (await p.isVisible("#qt-oferta")) && /0[34]:\d\d:\d\d/.test(await p.textContent("#qt-oferta-tempo")), await p.textContent("#qt-oferta"));
+  ok("oferta: taxa riscada e GRÁTIS no resumo", (await p.textContent(".qt-item--desloc s")).includes("R$ 90,00") && (await p.textContent(".qt-item--desloc")).includes("GRÁTIS"));
+  ok("oferta: total sem deslocamento (R$ 295,00)", (await totalOrc(p)).includes("R$ 295,00"), await totalOrc(p));
+  ok("oferta: região marcada como grátis (oferta)", (await p.textContent('#qt-regiao option[value="niteroi"]')).includes("grátis (oferta)"));
+  await p.context().route("https://wa.me/**", (r) => r.fulfill({ body: "ok", contentType: "text/plain" }));
+  const [pop2] = await Promise.all([p.waitForEvent("popup"), p.click("#qt-whatsapp")]);
+  const wa2 = decodeURIComponent(pop2.url()); await pop2.close();
+  ok("oferta: WhatsApp informa a oferta", wa2.includes("grátis (oferta, de R$ 90,00)"), wa2.slice(0, 300));
+  {
+    const fs2 = require("fs"), path2 = require("path");
+    const axePath = process.env.AXE_PATH;
+    if (axePath && fs2.existsSync(axePath)) {
+      await p.addScriptTag({ content: fs2.readFileSync(axePath, "utf8") });
+      const v = await p.evaluate(async () => (await axe.run(document.getElementById("qt-modal"))).violations.map((x) => x.id));
+      ok("oferta: axe-core sem violações no modal", v.length === 0, v.join(","));
+    }
+  }
+  ok("oferta: sem erros de JS", p.errors.length === 0, p.errors.join(" | "));
+  await p.context().close();
+
+  p = await newPage(b, { width: 1280, height: 800 });
+  await comOferta(p, Date.now() + 3000, Date.now());
+  await abrirOrc(p); await montarNiteroi(p);
+  const antes = await totalOrc(p);
+  await p.waitForTimeout(4500);
+  ok("oferta: ao terminar, a faixa some e a taxa volta", antes.includes("R$ 295,00") && !(await p.isVisible("#qt-oferta")) && (await totalOrc(p)).includes("R$ 385,00"), antes + " → " + (await totalOrc(p)));
+  await p.context().close();
+
+  p = await newPage(b, { width: 1280, height: 800 });
+  const servidor = Date.now() - 2 * 3600e3; // relógio do aparelho 2 h adiantado em relação ao servidor
+  await comOferta(p, servidor + 4 * 3600e3, servidor);
+  await abrirOrc(p); await montarNiteroi(p);
+  ok("oferta: contagem usa a hora do servidor (relógio do aparelho errado)", /^0(3:5\d|4:00)/.test(await p.textContent("#qt-oferta-tempo")) && (await totalOrc(p)).includes("R$ 295,00"), await p.textContent("#qt-oferta-tempo"));
+  await p.context().close();
+
+  p = await newPage(b, { width: 320, height: 640 }, { mobile: true });
+  await comOferta(p, Date.now() + 4 * 3600e3, Date.now());
+  await abrirOrc(p); await montarNiteroi(p);
+  ok("oferta 320px: sem rolagem horizontal e faixa visível", (await p.isVisible("#qt-oferta")) && await p.evaluate(() => { const bx = document.querySelector("#qt-modal .bk-modal__box"); return bx.scrollWidth <= bx.clientWidth + 1; }));
+  await p.context().close();
+
   p = await newPage(b, { width: 1280, height: 800 });
   await p.route("**/precos-publicos.php*", (r) => r.fulfill({ status: 500, body: "" }));
   await p.goto(BASE + "/#orcamento", { waitUntil: "load" }); await p.waitForSelector("#qt-falha:not([hidden])", { timeout: 8000 });

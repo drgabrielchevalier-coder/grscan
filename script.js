@@ -531,12 +531,41 @@ document.documentElement.classList.remove("no-js");
       status.hidden = false; falha.hidden = true; conteudo.hidden = true;
       carregando = fetch(CONFIG.endpointPrecos, { cache: "no-store" })
         .then((r) => r.ok ? r.json() : Promise.reject(r.status))
-        .then((j) => { if (!j || !j.ok) throw new Error("tabela"); tabela = j; montar(); status.hidden = true; conteudo.hidden = false; })
+        .then((j) => {
+          if (!j || !j.ok) throw new Error("tabela");
+          tabela = j;
+          const t = Date.parse(j.agora); difServidor = isNaN(t) ? 0 : t - Date.now();
+          montar(); status.hidden = true; conteudo.hidden = false; iniciarOferta();
+        })
         .catch(() => { status.hidden = true; falha.hidden = false; })
         .finally(() => { carregando = null; });
       return carregando;
     };
     $("#qt-recarregar").addEventListener("click", carregarTabela);
+
+    // Oferta de deslocamento grátis: prazo real definido no painel, contado pela hora do servidor
+    let difServidor = 0, relogioOferta = 0;
+    const agoraServidor = () => Date.now() + difServidor;
+    const ofertaEl = $("#qt-oferta"), ofertaTempo = $("#qt-oferta-tempo");
+    const ofertaAberta = () => !!(tabela && CALC.ofertaAtiva(tabela, agoraServidor()));
+    const doisDig = (n) => String(n).padStart(2, "0");
+    const tickOferta = () => {
+      const fim = ofertaAberta() ? Date.parse(tabela.promocao_deslocamento.fim) : 0;
+      const resta = fim - agoraServidor();
+      if (resta <= 0) {
+        clearInterval(relogioOferta); relogioOferta = 0;
+        if (tabela) tabela.promocao_deslocamento = null;
+        ofertaEl.hidden = true; montarRegioes(); atualizar();
+        return;
+      }
+      const s = Math.floor(resta / 1000);
+      ofertaTempo.textContent = doisDig(Math.floor(s / 3600)) + ":" + doisDig(Math.floor(s / 60) % 60) + ":" + doisDig(s % 60);
+    };
+    const iniciarOferta = () => {
+      clearInterval(relogioOferta); relogioOferta = 0;
+      ofertaEl.hidden = !ofertaAberta();
+      if (!ofertaEl.hidden) { tickOferta(); relogioOferta = setInterval(tickOferta, 1000); }
+    };
 
     const procPorId = (id) => tabela.procedimentos.find((p) => p.id === id);
     const temComp = (id) => tabela.componentes.some((c) => c.id === id);
@@ -554,14 +583,19 @@ document.documentElement.classList.remove("no-js");
       return ops;
     };
 
-    const montar = () => {
+    function montarRegioes() {
+      const sel = regiao.value, promo = ofertaAberta();
       regiao.length = 1;
       tabela.regioes.forEach((r) => {
         const o = document.createElement("option");
         o.value = r.id;
-        o.textContent = r.nome + " · " + (r.sob_consulta || r.taxa === null ? "sob consulta" : r.taxa === 0 ? "grátis" : brl(r.taxa));
+        o.textContent = r.nome + " · " + (r.sob_consulta || r.taxa === null ? "sob consulta" : r.taxa === 0 ? "grátis" : promo ? "grátis (oferta)" : brl(r.taxa));
         regiao.append(o);
       });
+      regiao.value = sel;
+    }
+    const montar = () => {
+      montarRegioes();
       const faixas = tabela.faixas_desconto.slice().sort((a, b) => a.min - b.min);
       const txt = faixas.map((f, i) => {
         const prox = faixas[i + 1];
@@ -631,7 +665,7 @@ document.documentElement.classList.remove("no-js");
     function atualizar() {
       if (!tabela) return;
       qErr.textContent = "";
-      const calc = CALC.calcular(tabela, pedido());
+      const calc = CALC.calcular(tabela, pedido(), agoraServidor());
       ultimo = calc;
       const semRegiao = !regiao.value;
       const errosReais = calc.erros.filter((m) => !(semRegiao && /região/.test(m)));
@@ -644,12 +678,16 @@ document.documentElement.classList.remove("no-js");
         d.textContent = (it.paciente ? "P" + it.paciente + " · " : "") + it.descricao + (it.qtd > 1 ? " × " + it.qtd : "");
         const v = document.createElement("span"); v.className = "qt-item__valor";
         v.textContent = it.total === null ? (it.tipo === "deslocamento" ? "sob consulta" : "sob avaliação") : it.total === 0 && it.tipo === "deslocamento" ? "grátis" : brl(it.total);
-        if (it.desconto > 0) { const s = document.createElement("s"); s.textContent = brl(it.preco_base * it.qtd); v.prepend(s, " "); }
+        if (it.promocao) {
+          const s = document.createElement("s"), g = document.createElement("b");
+          s.textContent = brl(it.preco_base); g.className = "qt-gratis"; g.textContent = "GRÁTIS";
+          v.textContent = ""; v.append(s, " ", g);
+        } else if (it.desconto > 0) { const s = document.createElement("s"); s.textContent = brl(it.preco_base * it.qtd); v.prepend(s, " "); }
         li.append(d, v); ul.append(li);
       });
       if (calc.itens.length) resumo.append(ul);
       if (errosReais.length) { const p = document.createElement("p"); p.className = "qt-resumo__erro"; p.textContent = errosReais[0]; resumo.append(p); }
-      const comDesconto = calc.itens.filter((i) => i.desconto > 0).length;
+      const comDesconto = calc.faixa ? calc.itens.filter((i) => i.desconto > 0 && !i.promocao).length : 0;
       descontoEl.hidden = !comDesconto;
       if (comDesconto) descontoEl.textContent = "Desconto clínica: " + calc.pacientes + " pacientes na mesma visita → " + brl(calc.faixa.preco) + " por escaneamento elegível.";
       if (errosReais.length) totalEl.innerHTML = "<span>Total</span> <b>—</b>";
@@ -663,7 +701,7 @@ document.documentElement.classList.remove("no-js");
       let t = "Olá! Orçamento de escaneamento intraoral GR Scan:\n\n";
       c.itens.forEach((it) => {
         t += "• " + (it.paciente ? "Paciente " + it.paciente + ": " : "") + it.descricao + (it.qtd > 1 ? " × " + it.qtd : "") + " — " +
-          (it.total === null ? "sob consulta" : it.total === 0 && it.tipo === "deslocamento" ? "grátis" : brl(it.total)) + "\n";
+          (it.promocao ? "grátis (oferta, de " + brl(it.preco_base) + ")" : it.total === null ? "sob consulta" : it.total === 0 && it.tipo === "deslocamento" ? "grátis" : brl(it.total)) + "\n";
       });
       t += c.pendente || !regiao.value ? "\n*Subtotal: " + brl(c.subtotal) + "* (total sob confirmação)\n" : "\n*Total: " + brl(c.total) + "*\n";
       if (f.dentes.value) t += "Dentes: " + f.dentes.value + "\n";
@@ -690,7 +728,7 @@ document.documentElement.classList.remove("no-js");
     const qValidate = () => {
       const f = qForm.elements;
       if (!regiao.value) return qFail(regiao, "Escolha a região da clínica.");
-      const c = CALC.calcular(tabela, pedido());
+      const c = CALC.calcular(tabela, pedido(), agoraServidor());
       if (c.erros.length) return qFail($("#qt-pacientes"), c.erros[0]);
       if (!f.nome.value.trim()) return qFail(f.nome, "Informe o nome do dentista responsável.");
       if (f.telefone.value.replace(/\D/g, "").length < 10) return qFail(f.telefone, "Informe um WhatsApp com DDD.");
