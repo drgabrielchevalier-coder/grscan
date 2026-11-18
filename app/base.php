@@ -88,6 +88,9 @@ function db_migrar(PDO $pdo): void {
     );
     CREATE INDEX IF NOT EXISTS tentativas_chave ON tentativas_login(chave, criado_em);
     ");
+    // Colunas acrescentadas depois da primeira versão
+    $cols = array_column($pdo->query('PRAGMA table_info(admins)')->fetchAll(PDO::FETCH_ASSOC), 'name');
+    if (!in_array('totp_ultimo', $cols, true)) $pdo->exec('ALTER TABLE admins ADD COLUMN totp_ultimo INTEGER NOT NULL DEFAULT 0');
 }
 
 function agora(): string { return date('Y-m-d H:i:s'); }

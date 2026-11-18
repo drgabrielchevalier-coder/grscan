@@ -43,6 +43,15 @@ function totp_verificar(string $segredo, string $codigo, ?int $tempo = null): bo
     return false;
 }
 
+/* Intervalo (passo de 30 s) a que o código pertence, ou null; usado para não aceitar o mesmo código duas vezes */
+function totp_passo(string $segredo, string $codigo, ?int $tempo = null): ?int {
+    $codigo = preg_replace('/\s/', '', $codigo);
+    if (!preg_match('/^\d{6}$/', $codigo) || $segredo === '') return null;
+    $tempo ??= time();
+    foreach ([0, -30, 30] as $d) if (hash_equals(totp_codigo($segredo, $tempo + $d), $codigo)) return intdiv($tempo + $d, 30);
+    return null;
+}
+
 function totp_novo_segredo(): string { return base32_codificar(random_bytes(20)); }
 
 function totp_uri(string $segredo, string $email): string {

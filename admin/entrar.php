@@ -40,7 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (isset($_POST['codigo']) && $pre && in_array($etapa, ['totp', 'totp_config'], true)) {
         if (login_bloqueado($pre['email'], $ip)) {
             $erro = 'Muitas tentativas. Aguarde 15 minutos e tente de novo.';
-        } elseif (totp_verificar((string)$pre['totp_segredo'], (string)$_POST['codigo'])) {
+        } elseif (($passo = totp_passo((string)$pre['totp_segredo'], (string)$_POST['codigo'])) !== null && $passo > (int)$pre['totp_ultimo']) {
+            db()->prepare('UPDATE admins SET totp_ultimo = ? WHERE id = ?')->execute([$passo, $pre['id']]);
             if ($etapa === 'totp_config') {
                 db()->prepare('UPDATE admins SET totp_ativo = 1 WHERE id = ?')->execute([$pre['id']]);
                 auditar((int)$pre['id'], 'autenticador_ativado');

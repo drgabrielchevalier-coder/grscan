@@ -46,7 +46,7 @@ function sessao_iniciar(): void {
 }
 
 function admin_por_id(int $id): ?array {
-    $st = db()->prepare('SELECT id, email, nome, senha_hash, totp_segredo, totp_ativo, ativo, criado_em FROM admins WHERE id = ?');
+    $st = db()->prepare('SELECT id, email, nome, senha_hash, totp_segredo, totp_ativo, totp_ultimo, ativo, criado_em FROM admins WHERE id = ?');
     $st->execute([$id]);
     return $st->fetch() ?: null;
 }

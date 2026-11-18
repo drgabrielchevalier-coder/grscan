@@ -13,3 +13,4 @@ afirmar(!totp_verificar($seg, '287082', 59 + 90), 'recusa código antigo');
 afirmar(!totp_verificar($seg, '28708', 59) && !totp_verificar($seg, 'abcdef', 59), 'recusa formato inválido');
 $novo = totp_novo_segredo();
 afirmar(strlen(base32_decodificar($novo)) === 20 && preg_match('/^[A-Z2-7]+$/', $novo), 'segredo novo: 20 bytes em base32');
+afirmar(totp_passo($seg, '287082', 59) === 1 && totp_passo($seg, '287082', 89) === 1 && totp_passo($seg, '000000', 59) === null, 'passo do código (para impedir reuso)');

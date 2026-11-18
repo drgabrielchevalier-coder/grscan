@@ -25,6 +25,15 @@ function totp(segredo, t = Date.now() / 1000) {
   return String(n % 1e6).padStart(6, "0");
 }
 
+// O painel não aceita o mesmo código duas vezes: espera o próximo intervalo de 30 s quando preciso
+const usados = {};
+async function codigo(seg) {
+  let passo = Math.floor(Date.now() / 30000);
+  if (usados[seg] !== undefined && usados[seg] >= passo) { await new Promise((r) => setTimeout(r, (passo + 1) * 30000 - Date.now() + 400)); passo++; }
+  usados[seg] = passo;
+  return totp(seg);
+}
+
 (async () => {
   fs.rmSync(DADOS, { recursive: true, force: true }); fs.mkdirSync(DADOS, { recursive: true });
   const srv = spawn("php", ["-S", "127.0.0.1:" + PORTA, "-t", RAIZ], { env: { ...process.env, GRSCAN_DADOS: DADOS, GRSCAN_SEM_EMAIL: "1", GRSCAN_SEM_LIMITE: "1" }, stdio: "ignore" });
@@ -48,7 +57,7 @@ function totp(segredo, t = Date.now() / 1000) {
     ok("instalação: mostra o segredo do autenticador", /^[A-Z2-7]{32}$/.test(segredo), segredo);
     await p.fill("[name=codigo]", "000000"); await p.click("button[type=submit]");
     ok("ativação: código errado é recusado", await p.isVisible(".aviso--erro"));
-    await p.fill("[name=codigo]", totp(segredo)); await p.click("button[type=submit]");
+    await p.fill("[name=codigo]", await codigo(segredo)); await p.click("button[type=submit]");
     await p.waitForURL(/admin\/(index\.php)?$/);
     ok("ativação: código certo entra no painel", (await p.textContent("h1")).length > 0);
     r = await p.request.get(BASE + "/admin/instalar.php");
@@ -73,9 +82,18 @@ function totp(segredo, t = Date.now() / 1000) {
     ok("login: senha errada com mensagem genérica", (await p.textContent(".aviso--erro")).includes("inválid"));
     await p.fill("[name=email]", EMAIL); await p.fill("[name=senha]", SENHA); await p.click("button[type=submit]");
     await p.waitForSelector("[name=codigo]");
-    await p.fill("[name=codigo]", totp(segredo)); await p.click("button[type=submit]");
+    await p.fill("[name=codigo]", await codigo(segredo)); await p.click("button[type=submit]");
     await p.waitForURL(/admin\/(index\.php)?$/);
     ok("login: senha + código entram no painel", (await p.textContent("h1")).includes("Painel"));
+    {
+      const c3 = await b.newContext(); const p3 = await c3.newPage();
+      await p3.goto(BASE + "/admin/entrar.php");
+      await p3.fill("[name=email]", EMAIL); await p3.fill("[name=senha]", SENHA); await p3.click("button[type=submit]");
+      await p3.waitForSelector("[name=codigo]");
+      await p3.fill("[name=codigo]", totp(segredo)); await p3.click("button[type=submit]");
+      ok("login: o mesmo código não vale duas vezes", (await p3.isVisible(".aviso--erro")) && /entrar\.php/.test(p3.url()));
+      await c3.close();
+    }
 
     // ---------- Preços (Tarefa 6) ----------
     const precoPublico = async (id) => (await (await p.request.get(BASE + "/precos-publicos.php")).json()).procedimentos.find((x) => x.id === id);
@@ -109,6 +127,62 @@ function totp(segredo, t = Date.now() / 1000) {
     await p.goto(BASE + "/admin/precos.php");
     await p.check('[name="comp[tibase][disponivel]"]'); await p.click("button[type=submit] >> text=Salvar");
 
+
+    // ---------- Orçamentos recebidos (Tarefa 7) ----------
+    const site = await ctx.newPage();
+    await site.goto(BASE + "/#orcamento"); await site.waitForSelector("#qt-conteudo:not([hidden])");
+    await site.selectOption("#qt-regiao", "niteroi"); await site.selectOption(".qt-paciente [data-campo=procedimento]", "implante");
+    await site.fill("[data-campo=transfers]", "1"); await site.fill("[data-campo=tibases]", "1");
+    await site.fill('#qt [name="nome"]', "Dra. Paula Teste"); await site.fill('#qt [name="clinica"]', "Clínica Sorriso Teste");
+    await site.fill('#qt [name="telefone"]', "21988887777"); await site.fill('#qt [name="email"]', "paula@exemplo.test");
+    await site.check('#qt [name="aceite_privacidade"]'); await site.click("#qt-submit");
+    await site.waitForSelector("#qt-done:not([hidden])");
+    const numero = ((await site.textContent("#qt-numero")).match(/GRS-\d{4}-\d{5}/) || [""])[0];
+    ok("site → servidor: orçamento gravado com número", /GRS-\d{4}-\d{5}/.test(numero) && (await site.textContent("#qt-numero")).includes("R$ 385,00"), await site.textContent("#qt-numero"));
+    await site.close();
+    await p.goto(BASE + "/admin/orcamentos.php");
+    const lista = await p.textContent("main");
+    ok("orçamentos: aparece na lista com clínica, valor e status", lista.includes(numero) && lista.includes("Clínica Sorriso Teste") && lista.includes("R$ 385,00") && lista.includes("solicitado"), lista.slice(0, 500));
+    await p.fill("[name=busca]", "Sorriso"); await p.click("button >> text=Filtrar");
+    ok("orçamentos: busca por clínica", (await p.textContent("main")).includes(numero));
+    await p.fill("[name=busca]", "nao-existe-xyz"); await p.click("button >> text=Filtrar");
+    ok("orçamentos: busca sem resultado", !(await p.textContent("main")).includes(numero));
+    await p.goto(BASE + "/admin/orcamentos.php"); await p.click(`a >> text=${numero}`);
+    const det = await p.textContent("main");
+    ok("orçamento: detalhe com itens, total, contato e versão da tabela", det.includes("TiBase padrão elegível") && det.includes("R$ 385,00") && det.includes("paula@exemplo.test") && /tabela de preços: versão \d+/i.test(det), det.slice(0, 600));
+    r = await p.goto(BASE + "/admin/orcamentos.php?id=999999");
+    ok("orçamento: id inexistente → 404", r.status() === 404, r.status());
+
+    // ---------- Administradores (Tarefa 7) ----------
+    const EMAIL2 = "segundo@grscan.test", SENHA2 = "outra-senha-forte-456";
+    await p.goto(BASE + "/admin/administradores.php");
+    await p.fill("[name=nome]", "Segundo Admin"); await p.fill("[name=email]", EMAIL2); await p.fill("[name=senha]", SENHA2);
+    await p.click("button >> text=Criar administrador");
+    ok("administradores: novo administrador criado", (await p.textContent("main")).includes(EMAIL2));
+    await p.click("button.sair"); await p.waitForURL(/entrar\.php/);
+    await p.fill("[name=email]", EMAIL2); await p.fill("[name=senha]", SENHA2); await p.click("button[type=submit]");
+    await p.waitForSelector("#totp-segredo");
+    const seg2 = (await p.textContent("#totp-segredo")).replace(/\s/g, "");
+    await p.fill("[name=codigo]", await codigo(seg2)); await p.click("button[type=submit]");
+    await p.waitForURL(/admin\/(index\.php)?$/);
+    ok("administradores: novo administrador ativa o próprio autenticador no 1º acesso", (await p.textContent(".quem")).includes("Segundo Admin"));
+    await p.click("button.sair"); await p.waitForURL(/entrar\.php/);
+    await p.fill("[name=email]", EMAIL); await p.fill("[name=senha]", SENHA); await p.click("button[type=submit]");
+    await p.waitForSelector("[name=codigo]");
+    await p.fill("[name=codigo]", await codigo(segredo)); await p.click("button[type=submit]");
+    await p.waitForURL(/admin\/(index\.php)?$/);
+    await p.goto(BASE + "/admin/administradores.php");
+    p.once("dialog", (d) => d.accept());
+    await p.click(`tr:has-text("${EMAIL2}") button >> text=Desativar`);
+    ok("administradores: desativar", (await p.textContent(`tr:has-text("${EMAIL2}")`)).includes("inativo"));
+    ok("administradores: não há botão para desativar a si mesmo", (await p.locator(`tr:has-text("${EMAIL}") button >> text=Desativar`).count()) === 0);
+    const ctx2 = await b.newContext(); const p2 = await ctx2.newPage();
+    await p2.goto(BASE + "/admin/entrar.php");
+    await p2.fill("[name=email]", EMAIL2); await p2.fill("[name=senha]", SENHA2); await p2.click("button[type=submit]");
+    ok("administradores: inativo não consegue entrar", (await p2.isVisible(".aviso--erro")) && !(await p2.isVisible("[name=codigo]")));
+    await ctx2.close();
+    await p.fill("[name=atual]", "senha-errada-qualquer"); await p.fill("[name=nova]", "nova-senha-forte-789"); await p.click("button >> text=Trocar minha senha");
+    ok("trocar senha: exige a senha atual", await p.isVisible(".aviso--erro"));
 
     // ---------- Bloqueio (por último: bloqueia este e-mail por 15 min) ----------
     await p.click("button.sair"); await p.waitForURL(/entrar\.php/);
