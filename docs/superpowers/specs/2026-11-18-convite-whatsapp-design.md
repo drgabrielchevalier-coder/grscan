@@ -1,5 +1,5 @@
 # Link de convite para prospecção pelo WhatsApp — desenho curto
-**Status:** aguardando aprovação · 18/11/2026
+**Status:** aprovado pelo dono do site em 18/11/2026.
 
 ## Por quê
 Prospectar dentistas que já conhecem o dono da GR Scan, por mensagem pessoal no WhatsApp, com um link
