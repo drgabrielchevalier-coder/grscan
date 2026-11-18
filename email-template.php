@@ -57,6 +57,26 @@ function em_bloco($titulo, $icone, array $linhas) {
 }
 
 /** Botão. $tipo: 'gold' ou 'line' */
+/* Tabela de itens do orçamento (valores em centavos; null = sob consulta) */
+function em_itens(array $calc) {
+    $brl = fn($c) => $c === null ? '<i style="color:#b07c3c;">sob consulta</i>' : 'R$&nbsp;' . number_format($c / 100, 2, ',', '.');
+    $rows = '';
+    foreach ($calc['itens'] as $it) {
+        $quem = $it['paciente'] ? 'Paciente ' . (int)$it['paciente'] : '';
+        $desc = em_e($it['descricao']) . ($it['qtd'] > 1 ? ' &times; ' . (int)$it['qtd'] : '')
+            . ($it['desconto'] > 0 ? '<br><span style="font-size:12px;color:#8a7f6e;">valor clínica (de ' . $brl($it['preco_base']) . ')</span>' : '');
+        $rows .= '<tr>'
+            . '<td style="padding:8px 0;border-bottom:1px solid #efe8db;font-size:12px;color:#8a7f6e;width:22%;vertical-align:top;">' . em_e($quem) . '</td>'
+            . '<td style="padding:8px 0;border-bottom:1px solid #efe8db;font-size:14px;color:#1d1813;vertical-align:top;">' . $desc . '</td>'
+            . '<td style="padding:8px 0;border-bottom:1px solid #efe8db;font-size:14px;color:#1d1813;text-align:right;white-space:nowrap;vertical-align:top;">' . $brl($it['total']) . '</td>'
+            . '</tr>';
+    }
+    $fim = $calc['pendente']
+        ? '<tr><td></td><td style="padding:12px 0 0;font-size:14px;color:#1d1813;"><b>Subtotal dos itens com preço</b><br><span style="font-size:12px;color:#8a7f6e;">Total definitivo depende de confirmação da GR Scan.</span></td><td style="padding:12px 0 0;text-align:right;font-size:16px;font-weight:700;">' . $brl($calc['subtotal']) . '</td></tr>'
+        : '<tr><td></td><td style="padding:12px 0 0;font-size:15px;color:#1d1813;"><b>Total</b></td><td style="padding:12px 0 0;text-align:right;font-size:18px;font-weight:700;color:#1d1813;">' . $brl($calc['total']) . '</td></tr>';
+    return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;">' . $rows . $fim . '</table>';
+}
+
 function em_botao($texto, $url, $tipo = 'gold') {
     $st = $tipo === 'gold'
         ? 'background:#e0aa45;background-image:linear-gradient(180deg,#f7cf6a,#d99a2b);color:#1a1206;border:1px solid #d99a2b;'
