@@ -1,0 +1,6 @@
+# Painel administrativo: fora dos buscadores e sem cache
+<IfModule mod_headers.c>
+  Header always set X-Robots-Tag "noindex, nofollow"
+  Header always set Cache-Control "no-store, max-age=0"
+</IfModule>
+Options -Indexes
