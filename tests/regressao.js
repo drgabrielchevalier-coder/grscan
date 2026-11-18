@@ -20,6 +20,8 @@ async function newPage(b, vp, opts = {}) {
   await p.route("**/agendar.php", async (r) => { p.payloads.agendar = JSON.parse(r.request().postData() || "{}"); await r.fulfill({ json: { ok: true } }); });
   await p.route("**/orcamento.php", async (r) => { p.payloads.orcamento = JSON.parse(r.request().postData() || "{}"); await r.fulfill({ json: { ok: true } }); });
   await p.route("**/disponibilidade.php*", (r) => r.fulfill({ json: opts.dispo || { ok: false, motivo: "nao_configurado" } }));
+  // Testes partem de "sem oferta aberta", mesmo rodando contra o site ao vivo (os testes de oferta simulam a sua)
+  await p.route("**/precos-publicos.php*", async (r) => { const res = await r.fetch(); const j = await res.json().catch(() => null); if (!j) return r.fulfill({ response: res }); j.promocao_deslocamento = null; await r.fulfill({ json: j }); });
   return p;
 }
 const pick = (p, sel) => p.locator(sel).locator("xpath=..").click();
