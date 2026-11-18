@@ -1,5 +1,5 @@
 // Versão do deploy: não editar à mão (ver CLAUDE.md)
-var GRSCAN_VERSAO = "2.1";
+var GRSCAN_VERSAO = "2.2";
 
 /* ============================================================
    CONFIGURAÇÃO — edite apenas este bloco
@@ -578,18 +578,18 @@ document.documentElement.classList.remove("no-js");
           if (!implanteIncluido) { ops.push(["implante", "Implante(s)"]); implanteIncluido = true; }
           return;
         }
-        ops.push([p.id, p.nome + (p.sob_avaliacao || p.preco === null ? " · sob avaliação" : " · " + brl(p.preco))]);
+        ops.push([p.id, p.nome + (p.sob_avaliacao || p.preco === null ? " · sob avaliação" : "")]);
       });
       return ops;
     };
 
     function montarRegioes() {
-      const sel = regiao.value, promo = ofertaAberta();
+      const sel = regiao.value;
       regiao.length = 1;
       tabela.regioes.forEach((r) => {
         const o = document.createElement("option");
         o.value = r.id;
-        o.textContent = r.nome + " · " + (r.sob_consulta || r.taxa === null ? "sob consulta" : r.taxa === 0 ? "grátis" : promo ? "grátis (oferta)" : brl(r.taxa));
+        o.textContent = r.nome + (r.sob_consulta || r.taxa === null ? " · sob consulta" : "");
         regiao.append(o);
       });
       regiao.value = sel;
@@ -674,8 +674,10 @@ document.documentElement.classList.remove("no-js");
       calc.itens.forEach((it) => {
         const li = document.createElement("li");
         if (it.tipo === "deslocamento") li.className = "qt-item--desloc";
+        const q = document.createElement("span"); q.className = "qt-item__quem";
+        q.textContent = it.paciente ? "Paciente " + it.paciente : "";
         const d = document.createElement("span"); d.className = "qt-item__desc";
-        d.textContent = (it.paciente ? "P" + it.paciente + " · " : "") + it.descricao + (it.qtd > 1 ? " × " + it.qtd : "");
+        d.textContent = it.descricao + (it.qtd > 1 ? " × " + it.qtd : "");
         const v = document.createElement("span"); v.className = "qt-item__valor";
         v.textContent = it.total === null ? (it.tipo === "deslocamento" ? "sob consulta" : "sob avaliação") : it.total === 0 && it.tipo === "deslocamento" ? "grátis" : brl(it.total);
         if (it.promocao) {
@@ -683,8 +685,20 @@ document.documentElement.classList.remove("no-js");
           s.textContent = brl(it.preco_base); g.className = "qt-gratis"; g.textContent = "GRÁTIS";
           v.textContent = ""; v.append(s, " ", g);
         } else if (it.desconto > 0) { const s = document.createElement("s"); s.textContent = brl(it.preco_base * it.qtd); v.prepend(s, " "); }
-        li.append(d, v); ul.append(li);
+        li.append(q, d, v); ul.append(li);
       });
+      // Linha final, como no e-mail: Total (ou Subtotal quando algo depende de confirmação)
+      if (calc.itens.length && !errosReais.length) {
+        const li = document.createElement("li"); li.className = "qt-item--total";
+        const q = document.createElement("span"); q.className = "qt-item__quem";
+        const d = document.createElement("span"); d.className = "qt-item__desc";
+        const v = document.createElement("span"); v.className = "qt-item__valor";
+        const parcial = semRegiao || calc.pendente;
+        d.textContent = parcial ? "Subtotal" : "Total";
+        if (parcial) { const n = document.createElement("small"); n.textContent = semRegiao ? "escolha a região para incluir o deslocamento" : "total sob confirmação da GR Scan"; d.append(n); }
+        v.textContent = brl(parcial ? calc.subtotal : calc.total);
+        li.append(q, d, v); ul.append(li);
+      }
       if (calc.itens.length) resumo.append(ul);
       if (errosReais.length) { const p = document.createElement("p"); p.className = "qt-resumo__erro"; p.textContent = errosReais[0]; resumo.append(p); }
       const comDesconto = calc.faixa ? calc.itens.filter((i) => i.desconto > 0 && !i.promocao).length : 0;

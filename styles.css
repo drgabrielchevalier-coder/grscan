@@ -9,7 +9,7 @@
 
 @layer tokens {
   :root {
-    --grscan-versao: "2.1"; /* versão do deploy: não editar à mão (ver CLAUDE.md) */
+    --grscan-versao: "2.2"; /* versão do deploy: não editar à mão (ver CLAUDE.md) */
     --bg: #0a0907;
     --bg-2: #0f0d0a;
     --panel: #15130f;
@@ -544,8 +544,13 @@
   .qt-add { margin-bottom: 10px; }
   .qt-faixas { margin: 0; font-size: var(--fs-sm); color: var(--text-soft); }
   .qt-itens { list-style: none; margin: 0; padding: 0; }
-  .qt-itens li { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line-soft); font-size: var(--fs-sm); }
-  .qt-item__desc { min-width: 0; }
+  .qt-itens li { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 16px; align-items: baseline; padding: 11px 0; border-bottom: 1px solid var(--line-soft); font-size: var(--fs-sm); }
+  .qt-item__quem { color: var(--text-soft); font-size: var(--fs-xs); }
+  .qt-item__desc { min-width: 0; color: var(--text); }
+  .qt-itens .qt-item--total { border-bottom: 0; padding-top: 14px; }
+  .qt-item--total .qt-item__desc { font-weight: 700; }
+  .qt-item--total .qt-item__desc small { display: block; font-weight: 400; color: var(--text-soft); font-size: var(--fs-xs); }
+  .qt-item--total .qt-item__valor { font-weight: 700; font-size: var(--fs-lg); color: var(--gold-1); }
   .qt-item__valor { white-space: nowrap; font-variant-numeric: tabular-nums; }
   .qt-item__valor s { color: var(--text-soft); font-size: .85em; }
   .qt-resumo__erro { color: var(--danger); font-size: var(--fs-sm); margin: 10px 0 0; }
@@ -642,6 +647,7 @@
   @media (max-width: 640px) {
     .launchers { grid-template-columns: minmax(0, 1fr); }
     .qt-paciente__campos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .qt-itens li { grid-template-columns: 74px minmax(0, 1fr) auto; gap: 10px; }
     .qt-proc { grid-column: 1 / -1; }
     .qt-barra { margin: 0 -18px -26px; padding: 12px 18px 14px; }
     .qt-barra__acoes { width: 100%; flex-wrap: nowrap; }

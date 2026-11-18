@@ -1,5 +1,14 @@
 # Registro de alterações — GR Scan
 
+## 2.2 — 18/11/2026 — Aviso para página desatualizada
+- Quem estava com o site aberto antes da 2.1 e enviava o formulário antigo recebia "Confirme o aceite do
+  aviso de privacidade", sem caixa para marcar. Agora recebe: "O orçamento do site foi atualizado.
+  Recarregue a página…".
+- Texto do cartão "Solicitar orçamento" atualizado para o orçamento com valores na hora.
+- As listas de região e de procedimento mostram só os nomes; os valores aparecem no resumo e no total.
+- Resumo do orçamento no mesmo formato do e-mail: coluna "Paciente N", item, valor e linha de Total.
+
+
 ## 2.1 — 18/11/2026 — Orçamento automático e painel
 Etapa A do sistema de orçamentos e gestão (desenho em `docs/superpowers/specs/2026-11-18-orcamento-e-gestao-design.md`).
 
