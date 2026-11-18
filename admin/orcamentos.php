@@ -14,7 +14,7 @@ if (isset($_GET['id'])) {
     auditar((int)$admin['id'], 'orcamento_visto', ['numero' => $o['numero']]);
     painel_inicio($o['numero'], $admin); ?>
 <p><a href="orcamentos.php">← Orçamentos</a></p>
-<h1>Orçamento <?= h($o['numero']) ?> <span class="status"><?= h($o['status']) ?></span></h1>
+<h1>Orçamento <?= h($o['numero']) ?> <span class="status"><?= h($o['status']) ?></span><?= ($d['origem'] ?? '') === 'convite' ? ' <span class="status status--convite">convite</span>' : '' ?></h1>
 <p class="dica">Recebido em <?= h(date('d/m/Y H:i', strtotime($o['criado_em']))) ?> · tabela de preços: versão <?= (int)$o['precos_versao_id'] ?> (<a href="historico.php">histórico</a>)</p>
 <div class="grade2">
 <section class="cartao">
@@ -53,9 +53,11 @@ if (isset($_GET['id'])) {
 $de = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['de'] ?? '') ? $_GET['de'] : '';
 $ate = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['ate'] ?? '') ? $_GET['ate'] : '';
 $busca = mb_substr(trim((string)($_GET['busca'] ?? '')), 0, 80);
+$origem = ($_GET['origem'] ?? '') === 'convite' ? 'convite' : '';
 $where = []; $par = [];
 if ($de) { $where[] = 'criado_em >= ?'; $par[] = "$de 00:00:00"; }
 if ($ate) { $where[] = 'criado_em <= ?'; $par[] = "$ate 23:59:59"; }
+if ($origem === 'convite') { $where[] = "json_extract(dados_json, '$.origem') = 'convite'"; }
 if ($busca !== '') { $where[] = '(numero LIKE ? OR dados_json LIKE ?)'; $like = '%' . str_replace(['%', '_'], ['\%', '\_'], $busca) . '%'; array_push($par, $like, $like); }
 $sql = 'SELECT id, numero, criado_em, dados_json, total_centavos, subtotal_centavos, pendente, status FROM orcamentos'
      . ($where ? ' WHERE ' . implode(' AND ', $where) : '') . ' ORDER BY id DESC LIMIT 200';
@@ -69,8 +71,9 @@ painel_inicio('Orçamentos', $admin); ?>
   <label>De<input type="date" name="de" value="<?= h($de) ?>"></label>
   <label>Até<input type="date" name="ate" value="<?= h($ate) ?>"></label>
   <label>Busca (número, clínica, dentista)<input name="busca" value="<?= h($busca) ?>" maxlength="80"></label>
+  <label>Origem<select name="origem"><option value="">Todas</option><option value="convite"<?= $origem === 'convite' ? ' selected' : '' ?>>Convite (WhatsApp)</option></select></label>
   <button type="submit" class="btn btn--line">Filtrar</button>
-  <?php if ($de || $ate || $busca !== ''): ?><a class="btn btn--line" href="orcamentos.php">Limpar</a><?php endif; ?>
+  <?php if ($de || $ate || $busca !== '' || $origem): ?><a class="btn btn--line" href="orcamentos.php">Limpar</a><?php endif; ?>
 </form>
 <section class="cartao">
 <?php if (!$lista): ?><p class="vazio">Nenhum orçamento encontrado.</p><?php else: ?>
@@ -80,7 +83,7 @@ painel_inicio('Orçamentos', $admin); ?>
       <td><?= h(date('d/m/Y H:i', strtotime($o['criado_em']))) ?></td>
       <td><?= h($d['clinica'] ?: '—') ?></td><td><?= h($d['nome']) ?></td>
       <td class="num"><?= $o['pendente'] ? brl_painel((int)$o['subtotal_centavos']) . ' <small>+ a confirmar</small>' : brl_painel((int)$o['total_centavos']) ?></td>
-      <td><span class="status"><?= h($o['status']) ?></span></td></tr>
+      <td><span class="status"><?= h($o['status']) ?></span><?= ($d['origem'] ?? '') === 'convite' ? ' <span class="status status--convite">convite</span>' : '' ?></td></tr>
   <?php endforeach; ?>
   </tbody></table></div>
   <?php if (count($lista) === 200): ?><p class="dica">Mostrando os 200 mais recentes. Use os filtros para refinar.</p><?php endif; ?>

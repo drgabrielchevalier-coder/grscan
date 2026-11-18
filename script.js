@@ -1,5 +1,5 @@
 // Versão do deploy: não editar à mão (ver CLAUDE.md)
-var GRSCAN_VERSAO = "2.2";
+var GRSCAN_VERSAO = "2.3";
 
 /* ============================================================
    CONFIGURAÇÃO — edite apenas este bloco
@@ -484,6 +484,17 @@ document.documentElement.classList.remove("no-js");
   // ---------- Janela de orçamento (cálculo automático) ----------
   // Preços vêm de precos-publicos.php (tabela administrável no painel); a prévia usa
   // assets/orcamento-calculo.js e o servidor recalcula tudo ao enviar.
+  // Link de convite (?r=<região>&origem=convite): guarda a origem nesta aba e limpa o endereço
+  const linkConvite = (() => {
+    const q = new URLSearchParams(location.search);
+    const r = (q.get("r") || "").toLowerCase(), o = q.get("origem");
+    if (!q.has("r") && !q.has("origem")) return { regiao: "" };
+    if (o === "convite") { try { sessionStorage.setItem("grscan_origem", "convite"); } catch (_) { /* sem armazenamento: segue sem origem */ } }
+    try { history.replaceState(null, "", location.pathname + location.hash); } catch (_) { /* navegador antigo */ }
+    return { regiao: /^[a-z_]{1,40}$/.test(r) ? r : "" };
+  })();
+  const origemVisita = () => { try { return sessionStorage.getItem("grscan_origem") === "convite" ? "convite" : ""; } catch (_) { return ""; } };
+
   const qModal = $("#qt-modal"), qForm = $("#qt");
   if (qModal && qForm) {
     const CALC = window.GRSCAN_CALC;
@@ -535,7 +546,9 @@ document.documentElement.classList.remove("no-js");
           if (!j || !j.ok) throw new Error("tabela");
           tabela = j;
           const t = Date.parse(j.agora); difServidor = isNaN(t) ? 0 : t - Date.now();
-          montar(); status.hidden = true; conteudo.hidden = false; iniciarOferta();
+          montar();
+          if (linkConvite.regiao && j.regioes.some((x) => x.id === linkConvite.regiao)) { regiao.value = linkConvite.regiao; atualizar(); }
+          status.hidden = true; conteudo.hidden = false; iniciarOferta();
         })
         .catch(() => { status.hidden = true; falha.hidden = false; })
         .finally(() => { carregando = null; });
@@ -762,6 +775,7 @@ document.documentElement.classList.remove("no-js");
         dentes: f.dentes.value.trim(), elementos: f.elementos.value.trim(), data_desejada: f.data_desejada.value, obs: f.obs.value.trim(),
         nome: f.nome.value.trim(), clinica: f.clinica.value.trim(), cro: f.cro.value.trim(), telefone: f.telefone.value.trim(),
         email: f.email.value.trim(), preferencia: f.preferencia.value, aceite_privacidade: f.aceite_privacidade.checked, website: f.website.value,
+        origem: origemVisita(),
       });
       const btn = $("#qt-submit"), label = btn.textContent;
       enviando = true; btn.disabled = true; btn.textContent = "Enviando…";
