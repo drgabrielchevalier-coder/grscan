@@ -55,3 +55,9 @@ afirmar($s === 200 && $x['ok'] && (int)db()->query('SELECT COUNT(*) FROM orcamen
 $pend = $base; $pend['regiao'] = 'outras'; $pend['email'] = 'c@exemplo.test';
 [$s, $x] = orcamento_processar($pend, '127.0.0.1');
 afirmar($s === 200 && $x['pendente'] === true && $x['total'] === null && $x['subtotal'] === 35500, 'pendente: subtotal e total nulo', $x);
+
+// Página antiga aberta durante um deploy: envio no formato antigo recebe aviso claro
+$antigo = ['trabalhos' => ['Prótese sobre implante'], 'arcadas' => 'Ambas', 'pacientes' => '1', 'nome' => 'Dr. Antigo',
+           'telefone' => '21999990000', 'email' => 'antigo@exemplo.test', 'preferencia' => 'WhatsApp', 'website' => ''];
+[$s, $x] = orcamento_processar($antigo, '127.0.0.1');
+afirmar($s === 409 && strpos($x['message'], 'Recarregue') !== false, 'formulário antigo: pede para recarregar a página', $x);

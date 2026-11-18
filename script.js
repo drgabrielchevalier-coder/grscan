@@ -1,5 +1,5 @@
 // Versão do deploy: não editar à mão (ver CLAUDE.md)
-var GRSCAN_VERSAO = "2.1";
+var GRSCAN_VERSAO = "2.2";
 
 /* ============================================================
    CONFIGURAÇÃO — edite apenas este bloco

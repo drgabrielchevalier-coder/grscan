@@ -9,7 +9,7 @@
 
 @layer tokens {
   :root {
-    --grscan-versao: "2.1"; /* versão do deploy: não editar à mão (ver CLAUDE.md) */
+    --grscan-versao: "2.2"; /* versão do deploy: não editar à mão (ver CLAUDE.md) */
     --bg: #0a0907;
     --bg-2: #0f0d0a;
     --panel: #15130f;

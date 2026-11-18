@@ -45,6 +45,10 @@ function orcamento_pedido(array $d): array {
 /* Devolve [status HTTP, resposta pública, registro interno|null] */
 function orcamento_processar(array $d, string $ip): array {
     if (!empty($d['website'])) return [200, ['ok' => true, 'numero' => null, 'total' => null, 'subtotal' => null, 'pendente' => false, 'message' => ''], null];
+    // Página antiga (aberta antes de um deploy) envia o formato anterior, sem a lista de pacientes
+    if (!is_array($d['pacientes'] ?? null) && (isset($d['trabalhos']) || !isset($d['regiao']))) {
+        return [409, ['ok' => false, 'message' => 'O orçamento do site foi atualizado. Recarregue a página para montar o orçamento com os valores na hora.'], null];
+    }
     [$dados, $erro] = orcamento_dados($d);
     if ($erro) return [400, ['ok' => false, 'message' => $erro], null];
     $pedido = orcamento_pedido($d);
