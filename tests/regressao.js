@@ -5,6 +5,9 @@ const { chromium } = require("playwright");
 const BASE = process.argv[2] || "http://127.0.0.1:8090";
 const OUT = process.argv[3];
 const results = [];
+// Versão e data do deploy lidas do próprio index.html (os testes não mudam a cada versão)
+const META = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8").match(/<meta name="grscan-versao" content="([^"]*)" data-data="(\d{4})-(\d{2})-(\d{2})"/) || [];
+const VERSAO = META[1], DATA_BR = META[4] + "/" + META[3] + "/" + META[2];
 const ok = (name, cond, info = "") => results.push({ name, pass: !!cond, info: String(info).slice(0, 300) });
 
 async function newPage(b, vp, opts = {}) {
@@ -203,7 +206,7 @@ const nextWeekday = () => { for (let i = 1; i < 10; i++) { const d = new Date();
     ok("versão: sem ?versao não há barra", (await p.locator("#versao-barra").count()) === 0);
     await abre(p, "/?versao");
     let r = await barra(p);
-    ok("versão: com ?versao mostra 2.0 ok", r && r.estado === "ok" && r.texto.includes("Versão 2.0") && r.texto.includes("10/11/2026") && r.role === "status", JSON.stringify(r));
+    ok("versão: com ?versao mostra a versão atual ok", r && r.estado === "ok" && r.texto.includes("Versão " + VERSAO) && r.texto.includes(DATA_BR) && r.role === "status", JSON.stringify(r));
     await abre(p, "/?versao=1&x=y");
     ok("versão: ?versao=1&x=y também abre", (await p.locator("#versao-barra").count()) === 1);
     ok("versão: barra sem erros de JS", p.errors.length === 0, p.errors.join(" | "));
@@ -217,7 +220,7 @@ const nextWeekday = () => { for (let i = 1; i < 10; i++) { const d = new Date();
     await p.context().close();
 
     p = await newPage(b, { width: 1280, height: 800 });
-    await trocaCss(p, " '2.0' ");
+    await trocaCss(p, " '" + VERSAO + "' ");
     await abre(p, "/?versao");
     r = await barra(p);
     ok("versão: aspas e espaços normalizados", r && r.estado === "ok", JSON.stringify(r));

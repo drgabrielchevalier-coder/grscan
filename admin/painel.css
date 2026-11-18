@@ -54,3 +54,6 @@ input[type=checkbox] { width: 20px; height: 20px; min-height: 0; accent-color: v
 .mudancas b { color: var(--text); font-weight: 500; }
 .grade2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
 @media (max-width: 640px) { .conteudo { padding: 20px 14px 48px; } .topo { padding: 12px 14px; } .cartao { padding: 16px; } }
+.tabela input.curto { max-width: 64px; display: inline-block; }
+.tabela.estreita { max-width: 520px; }
+.campo.limite { max-width: 260px; margin-top: 14px; }

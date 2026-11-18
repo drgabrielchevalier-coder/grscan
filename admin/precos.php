@@ -120,8 +120,8 @@ if ($erros) echo aviso("Não foi possível salvar:\n" . implode("\n", $erros));
         <td><input type="checkbox" name="proc[<?= h($id) ?>][sob_avaliacao]" value="1"<?= $marcado(['proc', $id, 'sob_avaliacao'], !empty($p['sob_avaliacao'])) ?> aria-label="<?= h($p['nome']) ?> sob avaliação"></td>
         <td><input type="checkbox" name="proc[<?= h($id) ?>][disponivel]" value="1"<?= $marcado(['proc', $id, 'disponivel'], !empty($p['disponivel'])) ?> aria-label="<?= h($p['nome']) ?> disponível"></td>
         <td><?php if (isset($p['implantes'])): ?>
-          <input name="proc[<?= h($id) ?>][imp_min]" value="<?= h($val(['proc', $id, 'imp_min'], (string)$p['implantes']['min'])) ?>" inputmode="numeric" style="max-width:60px" aria-label="Mínimo de implantes">
-          <input name="proc[<?= h($id) ?>][imp_max]" value="<?= h($val(['proc', $id, 'imp_max'], (string)($p['implantes']['max'] ?? ''))) ?>" inputmode="numeric" style="max-width:60px" aria-label="Máximo de implantes (vazio = sem limite)">
+          <input name="proc[<?= h($id) ?>][imp_min]" value="<?= h($val(['proc', $id, 'imp_min'], (string)$p['implantes']['min'])) ?>" inputmode="numeric" class="curto" aria-label="Mínimo de implantes">
+          <input name="proc[<?= h($id) ?>][imp_max]" value="<?= h($val(['proc', $id, 'imp_max'], (string)($p['implantes']['max'] ?? ''))) ?>" inputmode="numeric" class="curto" aria-label="Máximo de implantes (vazio = sem limite)">
         <?php else: ?>—<?php endif; ?></td>
       </tr>
     <?php endforeach; ?>
@@ -177,7 +177,7 @@ if ($erros) echo aviso("Não foi possível salvar:\n" . implode("\n", $erros));
 <section class="cartao">
   <h2>Desconto por volume (pacientes na mesma visita)</h2>
   <p class="dica">Vale só para os procedimentos marcados com "desconto por volume". Com 1 paciente vale o preço da tabela; aqui ficam os preços a partir de 2 pacientes. Se o preço da faixa for maior que o da tabela, vale o da tabela.</p>
-  <table class="tabela" style="max-width:520px">
+  <table class="tabela estreita">
     <thead><tr><th>A partir de (pacientes)</th><th class="num">Preço por escaneamento</th></tr></thead><tbody>
     <?php $fx = $atual['faixas_desconto']; $fx[] = ['min' => null, 'preco' => null];
     foreach ($fx as $i => $f): ?>
@@ -188,7 +188,7 @@ if ($erros) echo aviso("Não foi possível salvar:\n" . implode("\n", $erros));
     <?php endforeach; ?>
   </tbody></table>
   <p class="dica">Para remover uma faixa, apague a quantidade e o preço.</p>
-  <label class="campo" style="max-width:260px;margin-top:14px">Limite de pacientes por orçamento
+  <label class="campo limite">Limite de pacientes por orçamento
     <input name="limite_pacientes" value="<?= h($val(['limite_pacientes'], (string)$atual['limite_pacientes'])) ?>" inputmode="numeric"></label>
 </section>
 

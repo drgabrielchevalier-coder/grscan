@@ -29,8 +29,28 @@ Abra `https://grscan.implantstore.com.br/?versao`. Aparece no topo uma barra (s�
   e recarregue a página (se continuar, limpe o cache do navegador ou da Hostinger).
 O botão "fechar" tira a barra. Sem `?versao` no endereço, os visitantes não veem nada.
 
+## Painel administrativo e orçamento automático
+O orçamento do site usa a tabela de preços cadastrada no painel `/admin/`. Os dados ficam num banco
+SQLite na pasta `grscan-dados/`, **ao lado** do `public_html` (nunca dentro), criada automaticamente.
+
+**Primeiro acesso (uma vez só):**
+1. Abra `https://grscan.implantstore.com.br/admin/instalar.php`.
+2. No Gerenciador de Arquivos da Hostinger, abra `grscan-dados/grscan-config.php` (pasta acima de
+   `public_html`) e copie a `chave_instalacao`.
+3. Preencha a chave, seu nome, e-mail e uma senha de 12 caracteres ou mais.
+4. Ative o aplicativo autenticador (Google Authenticator, Microsoft Authenticator…) com a chave mostrada
+   e digite o código. Depois disso `instalar.php` deixa de existir (404).
+
+**No dia a dia:** `/admin/` → Preços (cada gravação vira uma versão no Histórico e vale na hora no site),
+Orçamentos (os recebidos pelo site, com número e tabela aplicada) e Administradores.
+
+**Backup:** copie a pasta `grscan-dados/` inteira (o backup da Hostinger já inclui a conta toda).
+Nunca coloque essa pasta nem arquivos `.sqlite` dentro do `public_html`.
+
 ## Testes de regressão
-Com o site rodando localmente (`php -S 127.0.0.1:8090`), execute `node tests/regressao.js http://127.0.0.1:8090`.
+Com o site rodando localmente (`GRSCAN_DADOS=/tmp/grscan-dados GRSCAN_SEM_EMAIL=1 php -S 127.0.0.1:8090`), execute
+`node tests/regressao.js http://127.0.0.1:8090`. Também: `php tests/php/executar.php` (regras, banco e TOTP),
+`node tests/orcamento-calculo.node.js` (cálculo no navegador) e `node tests/admin.js` (painel, sobe o próprio servidor).
 O teste usa o Playwright, intercepta os PHP (nenhum e-mail é enviado) e verifica agendamento, orçamento, odontograma,
 mapa, modelos 3D, links diretos e responsividade. Histórico de mudanças em `CHANGELOG.md`.
 
