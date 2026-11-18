@@ -47,6 +47,26 @@ Orçamentos (os recebidos pelo site, com número e tabela aplicada) e Administra
 **Backup:** copie a pasta `grscan-dados/` inteira (o backup da Hostinger já inclui a conta toda).
 Nunca coloque essa pasta nem arquivos `.sqlite` dentro do `public_html`.
 
+## Links de convite (prospecção pelo WhatsApp)
+Mande para o dentista o link da região da clínica dele. No WhatsApp aparece uma prévia própria (imagem
+`assets/convite-og.jpg`, gerada por `node tests/gerar-og-convite.js`) e, ao tocar, abre o orçamento já com a
+região escolhida. Os orçamentos que vierem daí aparecem no painel com o selo **convite** (filtro "Origem").
+
+| Região da clínica | Link para a mensagem |
+|---|---|
+| Barra da Tijuca | `https://grscan.implantstore.com.br/convite/?r=barra` |
+| Jacarepaguá | `https://grscan.implantstore.com.br/convite/?r=jacarepagua` |
+| Recreio dos Bandeirantes | `https://grscan.implantstore.com.br/convite/?r=recreio` |
+| Zona Sul | `https://grscan.implantstore.com.br/convite/?r=zona_sul` |
+| Tijuca | `https://grscan.implantstore.com.br/convite/?r=tijuca` |
+| Centro do Rio | `https://grscan.implantstore.com.br/convite/?r=centro` |
+| Duque de Caxias | `https://grscan.implantstore.com.br/convite/?r=duque_de_caxias` |
+| Nova Iguaçu | `https://grscan.implantstore.com.br/convite/?r=nova_iguacu` |
+| Niterói | `https://grscan.implantstore.com.br/convite/?r=niteroi` |
+| Outras localidades | `https://grscan.implantstore.com.br/convite/` (sem região) |
+
+Se uma região mudar de identificador no painel, o link antigo continua abrindo o orçamento, só que sem a região escolhida.
+
 ## Testes de regressão
 Com o site rodando localmente (`GRSCAN_DADOS=/tmp/grscan-dados GRSCAN_SEM_EMAIL=1 php -S 127.0.0.1:8090`), execute
 `node tests/regressao.js http://127.0.0.1:8090`. Também: `php tests/php/executar.php` (regras, banco e TOTP),

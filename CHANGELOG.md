@@ -1,5 +1,12 @@
 # Registro de alterações — GR Scan
 
+## 2.3 — 18/11/2026 — Link de convite para o WhatsApp
+- Novo endereço `/convite/?r=<região>` para prospecção: prévia própria no WhatsApp (imagem 1200×630 em preto
+  e dourado, título e descrição) e, ao tocar, o orçamento abre com a região da clínica já escolhida.
+- Orçamentos vindos do convite ficam marcados como "convite" no painel (selo e filtro "Origem").
+- Links por região no `README.md`.
+
+
 ## 2.2 — 18/11/2026 — Aviso para página desatualizada
 - Quem estava com o site aberto antes da 2.1 e enviava o formulário antigo recebia "Confirme o aceite do
   aviso de privacidade", sem caixa para marcar. Agora recebe: "O orçamento do site foi atualizado.
