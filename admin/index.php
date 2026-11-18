@@ -30,7 +30,7 @@ painel_inicio('Início', $admin);
       <td><?= h(date('d/m/Y H:i', strtotime($o['criado_em']))) ?></td>
       <td><?= h($d['clinica'] ?: $d['nome']) ?></td>
       <td class="num"><?= $o['pendente'] ? brl_painel((int)$o['subtotal_centavos']) . ' <small>+ a confirmar</small>' : brl_painel((int)$o['total_centavos']) ?></td>
-      <td><span class="status"><?= h($o['status']) ?></span></td></tr>
+      <td><span class="status"><?= h($o['status']) ?></span><?= ($d['origem'] ?? '') === 'convite' ? ' <span class="status status--convite">convite</span>' : '' ?></td></tr>
   <?php endforeach; ?>
   </tbody></table><?php endif; ?>
 </section>

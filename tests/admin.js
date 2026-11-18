@@ -185,6 +185,26 @@ async function codigo(seg) {
     r = await p.goto(BASE + "/admin/orcamentos.php?id=999999");
     ok("orçamento: id inexistente → 404", r.status() === 404, r.status());
 
+    // ---------- Origem "convite" ----------
+    {
+      const s3 = await ctx.newPage();
+      await s3.goto(BASE + "/convite/?r=tijuca"); await s3.waitForSelector("#qt-conteudo:not([hidden])");
+      ok("convite: /convite/ abre o orçamento com a região", (await s3.inputValue("#qt-regiao")) === "tijuca");
+      await s3.selectOption(".qt-paciente [data-campo=procedimento]", "orto");
+      await s3.fill('#qt [name="nome"]', "Dra. Convidada"); await s3.fill('#qt [name="clinica"]', "Clínica Convite");
+      await s3.fill('#qt [name="telefone"]', "21966665555"); await s3.fill('#qt [name="email"]', "convidada@exemplo.test");
+      await s3.check('#qt [name="aceite_privacidade"]'); await s3.click("#qt-submit"); await s3.waitForSelector("#qt-done:not([hidden])");
+      const nc = ((await s3.textContent("#qt-numero")).match(/GRS-\d{4}-\d{5}/) || [""])[0];
+      await s3.close();
+      await p.goto(BASE + "/admin/orcamentos.php");
+      ok("convite: selo na lista do painel", (await p.textContent(`tr:has-text("${nc}")`)).includes("convite"));
+      await p.selectOption("[name=origem]", "convite"); await p.click("button >> text=Filtrar");
+      const filtrada = await p.textContent("main");
+      ok("convite: filtro por origem", filtrada.includes(nc) && !filtrada.includes("Clínica Sorriso Teste"), filtrada.slice(0, 300));
+      await p.click(`a >> text=${nc}`);
+      ok("convite: selo no detalhe", (await p.textContent("h1")).includes("convite"));
+    }
+
     // ---------- Administradores (Tarefa 7) ----------
     const EMAIL2 = "segundo@grscan.test", SENHA2 = "outra-senha-forte-456";
     await p.goto(BASE + "/admin/administradores.php");

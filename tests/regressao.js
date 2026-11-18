@@ -139,6 +139,22 @@ const nextWeekday = () => { for (let i = 1; i < 10; i++) { const d = new Date();
   ok("orçamento: sem erros de JS", p.errors.length === 0, p.errors.join(" | "));
   await p.context().close();
 
+  // ---------- Link de convite: região e origem ----------
+  p = await newPage(b, { width: 1280, height: 800 });
+  await p.route("**/orcamento.php", async (r) => { p.payloads.orcamento = JSON.parse(r.request().postData() || "{}"); await r.fulfill({ json: { ok: true, numero: "GRS-2026-00077", total: 18000, subtotal: 18000, pendente: false } }); });
+  await p.goto(BASE + "/?r=niteroi&origem=convite#orcamento", { waitUntil: "load" }); await p.waitForSelector("#qt-conteudo:not([hidden])", { timeout: 8000 });
+  ok("convite: região do link já escolhida", (await p.inputValue("#qt-regiao")) === "niteroi");
+  ok("convite: endereço limpo, mantendo #orcamento", (await p.evaluate(() => location.search)) === "" && (await p.evaluate(() => location.hash)) === "#orcamento", await p.evaluate(() => location.href));
+  await p.fill('#qt [name="nome"]', "Dr. Convite"); await p.fill('#qt [name="telefone"]', "21999990000"); await p.fill('#qt [name="email"]', "c@exemplo.org");
+  await p.check('#qt [name="aceite_privacidade"]'); await p.click("#qt-submit"); await p.waitForTimeout(600);
+  ok("convite: orçamento enviado com origem convite", (p.payloads.orcamento || {}).origem === "convite", JSON.stringify(p.payloads.orcamento || {}).slice(0, 200));
+  await p.context().close();
+  p = await newPage(b, { width: 1280, height: 800 });
+  await p.goto(BASE + "/?r=%3Cscript%3E&origem=hack#orcamento", { waitUntil: "load" }); await p.waitForSelector("#qt-conteudo:not([hidden])", { timeout: 8000 });
+  ok("convite: região inválida é ignorada sem erro", (await p.inputValue("#qt-regiao")) === "" && p.errors.length === 0, p.errors.join(" | "));
+  ok("convite: origem desconhecida não é guardada", (await p.evaluate(() => { try { return sessionStorage.getItem("grscan_origem"); } catch (e) { return null; } })) === null);
+  await p.context().close();
+
   // ---------- Oferta de deslocamento grátis ----------
   const comOferta = (pg, fimMs, agoraMs) => pg.route("**/precos-publicos.php*", async (r) => {
     const res = await r.fetch(); const j = await res.json();

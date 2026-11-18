@@ -22,7 +22,7 @@ function painel_inicio(string $titulo, ?array $admin = null): void {
        . '<meta name="robots" content="noindex, nofollow">'
        . '<title>' . h($titulo) . ' · Painel GR Scan</title>'
        . '<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">'
-       . '<link rel="stylesheet" href="painel.css?v=3">'
+       . '<link rel="stylesheet" href="painel.css?v=4">'
        . '</head><body><header class="topo"><a class="marca" href="index.php"><img src="../assets/logo.svg" alt="" width="34" height="31"><span>GR Scan <small>painel</small></span></a>'
        . $nav . '</header><main class="conteudo">';
 }

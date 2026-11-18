@@ -19,6 +19,7 @@ function orcamento_dados(array $d): array {
         $x = str_replace(["\r", "\0"], '', trim((string)$x));
         $v[$k] = mb_substr($x, 0, $max);
     }
+    $v['origem'] = ($d['origem'] ?? '') === 'convite' ? 'convite' : '';
     if ($v['nome'] === '') return [$v, 'Informe o nome do dentista responsável.'];
     if (strlen(preg_replace('/\D/', '', $v['telefone'])) < 10) return [$v, 'Informe um WhatsApp com DDD.'];
     if (!filter_var($v['email'], FILTER_VALIDATE_EMAIL)) return [$v, 'E-mail inválido.'];

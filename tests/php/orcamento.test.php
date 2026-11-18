@@ -61,3 +61,13 @@ $antigo = ['trabalhos' => ['Prótese sobre implante'], 'arcadas' => 'Ambas', 'pa
            'telefone' => '21999990000', 'email' => 'antigo@exemplo.test', 'preferencia' => 'WhatsApp', 'website' => ''];
 [$s, $x] = orcamento_processar($antigo, '127.0.0.1');
 afirmar($s === 409 && strpos($x['message'], 'Recarregue') !== false, 'formulário antigo: pede para recarregar a página', $x);
+
+// Origem do orçamento: só "convite" é aceita
+$c1 = $base; $c1['email'] = 'conv@exemplo.test'; $c1['origem'] = 'convite';
+[, $x] = orcamento_processar($c1, '127.0.0.1');
+$d = json_decode(db()->query('SELECT dados_json FROM orcamentos WHERE numero = ' . db()->quote($x['numero']))->fetchColumn(), true);
+afirmar(($d['origem'] ?? null) === 'convite', 'origem: convite é gravada');
+$c2 = $base; $c2['email'] = 'outra@exemplo.test'; $c2['origem'] = '<script>';
+[, $x] = orcamento_processar($c2, '127.0.0.1');
+$d = json_decode(db()->query('SELECT dados_json FROM orcamentos WHERE numero = ' . db()->quote($x['numero']))->fetchColumn(), true);
+afirmar(($d['origem'] ?? null) === '', 'origem: valor desconhecido é gravado vazio');
