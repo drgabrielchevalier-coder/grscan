@@ -25,7 +25,7 @@ if (isset($_GET['id'])) {
       <td><?= h($it['descricao']) ?><?= $it['desconto'] > 0 ? '<br><small class="dica">desconto clínica: de ' . brl_painel($it['preco_base']) . '</small>' : '' ?></td>
       <td class="num"><?= (int)$it['qtd'] ?></td>
       <td class="num"><?= $it['unitario'] === null ? 'sob avaliação' : brl_painel($it['unitario']) ?></td>
-      <td class="num"><?= $it['total'] === null ? 'sob avaliação' : brl_painel($it['total']) ?></td></tr>
+      <td class="num"><?= !empty($it['promocao']) ? 'grátis (oferta)<br><small class="dica">de ' . brl_painel($it['preco_base']) . '</small>' : ($it['total'] === null ? 'sob avaliação' : brl_painel($it['total'])) ?></td></tr>
   <?php endforeach; ?>
   </tbody><tfoot><tr><th colspan="4"><?= $o['pendente'] ? 'Subtotal (total sob confirmação)' : 'Total' ?></th>
     <th class="num"><?= brl_painel($o['pendente'] ? (int)$o['subtotal_centavos'] : (int)$o['total_centavos']) ?></th></tr></tfoot></table></div>

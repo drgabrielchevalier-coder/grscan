@@ -57,3 +57,7 @@ input[type=checkbox] { width: 20px; height: 20px; min-height: 0; accent-color: v
 .tabela input.curto { max-width: 64px; display: inline-block; }
 .tabela.estreita { max-width: 520px; }
 .campo.limite { max-width: 260px; margin-top: 14px; }
+.oferta { border-color: var(--gold); }
+.oferta .ok { color: var(--gold-1); }
+.oferta .acoes { align-items: end; }
+.oferta .campo { min-width: 180px; }

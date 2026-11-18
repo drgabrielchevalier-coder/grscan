@@ -9,6 +9,33 @@ $erros = [];
 $post = $_SERVER['REQUEST_METHOD'] === 'POST';
 $P = fn(...$k) => array_reduce($k, fn($a, $x) => is_array($a) && array_key_exists($x, $a) ? $a[$x] : null, $_POST);
 
+/* Oferta de deslocamento grátis: abrir (por horas ou até data/hora) e encerrar */
+$acaoOferta = $post ? (string)($_POST['acao'] ?? '') : '';
+if (in_array($acaoOferta, ['oferta_abrir', 'oferta_encerrar'], true)) {
+    csrf_verificar();
+    $novo = $atual;
+    if ($acaoOferta === 'oferta_encerrar') {
+        $novo['promocao_deslocamento'] = null;
+    } else {
+        $fimTxt = trim((string)($_POST['fim'] ?? ''));
+        $horas = (int)($_POST['horas'] ?? 0);
+        $t = $fimTxt !== '' ? strtotime($fimTxt) : (in_array($horas, [1, 2, 4, 8, 24], true) ? time() + $horas * 3600 : false);
+        if ($t === false || $t <= time() + 60) $erros[] = 'Escolha um término no futuro para a oferta.';
+        elseif ($t > time() + 30 * 86400) $erros[] = 'A oferta pode durar no máximo 30 dias.';
+        else $novo['promocao_deslocamento'] = ['fim' => date('c', $t)];
+    }
+    if (!$erros) {
+        $mud = precos_diferencas($atual, $novo);
+        if ($mud) {
+            $v = precos_salvar($novo, (int)$admin['id'], $acaoOferta === 'oferta_abrir' ? 'Oferta de deslocamento grátis' : 'Oferta encerrada');
+            auditar((int)$admin['id'], $acaoOferta, ['versao' => $v, 'fim' => $novo['promocao_deslocamento']['fim'] ?? null]);
+        }
+        header('Location: precos.php?oferta=1', true, 303);
+        exit;
+    }
+    $post = false; // re-exibe a tabela com os valores salvos
+}
+
 if ($post) {
     csrf_verificar();
     $novo = $atual;
@@ -103,9 +130,26 @@ painel_inicio('Preços', $admin);
 <?php
 if (isset($_GET['salvo'])) echo aviso('Tabela salva como versão ' . (int)$_GET['salvo'] . '. O orçamento do site já usa os novos valores.', 'ok');
 if (isset($_GET['igual'])) echo aviso('Nenhuma alteração para salvar.', 'ok');
+if (isset($_GET['oferta'])) echo aviso('Oferta atualizada. O orçamento do site já reflete a mudança.', 'ok');
 if ($erros) echo aviso("Não foi possível salvar:\n" . implode("\n", $erros));
 ?>
 <p class="dica">Valores em reais (ex.: 180,00). Itens indisponíveis não aparecem no orçamento do site. "Sob avaliação" mostra o item sem preço, e o total fica sujeito à confirmação.</p>
+<?php require_once __DIR__ . '/../app/calculo.php'; $ofFim = oferta_deslocamento_ativa($atual); ?>
+<section class="cartao oferta" id="oferta">
+  <h2>Oferta de deslocamento grátis</h2>
+  <?php if ($ofFim): ?>
+    <p><b class="ok">Oferta aberta até <?= h(date('d/m/Y \à\s H:i', strtotime($ofFim))) ?></b>. O orçamento do site mostra a taxa riscada e a contagem regressiva até esse horário, igual para todos os visitantes.</p>
+    <form method="post" class="acoes"><?= csrf_campo() ?><input type="hidden" name="acao" value="oferta_encerrar">
+      <button type="submit" class="btn btn--perigo">Encerrar agora</button></form>
+  <?php else: ?>
+    <p class="dica">Oferta fechada. Ao abrir, o deslocamento fica grátis em todas as regiões com taxa até o horário escolhido; depois volta sozinho ao normal. "Outras localidades" continua sob consulta.</p>
+    <form method="post" class="acoes"><?= csrf_campo() ?><input type="hidden" name="acao" value="oferta_abrir">
+      <label class="campo">Duração<select name="horas"><option value="1">1 hora</option><option value="2">2 horas</option><option value="4" selected>4 horas</option><option value="8">8 horas</option><option value="24">24 horas</option></select></label>
+      <label class="campo">ou até (data e hora)<input type="datetime-local" name="fim"></label>
+      <button type="submit" class="btn btn--gold">Abrir oferta</button></form>
+  <?php endif; ?>
+</section>
+
 <form method="post">
 <?= csrf_campo() ?>
 <section class="cartao">

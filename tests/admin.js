@@ -128,6 +128,38 @@ async function codigo(seg) {
     await p.check('[name="comp[tibase][disponivel]"]'); await p.click("button[type=submit] >> text=Salvar");
 
 
+    // ---------- Oferta de deslocamento grátis ----------
+    const oferta = async () => (await (await p.request.get(BASE + "/precos-publicos.php")).json()).promocao_deslocamento;
+    ok("oferta: fechada por padrão", (await oferta()) === null);
+    await p.goto(BASE + "/admin/precos.php");
+    await p.selectOption("[name=horas]", "4"); await p.click("button >> text=Abrir oferta");
+    const of = await oferta();
+    const resta = of ? (Date.parse(of.fim) - Date.now()) / 3600000 : 0;
+    ok("oferta: aberta por 4 h aparece no público com o término real", of && resta > 3.9 && resta <= 4.01, JSON.stringify(of));
+    ok("oferta: painel mostra a oferta aberta e o botão de encerrar", (await p.textContent("#oferta")).includes("aberta até") && (await p.isVisible("button >> text=Encerrar agora")));
+    {
+      const s2 = await ctx.newPage();
+      await s2.goto(BASE + "/#orcamento"); await s2.waitForSelector("#qt-conteudo:not([hidden])");
+      await s2.selectOption("#qt-regiao", "niteroi"); await s2.selectOption(".qt-paciente [data-campo=procedimento]", "implante");
+      await s2.fill("[data-campo=transfers]", "1"); await s2.fill("[data-campo=tibases]", "1");
+      await s2.fill('#qt [name="nome"]', "Dr. Oferta"); await s2.fill('#qt [name="telefone"]', "21977776666"); await s2.fill('#qt [name="email"]', "oferta@exemplo.test");
+      await s2.check('#qt [name="aceite_privacidade"]'); await s2.click("#qt-submit"); await s2.waitForSelector("#qt-done:not([hidden])");
+      const txt = await s2.textContent("#qt-numero");
+      ok("oferta: orçamento enviado grava o deslocamento grátis (R$ 295,00)", txt.includes("R$ 295,00"), txt);
+      const num = (txt.match(/GRS-\d{4}-\d{5}/) || [""])[0];
+      await s2.close();
+      await p.goto(BASE + "/admin/orcamentos.php"); await p.click(`a >> text=${num}`);
+      ok("oferta: detalhe no painel mostra grátis (oferta) e o valor original", (await p.textContent("main")).includes("grátis (oferta)") && (await p.textContent("main")).includes("de R$ 90,00"));
+    }
+    await p.goto(BASE + "/admin/historico.php");
+    ok("oferta: abertura registrada no histórico", (await p.textContent("main")).includes("Oferta de deslocamento grátis: aberta até"));
+    await p.goto(BASE + "/admin/precos.php");
+    await p.click("button >> text=Encerrar agora");
+    ok("oferta: encerrar tira a oferta do público", (await oferta()) === null && (await p.textContent("#oferta")).includes("fechada"));
+    await p.goto(BASE + "/admin/precos.php");
+    await p.fill("[name=fim]", "2020-01-01T10:00"); await p.click("button >> text=Abrir oferta");
+    ok("oferta: término no passado é recusado", (await p.isVisible(".aviso--erro")) && (await oferta()) === null);
+
     // ---------- Orçamentos recebidos (Tarefa 7) ----------
     const site = await ctx.newPage();
     await site.goto(BASE + "/#orcamento"); await site.waitForSelector("#qt-conteudo:not([hidden])");
