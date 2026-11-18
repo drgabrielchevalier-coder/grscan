@@ -1,0 +1,38 @@
+{
+  "procedimentos": [
+    {"id": "orto", "nome": "Ortodontia / alinhadores", "preco": 18000, "desconto_volume": true, "disponivel": true, "sob_avaliacao": false},
+    {"id": "placas", "nome": "Placas e contenções", "preco": 18000, "desconto_volume": true, "disponivel": true, "sob_avaliacao": false},
+    {"id": "coroas", "nome": "Coroas sobre dentes", "preco": 18000, "desconto_volume": true, "disponivel": true, "sob_avaliacao": false},
+    {"id": "inlay", "nome": "Inlay / onlay / overlay", "preco": 18000, "desconto_volume": true, "disponivel": true, "sob_avaliacao": false},
+    {"id": "facetas", "nome": "Facetas / lentes de contato", "preco": 18000, "desconto_volume": true, "disponivel": true, "sob_avaliacao": false},
+    {"id": "fixa", "nome": "Prótese fixa sobre dentes", "preco": 18000, "desconto_volume": true, "disponivel": true, "sob_avaliacao": false},
+    {"id": "removivel", "nome": "Prótese parcial removível", "preco": 18000, "desconto_volume": true, "disponivel": true, "sob_avaliacao": false},
+    {"id": "total", "nome": "Prótese total / arcada edêntula", "preco": 21000, "desconto_volume": false, "disponivel": true, "sob_avaliacao": false},
+    {"id": "implante_unitario", "nome": "Implante unitário", "preco": 19000, "desconto_volume": false, "disponivel": true, "sob_avaliacao": false, "grupo": "implante", "implantes": {"min": 1, "max": 1}},
+    {"id": "implantes_multiplos", "nome": "Múltiplos implantes (2 a 4)", "preco": 22000, "desconto_volume": false, "disponivel": true, "sob_avaliacao": false, "grupo": "implante", "implantes": {"min": 2, "max": 4}},
+    {"id": "protocolo", "nome": "Protocolo total sobre implantes", "preco": null, "desconto_volume": false, "disponivel": true, "sob_avaliacao": true, "implantes": {"min": 1, "max": null}},
+    {"id": "reescaneamento", "nome": "Reescaneamento por alteração clínica", "preco": 9000, "desconto_volume": false, "disponivel": true, "sob_avaliacao": false}
+  ],
+  "componentes": [
+    {"id": "transfer", "nome": "Transfer digital / scanbody", "preco": 2500, "disponivel": true, "sob_avaliacao": false},
+    {"id": "tibase", "nome": "TiBase padrão elegível", "preco": 8000, "disponivel": true, "sob_avaliacao": false}
+  ],
+  "regioes": [
+    {"id": "barra", "nome": "Barra da Tijuca", "taxa": 0, "sob_consulta": false},
+    {"id": "jacarepagua", "nome": "Jacarepaguá", "taxa": 3000, "sob_consulta": false},
+    {"id": "recreio", "nome": "Recreio dos Bandeirantes", "taxa": 4000, "sob_consulta": false},
+    {"id": "zona_sul", "nome": "Zona Sul", "taxa": 5000, "sob_consulta": false},
+    {"id": "tijuca", "nome": "Tijuca", "taxa": 6000, "sob_consulta": false},
+    {"id": "centro", "nome": "Centro do Rio", "taxa": 7000, "sob_consulta": false},
+    {"id": "duque_de_caxias", "nome": "Duque de Caxias", "taxa": 7000, "sob_consulta": false},
+    {"id": "nova_iguacu", "nome": "Nova Iguaçu", "taxa": 8000, "sob_consulta": false},
+    {"id": "niteroi", "nome": "Niterói", "taxa": 9000, "sob_consulta": false},
+    {"id": "outras", "nome": "Outras localidades", "taxa": null, "sob_consulta": true}
+  ],
+  "faixas_desconto": [
+    {"min": 1, "preco": 18000},
+    {"min": 2, "preco": 17000},
+    {"min": 5, "preco": 16000}
+  ],
+  "limite_pacientes": 30
+}
