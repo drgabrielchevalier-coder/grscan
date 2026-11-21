@@ -15,7 +15,11 @@ const ANO = new Date().getFullYear();
 const b64 = (f) => fs.readFileSync(path.join(RAIZ, f)).toString("base64");
 const LOGO = "data:image/png;base64," + b64("assets/logo-completa.png");
 const MONO = "data:image/svg+xml;base64," + b64("assets/logo.svg");
-const SCANNER = "data:image/png;base64," + b64("assets/scanner-render.png");
+// Fotos reais do scanner (fora do Git, em entregas/imagens-portfolio); sem elas, usa a ilustração do site
+const FOTOS = path.join(RAIZ, "entregas/imagens-portfolio");
+const foto = (f) => fs.existsSync(path.join(FOTOS, f)) ? "data:image/png;base64," + fs.readFileSync(path.join(FOTOS, f)).toString("base64") : null;
+const FOTO_MAO = foto("scanner-mao.png"), FOTO_PONTEIRAS = foto("scanner-ponteiras.png");
+const SCANNER = FOTO_MAO || "data:image/png;base64," + b64("assets/scanner-render.png");
 
 const reais = (c) => Math.floor(c / 100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 const cent = (c) => String(c % 100).padStart(2, "0");
@@ -62,6 +66,7 @@ async function tabela() {
     // 1. Capa
     `<section class="pg capa">
       <div class="capa__topo"><img class="capa__logo" src="${LOGO}" alt="GR Scan — Digital Scan"></div>
+      ${FOTO_PONTEIRAS ? `<img class="capa__foto" src="${FOTO_PONTEIRAS}" alt="Scanner intraoral iTero">` : ""}
       <div class="capa__meio">
         ${rotulo("Portfólio de serviços")}
         <h1>O escaneamento<br>iTero vai<br>até você.</h1>
@@ -75,7 +80,7 @@ async function tabela() {
       ${rotulo("A experiência GR Scan")}
       <h2>Você atende.<br>Nós levamos o digital.</h2>
       <p class="lead">Vamos até o seu consultório com o scanner iTero e um operador especializado, no horário agendado. O modelo digital segue direto para o seu laboratório.</p>
-      <figure class="scanner"><img src="${SCANNER}" alt="Ilustração de scanner intraoral"><figcaption>Imagem ilustrativa</figcaption></figure>
+      <figure class="scanner${FOTO_MAO ? " scanner--foto" : ""}"><img src="${SCANNER}" alt="${FOTO_MAO ? "Scanner intraoral iTero" : "Ilustração de scanner intraoral"}"><figcaption>${FOTO_MAO ? "Scanner iTero" : "Imagem ilustrativa"}</figcaption></figure>
       <div class="beneficios">
         <div><span class="b__n">01</span><h3>Sem investir em equipamento</h3><p>O scanner vem com a GR Scan. Você paga só pelo escaneamento.</p></div>
         <div><span class="b__n">02</span><h3>Sem moldeira e sem gesso</h3><p>Duas arcadas e registro oclusal capturados no próprio consultório.</p></div>
@@ -126,7 +131,7 @@ async function tabela() {
         <p><span>E-mail</span>${CONTATO.email}</p>
         <p><span>Site</span>${CONTATO.site}</p>
       </div>
-      <p class="fino">Valores sujeitos à confirmação da disponibilidade, da compatibilidade dos componentes e da viabilidade técnica. Atendimento com agendamento; taxa de deslocamento conforme a região, informada no orçamento online.</p>
+      <p class="fino">Valores sujeitos à confirmação da disponibilidade, da compatibilidade dos componentes e da viabilidade técnica. Atendimento com agendamento; taxa de deslocamento conforme a região, informada no orçamento online. iTero é marca registrada da Align Technology, Inc.</p>
     </section>`,
   ];
 
@@ -167,9 +172,10 @@ async function tabela() {
   /* capa */
   .capa { padding: 0; background: radial-gradient(ellipse 70% 45% at 50% 30%, rgba(214,165,72,.10), transparent 70%), var(--bg); }
   .capa__mono { position: absolute; right: -330px; top: 330px; width: 820px; opacity: .06; }
-  .capa__topo { position: absolute; top: 210px; left: 0; right: 0; text-align: center; }
+  .capa__topo { position: absolute; top: 170px; left: 0; right: 0; text-align: center; }
   .capa__logo { width: 420px; }
-  .capa__meio { position: absolute; left: 120px; right: 120px; top: 960px; }
+  .capa__meio { position: absolute; left: 120px; right: 120px; top: 1080px; }
+  .capa__foto { position: absolute; left: 60px; top: 560px; width: 960px; height: 540px; object-fit: contain; }
   .capa h1 { font-size: 100px; margin-bottom: 44px; }
   .capa__sub { font-size: 32px; color: var(--soft); line-height: 1.5; max-width: 760px; }
   .capa__base { position: absolute; left: 120px; right: 120px; bottom: 120px; display: flex; justify-content: space-between; padding-top: 30px; border-top: 1px solid var(--hair); font-size: 21px; letter-spacing: 4px; color: var(--soft); }
@@ -178,6 +184,8 @@ async function tabela() {
   /* proposta */
   .scanner { position: relative; margin: -20px -140px 40px -40px; height: 300px; }
   .scanner img { width: 100%; height: 300px; object-fit: contain; filter: drop-shadow(0 40px 50px rgba(0,0,0,.7)); }
+  .scanner--foto { margin: -10px -120px 40px 120px; height: 400px; }
+  .scanner--foto img { height: 400px; object-position: right center; filter: none; }
   .scanner figcaption { position: absolute; right: 150px; bottom: -14px; font-size: 17px; color: var(--dim); letter-spacing: 1px; }
   .beneficios { display: flex; flex-direction: column; }
   .beneficios div { display: grid; grid-template-columns: 90px 1fr; column-gap: 10px; padding: 26px 0; border-top: 1px solid rgba(255,255,255,.08); }
