@@ -7,7 +7,7 @@
     {"id": "facetas", "nome": "Facetas / lentes de contato", "preco": 18000, "desconto_volume": true, "disponivel": true, "sob_avaliacao": false},
     {"id": "fixa", "nome": "Prótese fixa sobre dentes", "preco": 18000, "desconto_volume": true, "disponivel": true, "sob_avaliacao": false},
     {"id": "removivel", "nome": "Prótese parcial removível", "preco": 18000, "desconto_volume": true, "disponivel": true, "sob_avaliacao": false},
-    {"id": "total", "nome": "Prótese total / arcada edêntula", "preco": 21000, "desconto_volume": false, "disponivel": true, "sob_avaliacao": false},
+    {"id": "total", "nome": "Escaneamento de molde / modelo", "preco": 9000, "desconto_volume": false, "disponivel": true, "sob_avaliacao": false},
     {"id": "implante_unitario", "nome": "Implante unitário", "preco": 19000, "desconto_volume": false, "disponivel": true, "sob_avaliacao": false, "grupo": "implante", "implantes": {"min": 1, "max": 1}},
     {"id": "implantes_multiplos", "nome": "Múltiplos implantes (2 a 4)", "preco": 22000, "desconto_volume": false, "disponivel": true, "sob_avaliacao": false, "grupo": "implante", "implantes": {"min": 2, "max": 4}},
     {"id": "protocolo", "nome": "Protocolo total sobre implantes", "preco": null, "desconto_volume": false, "disponivel": true, "sob_avaliacao": true, "implantes": {"min": 1, "max": null}},
