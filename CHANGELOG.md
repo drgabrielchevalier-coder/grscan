@@ -1,5 +1,11 @@
 # Registro de alterações — GR Scan
 
+## 2.4 — 21/11/2026 — WhatsApp, e-mail e CNPJ
+- WhatsApp (21) 99211-4630 e e-mail grscan@implantstore.com.br configurados: os botões de contato, o ícone
+  flutuante e o rodapé abrem a conversa e o e-mail; "Enviar pelo WhatsApp" do orçamento vai direto para a GR Scan.
+- CNPJ 69.304.216/0001-47 no rodapé e nos dados estruturados (JSON-LD).
+
+
 ## 2.3 — 18/11/2026 — Link de convite para o WhatsApp
 - Novo endereço `/convite/?r=<região>` para prospecção: prévia própria no WhatsApp (imagem 1200×630 em preto
   e dourado, título e descrição) e, ao tocar, o orçamento abre com a região da clínica já escolhida.
