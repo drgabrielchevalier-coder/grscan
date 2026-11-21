@@ -9,7 +9,7 @@ const fs = require("fs"), path = require("path");
 const RAIZ = path.join(__dirname, "..");
 const SAIDA = path.resolve(process.argv[2] || path.join(RAIZ, "entregas/GR-Scan-Portfolio-2026.pdf"));
 const SITE = "https://grscan.implantstore.com.br";
-const CONTATO = { whatsapp: "(21) 99292-1042", email: "grscan@implantstore.com.br", site: "grscan.implantstore.com.br" };
+const CONTATO = { whatsapp: "(21) 99211-4630", wa: "https://wa.me/5521992114630", email: "grscan@implantstore.com.br", site: "grscan.implantstore.com.br", cnpj: "69.304.216/0001-47" };
 const ANO = new Date().getFullYear();
 
 const b64 = (f) => fs.readFileSync(path.join(RAIZ, f)).toString("base64");
@@ -53,7 +53,7 @@ async function tabela() {
   const qr = await QR.toDataURL(SITE + "/convite/", { margin: 1, width: 520, color: { dark: "#0a0907", light: "#f3ede3" } });
 
   const cabecalho = (n) => `<header class="cab"><img src="${MONO}" alt=""><span>GR Scan</span><span class="num">${String(n).padStart(2, "0")}</span></header>`;
-  const rodape = `<footer class="rod"><span>Portfólio ${ANO}</span><span>${CONTATO.site}</span></footer>`;
+  const rodape = `<footer class="rod"><span>Portfólio ${ANO} · CNPJ ${CONTATO.cnpj}</span><a href="${CONTATO.wa}">WhatsApp ${CONTATO.whatsapp}</a></footer>`;
   const rotulo = (txt) => `<p class="rotulo">${txt}</p>`;
 
   const faixaHtml = faixas.map((f, i) => {
@@ -73,6 +73,7 @@ async function tabela() {
         <p class="capa__sub">Fluxo digital na sua cadeira, sem investir em um scanner.</p>
       </div>
       <div class="capa__base"><span>Tabela ${ANO}</span><span>Rio de Janeiro e Região Metropolitana</span></div>
+      <p class="capa__cnpj">GR Scan · CNPJ ${CONTATO.cnpj}</p>
     </section>`,
 
     // 2. Proposta
@@ -124,12 +125,13 @@ async function tabela() {
       <img class="contato__logo" src="${LOGO}" alt="GR Scan">
       ${rotulo("Orçamento online")}
       <h2>Veja o valor para<br>a sua clínica.</h2>
-      <img class="qr" src="${qr}" alt="QR Code para o orçamento online">
-      <p class="qr__link">${CONTATO.site}/convite</p>
+      <a href="${SITE}/convite/"><img class="qr" src="${qr}" alt="QR Code para o orçamento online"></a>
+      <p class="qr__link"><a href="${SITE}/convite/">${CONTATO.site}/convite</a></p>
       <div class="contato__lista">
-        <p><span>WhatsApp</span>${CONTATO.whatsapp}</p>
-        <p><span>E-mail</span>${CONTATO.email}</p>
-        <p><span>Site</span>${CONTATO.site}</p>
+        <p><span>WhatsApp</span><a href="${CONTATO.wa}">${CONTATO.whatsapp}</a></p>
+        <p><span>E-mail</span><a href="mailto:${CONTATO.email}">${CONTATO.email}</a></p>
+        <p><span>Site</span><a href="${SITE}/">${CONTATO.site}</a></p>
+        <p><span>CNPJ</span>${CONTATO.cnpj}</p>
       </div>
       <p class="fino">Valores sujeitos à confirmação da disponibilidade, da compatibilidade dos componentes e da viabilidade técnica. Atendimento com agendamento; taxa de deslocamento conforme a região, informada no orçamento online. iTero é marca registrada da Align Technology, Inc.</p>
     </section>`,
@@ -149,6 +151,8 @@ async function tabela() {
   .cab img { width: 34px; }
   .cab span { font-size: 20px; letter-spacing: 6px; font-weight: 400; color: var(--soft); }
   .cab .num { margin-left: auto; color: var(--gold); letter-spacing: 2px; }
+  a { color: inherit; text-decoration: none; }
+  .capa__cnpj { position: absolute; left: 120px; right: 120px; bottom: 70px; font-size: 18px; letter-spacing: 3px; color: var(--dim); }
   .rod { position: absolute; left: 120px; right: 120px; bottom: 80px; display: flex; justify-content: space-between; font-size: 19px; letter-spacing: 3px; color: var(--dim); border-top: 1px solid rgba(255,255,255,.07); padding-top: 26px; }
 
   .rotulo { font-size: 21px; letter-spacing: 7px; font-weight: 500; color: var(--gold); margin-bottom: 34px; }
