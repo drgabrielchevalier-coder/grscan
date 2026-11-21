@@ -1,14 +1,14 @@
 // Versão do deploy: não editar à mão (ver CLAUDE.md)
-var GRSCAN_VERSAO = "2.3";
+var GRSCAN_VERSAO = "2.4";
 
 /* ============================================================
    CONFIGURAÇÃO — edite apenas este bloco
    ============================================================ */
 const CONFIG = {
   // WhatsApp com DDI + DDD, só números. Ex.: "5581999999999"
-  whatsapp: "",
+  whatsapp: "5521992114630",
   whatsappMessage: "Olá! Gostaria de solicitar um orçamento de escaneamento intraoral com a GR Scan.",
-  email: "",       // Ex.: "contato@grscan.com.br" (aparece no rodapé)
+  email: "grscan@implantstore.com.br", // aparece no rodapé
   instagram: "",   // Ex.: "grscan"
 
   // Região atendida (aparece no texto)

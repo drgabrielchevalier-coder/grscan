@@ -20,6 +20,8 @@ async function newPage(b, vp, opts = {}) {
   await p.route("**/agendar.php", async (r) => { p.payloads.agendar = JSON.parse(r.request().postData() || "{}"); await r.fulfill({ json: { ok: true } }); });
   await p.route("**/orcamento.php", async (r) => { p.payloads.orcamento = JSON.parse(r.request().postData() || "{}"); await r.fulfill({ json: { ok: true } }); });
   await p.route("**/disponibilidade.php*", (r) => r.fulfill({ json: opts.dispo || { ok: false, motivo: "nao_configurado" } }));
+  // Testes partem de "sem oferta aberta", mesmo rodando contra o site ao vivo (os testes de oferta simulam a sua)
+  await p.route("**/precos-publicos.php*", async (r) => { const res = await r.fetch(); const j = await res.json().catch(() => null); if (!j) return r.fulfill({ response: res }); j.promocao_deslocamento = null; await r.fulfill({ json: j }); });
   return p;
 }
 const pick = (p, sel) => p.locator(sel).locator("xpath=..").click();
@@ -60,6 +62,10 @@ const nextWeekday = () => { for (let i = 1; i < 10; i++) { const d = new Date();
   ok("mapa de cobertura (Leaflet) renderizado", await p.locator("#mapa .leaflet-container").count());
   ok("contornos dos municípios no mapa", (await p.locator("#mapa path.cov-area").count()) > 0);
   for (const id of ["como-atuamos", "aplicacoes", "atendimento", "tecnologia", "agendar", "faq"]) ok("seção #" + id + " existe", await p.locator("#" + id).count());
+  ok("contato: WhatsApp do rodapé abre (21) 99211-4630", (await p.getAttribute(".footer [data-whatsapp]", "href") || "").startsWith("https://wa.me/5521992114630"), await p.getAttribute(".footer [data-whatsapp]", "href"));
+  ok("contato: e-mail do rodapé com link", (await p.getAttribute(".footer [data-email]", "href")) === "mailto:grscan@implantstore.com.br");
+  ok("contato: botão flutuante de WhatsApp visível", await p.isVisible(".wa-float"));
+  ok("rodapé: CNPJ", (await p.textContent(".footer__copy")).includes("69.304.216/0001-47"));
   ok("FAQ com 7+ perguntas", (await p.locator("#faq details").count()) >= 7);
   ok("ano no rodapé", (await p.textContent("#ano")) == String(new Date().getFullYear()));
 
@@ -116,7 +122,7 @@ const nextWeekday = () => { for (let i = 1; i < 10; i++) { const d = new Date();
   await p.context().route("https://wa.me/**", (r) => r.fulfill({ body: "ok", contentType: "text/plain" }));
   const [popup] = await Promise.all([p.waitForEvent("popup"), p.click("#qt-whatsapp")]);
   const waUrl = decodeURIComponent(popup.url()); await popup.close();
-  ok("orçamento: WhatsApp leva o orçamento", waUrl.includes("wa.me") && waUrl.includes("R$ 385,00"), waUrl.slice(0, 160));
+  ok("orçamento: WhatsApp leva o orçamento para a GR Scan", waUrl.includes("wa.me/5521992114630") && waUrl.includes("R$ 385,00"), waUrl.slice(0, 160));
   await p.click("#qt-submit"); await p.waitForTimeout(600);
   const po = p.payloads.orcamento || {};
   ok("orçamento: envio ao orcamento.php com o pedido", po.regiao === "niteroi" && Array.isArray(po.pacientes) && po.pacientes[0].procedimento === "implante" && po.aceite_privacidade === true, JSON.stringify(po).slice(0, 200));
