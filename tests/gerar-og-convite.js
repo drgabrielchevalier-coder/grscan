@@ -21,12 +21,13 @@ const html = `<!doctype html><html><head><meta charset="utf-8">
          background: linear-gradient(180deg, #f5cf6e, #d99a2b); padding: 16px 28px; border-radius: 4px 22px 4px 22px; }
   .cta span { font-size: 30px; }
   .site { font-size: 22px; color: #aba193; }
+  sup.reg { font-size: .5em; line-height: 0; vertical-align: .75em; margin-left: .04em; font-weight: 500; }
 </style></head><body>
   <div class="brilho"></div><div class="moldura"></div>
   <div class="conteudo">
     <img class="logo" src="${logo}" alt="">
     <div class="texto">
-      <p class="kicker">Escaneamento intraoral iTero</p>
+      <p class="kicker">Escaneamento intraoral iTero<sup class="reg">®</sup></p>
       <h1>No seu consultório, com o valor na hora</h1>
       <p class="cta">Veja o valor para a sua clínica <span>→</span></p>
       <p class="site">grscan.implantstore.com.br</p>

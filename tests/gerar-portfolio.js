@@ -66,10 +66,10 @@ async function tabela() {
     // 1. Capa
     `<section class="pg capa">
       <div class="capa__topo"><img class="capa__logo" src="${LOGO}" alt="GR Scan — Digital Scan"></div>
-      ${FOTO_PONTEIRAS ? `<img class="capa__foto" src="${FOTO_PONTEIRAS}" alt="Scanner intraoral iTero">` : ""}
+      ${FOTO_PONTEIRAS ? `<img class="capa__foto" src="${FOTO_PONTEIRAS}" alt="Scanner intraoral iTero®">` : ""}
       <div class="capa__meio">
         ${rotulo("Portfólio de serviços")}
-        <h1>O escaneamento<br>iTero vai<br>até você.</h1>
+        <h1>O escaneamento<br>iTero<sup class="reg">®</sup> vai<br>até você.</h1>
         <p class="capa__sub">Fluxo digital na sua cadeira, sem investir em um scanner.</p>
       </div>
       <div class="capa__base"><span>Tabela ${ANO}</span><span>Rio de Janeiro e Região Metropolitana</span></div>
@@ -80,8 +80,8 @@ async function tabela() {
     `<section class="pg">${cabecalho(2)}
       ${rotulo("A experiência GR Scan")}
       <h2>Você atende.<br>Nós levamos o digital.</h2>
-      <p class="lead">Vamos até o seu consultório com o scanner iTero e um operador especializado, no horário agendado. O modelo digital segue direto para o seu laboratório.</p>
-      <figure class="scanner${FOTO_MAO ? " scanner--foto" : ""}"><img src="${SCANNER}" alt="${FOTO_MAO ? "Scanner intraoral iTero" : "Ilustração de scanner intraoral"}"><figcaption>${FOTO_MAO ? "Scanner iTero" : "Imagem ilustrativa"}</figcaption></figure>
+      <p class="lead">Vamos até o seu consultório com o scanner iTero<sup class="reg">®</sup> e um operador especializado, no horário agendado. O modelo digital segue direto para o seu laboratório.</p>
+      <figure class="scanner${FOTO_MAO ? " scanner--foto" : ""}"><img src="${SCANNER}" alt="${FOTO_MAO ? "Scanner intraoral iTero®" : "Ilustração de scanner intraoral"}"><figcaption>${FOTO_MAO ? 'Scanner iTero<sup class="reg">®</sup>' : "Imagem ilustrativa"}</figcaption></figure>
       <div class="beneficios">
         <div><span class="b__n">01</span><h3>Sem investir em equipamento</h3><p>O scanner vem com a GR Scan. Você paga só pelo escaneamento.</p></div>
         <div><span class="b__n">02</span><h3>Sem moldeira e sem gesso</h3><p>Duas arcadas e registro oclusal capturados no próprio consultório.</p></div>
@@ -133,7 +133,7 @@ async function tabela() {
         <p><span>Site</span><a href="${SITE}/">${CONTATO.site}</a></p>
         <p><span>CNPJ</span>${CONTATO.cnpj}</p>
       </div>
-      <p class="fino">Valores sujeitos à confirmação da disponibilidade, da compatibilidade dos componentes e da viabilidade técnica. Atendimento com agendamento; taxa de deslocamento conforme a região, informada no orçamento online. iTero é marca registrada da Align Technology, Inc.</p>
+      <p class="fino">Valores sujeitos à confirmação da disponibilidade, da compatibilidade dos componentes e da viabilidade técnica. Atendimento com agendamento; taxa de deslocamento conforme a região, informada no orçamento online. iTero® e Align® são marcas registradas da Align Technology, Inc.</p>
     </section>`,
   ];
 
@@ -218,6 +218,7 @@ async function tabela() {
   .contato__lista p { font-size: 29px; font-weight: 400; }
   .contato__lista span { display: inline-block; width: 200px; font-size: 20px; letter-spacing: 5px; color: var(--gold); font-weight: 500; }
   .fino { position: absolute; left: 160px; right: 160px; bottom: 90px; font-size: 18px; line-height: 1.6; color: var(--dim); }
+  sup.reg { font-size: .5em; line-height: 0; vertical-align: .75em; margin-left: .04em; font-weight: 500; }
 </style></head><body>${paginas.join("")}</body></html>`;
 
   const b = await chromium.launch();

@@ -565,6 +565,7 @@
   .qt-total b { font-size: var(--fs-xl); color: var(--gold-1); font-variant-numeric: tabular-nums; }
   .qt-total small { flex-basis: 100%; text-align: center; color: var(--text-soft); font-size: var(--fs-xs); }
   .qt-barra__acoes { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  sup.reg { font-size: .5em; line-height: 0; vertical-align: .75em; margin-left: .04em; font-weight: 500; }
   .qt-numero { font-weight: 600; color: var(--gold-1); margin: 0 0 6px; }
   .qt-oferta { display: flex; align-items: center; gap: 12px; margin: 0 0 24px; padding: 14px 18px; border-radius: var(--r-sm); background: var(--gold-grad); color: #1a1206; animation: ofertaIn .6s var(--ease) both; }
   .qt-oferta svg { flex: 0 0 auto; width: 26px; height: 26px; fill: #1a1206; }
