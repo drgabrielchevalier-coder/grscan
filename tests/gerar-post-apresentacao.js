@@ -7,7 +7,7 @@ const fs = require("fs"), path = require("path");
 
 const RAIZ = path.join(__dirname, "..");
 const SAIDA = path.resolve(process.argv[2] || path.join(RAIZ, "entregas/post-apresentacao-4x5.png"));
-const FOTO = path.resolve(process.argv[3] || path.join(RAIZ, "entregas/imagens-portfolio/scanner-ponteiras.png"));
+const FOTO = path.resolve(process.argv[3] || path.join(RAIZ, "entregas/imagens-portfolio/lumina-mao.png"));
 const W = 1600, H = 2000, ESCALA = 2; // 3200×4000 px
 
 const uri = (f) => `data:image/${path.extname(f) === ".jpg" ? "jpeg" : "png"};base64,` + fs.readFileSync(f).toString("base64");
@@ -19,11 +19,11 @@ const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
   :root { --preto: #171717; --grafite: #211C19; --ouro: #C49B59; --off: #F3F0EA; --taupe: #A99B8A; }
   body { width: ${W}px; height: ${H}px; overflow: hidden; background: var(--preto); }
   .post { position: relative; width: ${W}px; height: ${H}px; overflow: hidden; font-family: Manrope, sans-serif; font-weight: 300; color: var(--off);
-    background: radial-gradient(ellipse 62% 40% at 62% 30%, rgba(196,155,89,.13), transparent 70%), linear-gradient(180deg, var(--grafite) 0%, var(--preto) 62%); }
-  .rotulo { position: absolute; left: 130px; top: 130px; font-size: 22px; font-weight: 500; letter-spacing: .32em; color: var(--ouro); text-transform: uppercase; }
-  .foto { position: absolute; left: 0; right: 0; top: 200px; height: 840px; display: flex; align-items: center; justify-content: center; }
-  .foto img { width: 1500px; max-width: none; transform: translateX(80px); filter: drop-shadow(0 50px 60px rgba(0,0,0,.55)); }
-  .legenda { position: absolute; right: 130px; top: 1040px; font-size: 20px; letter-spacing: .14em; color: var(--taupe); }
+    background: radial-gradient(ellipse 70% 30% at 30% 72%, rgba(196,155,89,.07), transparent 70%), linear-gradient(180deg, #0a0909 0%, #0a0909 48%, var(--preto) 72%, var(--grafite) 100%); }
+  .rotulo { position: absolute; left: 130px; top: 130px; font-size: 22px; font-weight: 500; letter-spacing: .32em; color: var(--ouro); text-transform: uppercase; z-index: 2; }
+  .foto { position: absolute; left: 0; right: 0; top: 0; }
+  .foto img { display: block; width: 100%; -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent 97%); mask-image: linear-gradient(180deg, #000 62%, transparent 97%); }
+  .legenda { position: absolute; z-index: 2; right: 130px; top: 1040px; font-size: 20px; letter-spacing: .14em; color: var(--taupe); }
   .texto { position: absolute; left: 130px; right: 130px; top: 1150px; }
   h1 { font-family: "Cormorant Garamond", serif; font-weight: 300; font-size: 158px; line-height: .98; letter-spacing: -.01em; }
   .sub { margin-top: 48px; font-size: 42px; line-height: 1.4; color: var(--taupe); max-width: 1000px; }
