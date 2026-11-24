@@ -36,8 +36,8 @@ const valor = (c) => c === null || c === undefined
   ? `<span class="v sob">sob avaliação</span>`
   : `<span class="v"><small>R$</small>${reais(c)}<sup>,${cent(c)}</sup></span>`;
 /* Item de cardápio: nome · linha pontilhada · valor */
-const item = (nome, c, nota) =>
-  `<div class="item"><div class="item__linha"><span class="n">${esc(nome)}</span><i></i>${valor(c)}</div>${nota ? `<p class="nota">${esc(nota)}</p>` : ""}</div>`;
+const item = (nome, c, nota, unidade) =>
+  `<div class="item"><div class="item__linha"><span class="n">${esc(nome)}</span><i></i>${valor(c)}</div>${nota || unidade ? `<p class="nota">${unidade ? `<b class="un">${esc(unidade)}</b>${nota ? " · " : ""}` : ""}${esc(nota || "")}</p>` : ""}</div>`;
 
 async function tabela() {
   if (!SO_PADRAO) try {
@@ -114,9 +114,9 @@ async function tabela() {
       ${rotulo("Prótese sobre implante")}
       <h2>Implantes e<br>componentes</h2>
       <div class="lista">
-        ${imp.map((p) => item(p.nome, p.sob_avaliacao ? null : p.preco, p.sob_avaliacao ? "Orçamento conforme o caso" : "")).join("")}
-        ${comp("transfer") ? item(comp("transfer").nome + " · por unidade", comp("transfer").sob_avaliacao ? null : comp("transfer").preco, "Somente quando solicitado") : ""}
-        ${comp("tibase") ? item(comp("tibase").nome + " · por unidade", comp("tibase").sob_avaliacao ? null : comp("tibase").preco, "Fornecimento opcional; compatibilidade confirmada pela GR Scan") : ""}
+        ${imp.map((p) => p.sob_avaliacao ? item(p.nome, null, "Orçamento conforme o caso") : item(p.nome, p.preco, "", "Por paciente")).join("")}
+        ${comp("transfer") ? item(comp("transfer").nome, comp("transfer").sob_avaliacao ? null : comp("transfer").preco, "somente quando solicitado", "Por implante") : ""}
+        ${comp("tibase") ? item(comp("tibase").nome, comp("tibase").sob_avaliacao ? null : comp("tibase").preco, "fornecimento opcional; compatibilidade confirmada pela GR Scan", "Por implante") : ""}
       </div>
       ${faixas.length ? `<div class="clinica">
         ${rotulo("Valor clínica")}
@@ -178,6 +178,7 @@ async function tabela() {
   .v small { font-size: 22px; letter-spacing: 2px; margin-right: 8px; color: var(--gold); font-weight: 400; }
   .v sup { font-size: 22px; vertical-align: top; position: relative; top: 4px; margin-left: 2px; }
   .v.sob { font-size: 31px; font-style: italic; color: var(--gold); }
+  .nota .un { color: var(--gold); font-weight: 500; letter-spacing: .5px; }
   .nota { font-size: 24px; color: var(--dim); margin-top: 12px; letter-spacing: .3px; }
 
   /* capa */
@@ -205,7 +206,7 @@ async function tabela() {
   .beneficios p { font-size: 28px; color: var(--soft); line-height: 1.5; }
 
   /* valor clínica */
-  .clinica { margin-top: 80px; }
+  .clinica { margin-top: 50px; }
   .clinica .rotulo { margin-bottom: 20px; }
   .clinica__t { font-size: 40px; font-weight: 300; line-height: 1.3; margin-bottom: 40px; max-width: 820px; }
   .fxs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 18px; }
@@ -241,6 +242,8 @@ async function tabela() {
     return { pagina: i + 1, folga: Math.round(lim - fundo) };
   }));
   const ruins = sobras.filter((x) => x.folga < 0);
+  const largas = await p.evaluate(() => [...document.querySelectorAll(".item__linha")].filter((l) => l.scrollWidth > l.clientWidth + 1 || l.querySelector("i").getBoundingClientRect().width < 30).map((l) => l.querySelector(".n").textContent));
+  if (largas.length) console.log("AVISO: linha de preço apertada:", JSON.stringify(largas));
   if (ruins.length) console.log("AVISO: conteúdo passando do limite:", JSON.stringify(ruins));
   else console.log("layout ok · folga por página (px):", sobras.map((x) => x.folga).join(", "));
   fs.mkdirSync(path.dirname(SAIDA), { recursive: true });
